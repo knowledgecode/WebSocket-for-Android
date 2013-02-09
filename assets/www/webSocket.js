@@ -44,7 +44,7 @@
                 null,
                 'WebSocket',
                 'send',
-                [this.getId(), JSON.stringify(data)]
+                [this.getId(), data]
             );
         };
         sock.close = function () {
