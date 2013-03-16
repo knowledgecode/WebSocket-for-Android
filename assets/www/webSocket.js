@@ -1,5 +1,5 @@
 /**
- * @preserve WebSocket.js v0.1.0 (c) 2013 knowledgecode | MIT licensed
+ * @preserve WebSocket.js v0.2.0 (c) 2013 knowledgecode | MIT licensed
  */
 /*jslint browser: true */
 (function () {
@@ -7,96 +7,76 @@
 
     var identifier = 0,
         socks = [],
-        webSocket = {};
+        WebSocket = function (uri, protocol) {
+            var that = this;
 
-    /**
-     * create
-     * @param {String} uri
-     * @param {String} protocol
-     * @param {Function} onopen function
-     * @param {Function} onmessage function
-     * @param {Function} onerror function
-     * @param {Function} onclose function
-     * @return {Object} socket object
-     */
-    webSocket.create = function (
-        uri,
-        protocol,
-        onopen,
-        onmessage,
-        onerror,
-        onclose
-    ) {
-        var sock = {};
-
-        sock.getId = (function (id) {
-            return function () {
-                return id;
-            };
-        }(identifier));
-        sock.onopen = onopen;
-        sock.onmessage = onmessage;
-        sock.onerror = onerror;
-        sock.onclose = onclose;
-        sock.send = function (data) {
-            window.cordova.exec(
-                null,
-                null,
-                'WebSocket',
-                'send',
-                [this.getId(), data]
-            );
-        };
-        sock.close = function () {
-            window.cordova.exec(
-                null,
-                null,
-                'WebSocket',
-                'close',
-                [this.getId()]
-            );
-        };
-        socks[identifier] = sock;
-
-        /*jslint plusplus: true */
-        window.cordova.exec(
-            null,
-            null,
-            'WebSocket',
-            'create',
-            [identifier++, uri, protocol || '']
-        );
-
-        return sock;
-    };
-
-    webSocket.callback = function (id, type, arg) {
-        setTimeout(function () {
-            var sock = socks[id];
-
-            if (sock) {
-                switch (type) {
-                case 'onopen':
-                    sock.onopen();
-                    break;
-                case 'onmessage':
-                    sock.onmessage(arg);
-                    break;
-                case 'onerror':
-                    sock.onerror(arg);
-                    break;
-                case 'onclose':
-                    sock.onclose(parseInt(arg, 10));
-                    delete socks[id];
-                    break;
-                }
+            if (this === window) {
+                return;
             }
-        }, 0);
-    };
+            this.getId = (function (id) {
+                return function () {
+                    return id;
+                };
+            }(identifier));
+
+            this.onopen = function () {
+            };
+            this.onmessage = function () {
+            };
+            this.onerror = function () {
+            };
+            this.onclose = function () {
+            };
+            this.send = function (data) {
+                window.cordova.exec(
+                    null,
+                    null,
+                    'WebSocket',
+                    'send',
+                    [this.getId(), data]
+                );
+            };
+            this.close = function () {
+                window.cordova.exec(
+                    null,
+                    null,
+                    'WebSocket',
+                    'close',
+                    [this.getId()]
+                );
+            };
+            socks[identifier] = this;
+
+            /*jslint plusplus: true */
+            window.cordova.exec(
+                function (data) {
+                    setTimeout(function () {
+                        switch (data.event) {
+                        case 'onopen':
+                            that.onopen();
+                            break;
+                        case 'onmessage':
+                            that.onmessage(data.value);
+                            break;
+                        case 'onclose':
+                            that.onclose(data.value);
+                            delete socks[that.getId()];
+                            break;
+                        }
+                    }, 0);
+                },
+                function (err) {
+                    that.onerror(err);
+                },
+                'WebSocket',
+                'create',
+                [identifier++, uri, protocol || '']
+            );
+        };
 
     if (!window.plugins) {
         window.plugins = {};
     }
-    window.plugins.WebSocket = window.plugins.WebSocket || webSocket;
+    window.plugins.WebSocket = window.plugins.WebSocket || WebSocket;
 
 }());
