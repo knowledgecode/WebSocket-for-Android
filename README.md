@@ -39,7 +39,7 @@ The "uri" is a URL which to connect.
 The "protocol" is a sub protocol. If don't need this parameter, omit it.  
 For example,  
 
-    var ws = plugins.WebSocket('ws://echo.websocket.org:80');
+    var ws = new plugins.WebSocket('ws://echo.websocket.org:80');
 
     // onopen callback
     ws.onopen = function () {
