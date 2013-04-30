@@ -1,11 +1,12 @@
 /*
- * WebSocket.java v0.2.0 (c) 2013 knowledgecode | MIT licensed
+ * WebSocket.java v0.3.0 (c) 2013 knowledgecode | MIT licensed
  * This source file is using Jetty in terms of Apache License 2.0.
  */
 package org.apache.cordova.plugin;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.cordova.CordovaWebView;
@@ -14,6 +15,8 @@ import org.apache.cordova.api.CordovaInterface;
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.PluginResult;
 import org.apache.cordova.api.PluginResult.Status;
+import org.apache.http.client.utils.URIUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -32,8 +35,8 @@ public class WebSocket extends CordovaPlugin {
 
     private static final int CONNECTION_TIMEOUT = 5;
 
-    private WebSocketClientFactory _factory = null;
-    private SparseArray<Connection> _conn = null;
+    private WebSocketClientFactory _factory;
+    private SparseArray<Connection> _conn;
 
     /**
      * {@inheritDoc}
@@ -126,8 +129,10 @@ public class WebSocket extends CordovaPlugin {
         client.setProtocol(protocol);
 
         try {
+            client.setOrigin(getOrigin(this.webView.getUrl()));
+
             client.open(
-                    new URI(uri),
+                    createURI(uri),
                     new org.eclipse.jetty.websocket.WebSocket.OnTextMessage() {
                 @Override
                 public void onOpen(Connection conn) {
@@ -160,6 +165,38 @@ public class WebSocket extends CordovaPlugin {
         } catch (Exception e) {
             callbackContext.error(e.toString());
         }
+    }
+
+    /**
+     * Create the uri.
+     * @param uriString
+     * @return
+     * @throws URISyntaxException
+     */
+    private URI createURI(String uriString) throws URISyntaxException {
+        URI uri = new URI(uriString);
+        int port = uri.getPort();
+
+        if (port == -1) {
+            if ("ws".equals(uri.getScheme())) {
+                port = 80;
+            } else if ("wss".equals(uri.getScheme())) {
+                port = 443;
+            }
+            uri = URIUtils.createURI(uri.getScheme(), uri.getHost(), port, uri.getPath(), uri.getQuery(), uri.getFragment());
+        }
+        return uri;
+    }
+
+    /**
+     * Get the origin.
+     * @param uriString
+     * @return
+     * @throws URISyntaxException
+     */
+    private String getOrigin(String uriString) throws URISyntaxException {
+        URI uri = new URI(uriString);
+        return String.format("%s://%s", uri.getScheme(), StringUtil.nonNull(uri.getAuthority()));
     }
 
     /**

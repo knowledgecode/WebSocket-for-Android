@@ -4,17 +4,17 @@ This plugin is using Jetty-8 in terms of Apache License 2.0.
 
 ## Preparation for use in Android
 ### src/org/apache/cordova/plugin/
-Add `WebSocket.java` to your PhoneGap project.  
+Add `WebSocket.java` to your Android PhoneGap project.  
 
 ### assets/www/
-Add `webSocket.min.js` to your PhoneGap project.  
+Add `webSocket.min.js` to your Android PhoneGap project.  
 And append it to html files as follows.  
 
     <script src="cordova-2.x.x.js"></script>
     <script src="webSocket.min.js"></script>
 
 ### libs/
-Add jetty-websocket-8.x.jar and slf4j-android-x.jar to your PhoneGap project.  
+Add jetty-websocket-8.x.jar and slf4j-android-x.jar to your Android PhoneGap project.  
 
 ### res/xml/config.xml
 Append the following to the config.xml.  
@@ -39,7 +39,7 @@ The "uri" is a URL which to connect.
 The "protocol" is a sub protocol. If don't need this parameter, omit it.  
 For example,  
 
-    var ws = new plugins.WebSocket('ws://echo.websocket.org:80');
+    var ws = new plugins.WebSocket('ws://echo.websocket.org');
 
     // onopen callback
     ws.onopen = function () {
@@ -74,13 +74,13 @@ The "onclose" is a function which is called when it has been closed.
 ### ws.send(message)
 Send a message.  
 The "message" is a string.  
-If you want to send a JSON, need to serialize it by use of JSON.stringify().  
+If you want to send JSON object, need to serialize it by use of JSON.stringify().  
 
 ### ws.close()
 Close the socket.  
 
 ## Notes
-At the moment, WebSocket for Android is not supported wss uri scheme and binary data.  
+At the moment, WebSocket for Android is not supported binary data.  
 
 ## License
 WebSocket for Android is available under the terms of the MIT license.  
