@@ -1,5 +1,5 @@
 /*
- * WebSocket.java v0.3.0 (c) 2013 knowledgecode | MIT licensed
+ * WebSocket.java v0.3.1 (c) 2013 knowledgecode | MIT licensed
  * This source file is using Jetty in terms of Apache License 2.0.
  */
 package org.apache.cordova.plugin;
@@ -16,7 +16,6 @@ import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.PluginResult;
 import org.apache.cordova.api.PluginResult.Status;
 import org.apache.http.client.utils.URIUtils;
-import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -65,7 +64,7 @@ public class WebSocket extends CordovaPlugin {
             public void run() {
                 try {
                     if ("create".equals(action)) {
-                        create(callbackContext, args.getInt(0), args.getString(1), args.getString(2));
+                        create(callbackContext, args.getInt(0), args.getString(1), args.getString(2), args.getString(3));
                     } else if ("send".equals(action)) {
                         send(args.getInt(0), args.getString(1));
                         callbackContext.success();
@@ -120,17 +119,17 @@ public class WebSocket extends CordovaPlugin {
      * @param callbackId
      * @param uri
      * @param protocol
+     * @param origin
      */
-    private void create(final CallbackContext callbackContext, final int callbackId, String uri, String protocol) {
+    private void create(final CallbackContext callbackContext, final int callbackId, String uri, String protocol, String origin) {
 
         WebSocketClient client = _factory.newWebSocketClient();
 
         client.setMaxTextMessageSize(1024);
         client.setProtocol(protocol);
+        client.setOrigin(origin);
 
         try {
-            client.setOrigin(getOrigin(this.webView.getUrl()));
-
             client.open(
                     createURI(uri),
                     new org.eclipse.jetty.websocket.WebSocket.OnTextMessage() {
@@ -186,17 +185,6 @@ public class WebSocket extends CordovaPlugin {
             uri = URIUtils.createURI(uri.getScheme(), uri.getHost(), port, uri.getPath(), uri.getQuery(), uri.getFragment());
         }
         return uri;
-    }
-
-    /**
-     * Get the origin.
-     * @param uriString
-     * @return
-     * @throws URISyntaxException
-     */
-    private String getOrigin(String uriString) throws URISyntaxException {
-        URI uri = new URI(uriString);
-        return String.format("%s://%s", uri.getScheme(), StringUtil.nonNull(uri.getAuthority()));
     }
 
     /**

@@ -33,10 +33,11 @@ Append the following to the AndroidManifest.xml.
     <uses-permission android:name="android.permission.INTERNET" />
 
 ## Usage
-### plugins.WebSocket(uri[, protocol])
+### plugins.WebSocket(uri[, protocol, origin])
 Create a new socket.  
-The "uri" is a URL which to connect.  
+The "uri" is a URI which to connect.  
 The "protocol" is a sub protocol. If don't need this parameter, omit it.  
+The "origin" is an origin header field. If don't need this parameter, omit it.  
 For example,  
 
     var ws = new plugins.WebSocket('ws://echo.websocket.org');
@@ -81,6 +82,7 @@ Close the socket.
 
 ## Notes
 At the moment, WebSocket for Android is not supported binary data.  
+Also will not work "wss" URIs on Android 2.x.  
 
 ## License
 WebSocket for Android is available under the terms of the MIT license.  

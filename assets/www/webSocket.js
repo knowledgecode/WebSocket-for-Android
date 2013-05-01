@@ -1,5 +1,5 @@
 /**
- * @preserve WebSocket.js v0.2.0 (c) 2013 knowledgecode | MIT licensed
+ * @preserve WebSocket.js v0.3.0 (c) 2013 knowledgecode | MIT licensed
  */
 /*jslint browser: true */
 (function () {
@@ -7,7 +7,7 @@
 
     var identifier = 0,
         socks = [],
-        WebSocket = function (uri, protocol) {
+        WebSocket = function (uri, protocol, origin) {
             var that = this;
 
             if (this === window) {
@@ -70,7 +70,7 @@
                 },
                 'WebSocket',
                 'create',
-                [identifier++, uri, protocol || '']
+                [identifier++, uri, protocol || '', origin || '']
             );
         };
 
