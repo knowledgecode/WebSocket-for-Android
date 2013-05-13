@@ -1,6 +1,11 @@
 # WebSocket for Android
-WebSocket for Android is a PhoneGap / Cordova plugin.  
-This plugin is using Jetty-8 in terms of Apache License 2.0.  
+WebSocket for Android is a PhoneGap plugin that make possible to use the WebSocket (RFC 6455) on an Android WebView.  
+It is using Jetty 8 under the terms of the Apache License v2.0.  
+
+## Product requirements
+ - Java 1.6  
+ - Android 2.1 or higher (recommend 4.0 or higher)  
+ - PhoneGap 2.2.0 or higher  
 
 ## Preparation for use in Android
 ### src/org/apache/cordova/plugin/
@@ -81,8 +86,8 @@ If you want to send JSON object, need to serialize it by use of JSON.stringify()
 Close the socket.  
 
 ## Notes
-At the moment, WebSocket for Android is not supported binary data.  
-Also will not work "wss" URIs on Android 2.x.  
+At the moment, this plugin is not supported binary data.  
+Also maybe the wss protocol will not work on Android 2.x devices.  
 
 ## License
 WebSocket for Android is available under the terms of the MIT license.  
