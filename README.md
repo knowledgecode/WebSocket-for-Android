@@ -1,10 +1,10 @@
 # WebSocket for Android
-WebSocket for Android is a PhoneGap plugin that make possible to use the WebSocket (RFC 6455) on an Android WebView.  
+WebSocket for Android is a PhoneGap plugin that makes possible to use the WebSocket (RFC 6455) on an Android WebView.  
 It is using Jetty 8 under the terms of the Apache License v2.0.  
 
 ## Product requirements
  - Java 1.6  
- - Android 2.1 or higher (recommend 4.0 or higher)  
+ - Android 2.1 (API 7) or higher (recommend 4.0 (API 14) or higher)  
  - PhoneGap 2.2.0 or higher  
 
 ## Preparation for use in Android
@@ -40,9 +40,9 @@ Append the following to the AndroidManifest.xml.
 ## Usage
 ### plugins.WebSocket(uri[, protocol, origin])
 Create a new socket.  
-The "uri" is a URI which to connect.  
-The "protocol" is a sub protocol. If don't need this parameter, omit it.  
-The "origin" is an origin header field. If don't need this parameter, omit it.  
+The uri is a URI which to connect.  
+The protocol is a sub protocol. If don't need this parameter, can omit it.  
+The origin is an Origin header field. If don't need this parameter, can omit it.  
 For example,  
 
     var ws = new plugins.WebSocket('ws://echo.websocket.org');
@@ -55,31 +55,31 @@ For example,
 
     // onmessage callback
     ws.onmessage = function (data) {
-        // "data" is a received string
+        // The data is received text
         console.log(data);  // hello
         this.close();
     };
 
     // onerror callback
     ws.onerror = function (message) {
-        // "message" is a reason of error
+        // The message is the reason of error
         console.log(message);
     };
 
     // onclose callback
     ws.onclose = function (code) {
-        // "code" is a reason code of disconnection
+        // The code is the reason code of disconnection
         console.log(code);  // 1000
     };
 
-The "onopen" is a function which is called when it has been connected a server.  
-The "onmessage" is a function which is called when it has been received data.  
-The "onerror" is a function which is called when it has been failed.  
-The "onclose" is a function which is called when it has been closed.  
+The onopen is called when it has been connected a server.  
+The onmessage is called when it has been received any data.  
+The onerror is called when the connection has failed. Need not implement if don't handle errors.  
+The onclose is called when it has been closed.  
 
 ### ws.send(message)
 Send a message.  
-The "message" is a string.  
+The message is UTF-8 text.  
 If you want to send JSON object, need to serialize it by use of JSON.stringify().  
 
 ### ws.close()
