@@ -1,6 +1,6 @@
 /*
- * WebSocket.java v0.3.1 (c) 2013 knowledgecode | MIT licensed
- * This source file is using Jetty in terms of Apache License 2.0.
+ * WebSocket.java v0.3.2 (c) 2013 knowledgecode | MIT licensed
+ * This source file is using Jetty 8 under the terms of the Apache License v2.0.
  */
 package org.apache.cordova.plugin;
 
@@ -32,7 +32,7 @@ import android.util.SparseArray;
  */
 public class WebSocket extends CordovaPlugin {
 
-    private static final int CONNECTION_TIMEOUT = 5;
+    private static final int CONNECTION_TIMEOUT = 5000;
 
     private WebSocketClientFactory _factory;
     private SparseArray<Connection> _conn;
@@ -126,8 +126,12 @@ public class WebSocket extends CordovaPlugin {
         WebSocketClient client = _factory.newWebSocketClient();
 
         client.setMaxTextMessageSize(1024);
-        client.setProtocol(protocol);
-        client.setOrigin(origin);
+        if (protocol.length() > 0) {
+            client.setProtocol(protocol);
+        }
+        if (origin.length() > 0) {
+            client.setOrigin(origin);
+        }
 
         try {
             client.open(
@@ -156,11 +160,11 @@ public class WebSocket extends CordovaPlugin {
                     JSONObject json = createCallbackJSON("onclose", code);
                     PluginResult result = new PluginResult(Status.OK, json);
                     if (code != 1000) {
-                       result.setKeepCallback(true);
+                        result.setKeepCallback(true);
                     }
                     callbackContext.sendPluginResult(result);
                 }
-            }, CONNECTION_TIMEOUT, TimeUnit.SECONDS);
+            }, CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             callbackContext.error(e.toString());
         }
