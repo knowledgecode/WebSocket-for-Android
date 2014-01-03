@@ -5,7 +5,7 @@ It is using Jetty 8 under the terms of the Apache License v2.0.
 ## Product requirements
  - Java 1.6  
  - Android 2.1 (API 7) or higher (recommend 4.0 (API 14) or higher)  
- - PhoneGap 2.2.0 or higher  
+ - PhoneGap 2.2.0 or higher (not available on 3.0+)  
 
 ## Preparation for use in Android
 ### src/org/apache/cordova/plugin/
