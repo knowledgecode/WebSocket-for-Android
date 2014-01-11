@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  id="com.knowledgecode.cordova.websocket"
+  version="0.1.0">
+  <name>WebSocket for Android</name>
+  <description>Cordova WebSocket Plugin for Android</description>
+  <license>Apache 2.0</license>
+  <keywords>cordova,phonegap,websocket,android</keywords>
+
+  <js-module src="www/websocket.js" name="websocket">
+    <clobbers target="window.WebSocket" />
+    <merges target="window" />
+  </js-module>
+
+  <platform name="android">
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="WebSocket">
+        <param name="android-package" value="com.knowledgecode.cordova.WebSocket" />
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.INTERNET" />
+    </config-file>
+
+    <source-file src="libs/jetty-websocket-8.jar" target-dir="libs" />
+    <source-file src="src/android/WebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
+  </platform>
+
+</plugin>

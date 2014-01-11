@@ -2,7 +2,7 @@
  * WebSocket.java v0.3.2 (c) 2013 knowledgecode | MIT licensed
  * This source file is using Jetty 8 under the terms of the Apache License v2.0.
  */
-package org.apache.cordova.plugin;
+package com.knowledgecode.cordova;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,7 +45,6 @@ public class WebSocket extends CordovaPlugin {
         super.initialize(cordova, webView);
 
         _factory = new WebSocketClientFactory();
-        _factory.setBufferSize(4096);
         _conn = new SparseArray<Connection>();
         try {
             start();
@@ -125,7 +124,6 @@ public class WebSocket extends CordovaPlugin {
 
         WebSocketClient client = _factory.newWebSocketClient();
 
-        client.setMaxTextMessageSize(1024);
         if (protocol.length() > 0) {
             client.setProtocol(protocol);
         }
@@ -134,9 +132,7 @@ public class WebSocket extends CordovaPlugin {
         }
 
         try {
-            client.open(
-                    createURI(uri),
-                    new org.eclipse.jetty.websocket.WebSocket.OnTextMessage() {
+            client.open(createURI(uri), new org.eclipse.jetty.websocket.WebSocket.OnTextMessage() {
                 @Override
                 public void onOpen(Connection conn) {
                     _conn.put(callbackId, conn);
