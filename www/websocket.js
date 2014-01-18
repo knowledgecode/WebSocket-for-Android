@@ -1,55 +1,132 @@
-/**
- * @preserve WebSocket.js v0.3.0 (c) 2013 knowledgecode | MIT licensed
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-var exec = require('cordova/exec'),
-    identifier = 0,
-    socks = [],
-    WebSocket = function (uri, protocol, origin) {
-        var that = this;
 
-        if (this === window) {
-            return;
-        }
-        this.getId = (function (id) {
-            return function () {
-                return id;
+/*jslint browser: true, nomen: true, plusplus: true */
+/*global require, module */
+(function () {
+    'use strict';
+    var exec = require('cordova/exec'),
+        uuid = require('cordova/utils').createUUID(),
+        identifier = 0,
+        socks = [],
+        tasks = [],
+        post = function (fn) {
+            tasks.push(fn);
+            window.postMessage(uuid, '*');
+        },
+        listener = function (event) {
+            if (event.source === window && event.data === uuid) {
+                event.stopPropagation();
+                if (tasks.length > 0) {
+                    tasks.shift()();
+                }
+            }
+        },
+        createMessage = function (type, data, origin) {
+            var evt;
+
+            switch (type) {
+            case 'open':
+                evt = document.createEvent('Event');
+                evt.initEvent(type, false, false);
+                break;
+            case 'message':
+                evt = document.createEvent('MessageEvent');
+                evt.initMessageEvent(type, false, false, data.data, origin);
+                break;
+            case 'error':
+                evt = document.createEvent('Event');
+                evt.initEvent(type, false, false);
+                break;
+            case 'close':
+                evt = document.createEvent('Event');
+                evt.initEvent(type, false, false);
+                evt.wasClean = data.wasClean;
+                evt.code = data.code;
+                evt.reason = data.reason;
+                break;
+            }
+            return evt;
+        },
+        WebSocket = function (url, protocols, origin) {
+            var that = this;
+
+            if (this === window) {
+                throw new TypeError('Failed to construct \'WebSocket\': ' +
+                    'Please use the \'new\' operator, ' +
+                    'this DOM object constructor cannot be called as a function.');
+            }
+            this.url = url;
+            this.onopen = null;
+            this.onmessage = null;
+            this.onerror = null;
+            this.onclose = null;
+            this.extensions = '';
+            if (Array.isArray(protocols)) {
+                this.protocol = protocols.length > 0 ? protocols[0] : '';
+            } else {
+                this.protocol = protocols || '';
+            }
+            WebSocket.prototype.send = function (data) {
+                exec(null, null, 'WebSocket', 'send', [this._getId(), data]);
             };
-        }(identifier));
+            WebSocket.prototype.close = function (code, reason) {
+                exec(null, null, 'WebSocket', 'close', [this._getId(), code || 0, reason || '']);
+            };
+            socks[identifier] = this;
+            this._getId = (function (id) {
+                return function () {
+                    return id;
+                };
+            }(identifier));
 
-        this.send = function (data) {
-            exec(null, null, 'WebSocket', 'send', [this.getId(), data]);
-        };
-        this.close = function () {
-            exec(null, null, 'WebSocket', 'close', [this.getId()]);
-        };
-        socks[identifier] = this;
-
-        /*jslint plusplus: true */
-        exec(
-            function (data) {
-                setTimeout(function () {
+            exec(function (data) {
+                post(function () {
+                    data = JSON.parse(data);
                     switch (data.event) {
                     case 'onopen':
-                        that.onopen && that.onopen();
+                        if (typeof that.onopen === 'function') {
+                            that.onopen(createMessage('open'));
+                        }
                         break;
                     case 'onmessage':
-                        that.onmessage && that.onmessage(data.value);
+                        if (typeof that.onmessage === 'function') {
+                            that.onmessage(createMessage('message', data, url));
+                        }
                         break;
                     case 'onclose':
-                        that.onclose && that.onclose(data.value);
-                        socks[that.getId()] = undefined;
+                        if (typeof that.onclose === 'function') {
+                            that.onclose(createMessage('close', data));
+                        }
+                        socks[that._getId()] = undefined;
                         break;
                     }
-                }, 0);
-            },
-            function (err) {
-                that.onerror && that.onerror(err);
-            },
-            'WebSocket',
-            'create',
-            [identifier++, uri, protocol || '', origin || '']
-        );
-    };
+                });
+            }, function () {
+                post(function () {
+                    if (typeof that.onerror === 'function') {
+                        that.onerror(createMessage('error'));
+                    }
+                });
+            }, 'WebSocket', 'create', [identifier++, url, this.protocol, origin || '']);
+        };
 
-module.exports = WebSocket;
-
+    window.addEventListener('message', listener, true);
+    module.exports = WebSocket;
+}());

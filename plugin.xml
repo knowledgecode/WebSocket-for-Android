@@ -3,21 +3,20 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.knowledgecode.cordova.websocket"
-  version="0.1.0">
+  version="0.4.0">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
   <keywords>cordova,phonegap,websocket,android</keywords>
 
   <js-module src="www/websocket.js" name="websocket">
-    <clobbers target="window.WebSocket" />
-    <merges target="window" />
+    <clobbers target="WebSocket" />
   </js-module>
 
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="WebSocket">
-        <param name="android-package" value="com.knowledgecode.cordova.WebSocket" />
+        <param name="android-package" value="com.knowledgecode.cordova.websocket.WebSocket" />
       </feature>
     </config-file>
 
@@ -25,7 +24,7 @@
       <uses-permission android:name="android.permission.INTERNET" />
     </config-file>
 
-    <source-file src="libs/jetty-websocket-8.jar" target-dir="libs" />
+    <source-file src="libs/jetty-websocket-8.1.14.v20131031.jar" target-dir="libs" />
     <source-file src="src/android/WebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
   </platform>
 
