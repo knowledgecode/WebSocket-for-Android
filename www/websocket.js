@@ -127,6 +127,8 @@
             }, 'WebSocket', 'create', [identifier++, url, this.protocol, origin || '']);
         };
 
-    window.addEventListener('message', listener, true);
+    if (!window.WebSocket) {
+        window.addEventListener('message', listener, true);
+    }
     module.exports = WebSocket;
 }());
