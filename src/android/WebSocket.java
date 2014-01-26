@@ -18,6 +18,7 @@
  */
 package com.knowledgecode.cordova.websocket;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,13 +30,13 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
-import org.apache.http.client.utils.URIUtils;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.util.Base64;
 import android.util.SparseArray;
 
 /**
@@ -45,15 +46,66 @@ import android.util.SparseArray;
  * @version 0.4.0
  */
 public class WebSocket extends CordovaPlugin {
+    // TODO option
     private static final int CONNECTION_TIMEOUT = 20000;
 
     private WebSocketClientFactory _factory;
     private SparseArray<Connection> _conn;
 
+    private abstract class JettyWebSocket implements
+        org.eclipse.jetty.websocket.WebSocket.OnTextMessage,
+        org.eclipse.jetty.websocket.WebSocket.OnBinaryMessage,
+        org.eclipse.jetty.websocket.WebSocket.OnFrame {
+        private static final int BUFFER_SIZE = 8192;
+
+        private FrameConnection _frame;
+        private boolean _binary;
+        private ByteArrayOutputStream _stream;
+
+        @Override
+        public void onOpen(Connection arg0) {
+            _stream = new ByteArrayOutputStream(BUFFER_SIZE);
+        }
+
+        @Override
+        public void onClose(int code, String reason) {
+            try {
+                if (_stream != null) {
+                    _stream.close();
+                    _stream = null;
+                }
+            } catch (IOException e) {
+            }
+            _frame = null;
+        }
+
+        @Override
+        public boolean onFrame(byte flags, byte opcode, byte[] data, int offset, int length) {
+            if (_frame.isBinary(opcode) || (_frame.isContinuation(opcode) && _binary)) {
+                _binary = true;
+                _stream.write(data, offset, length);
+                if (_frame.isMessageComplete(flags)) {
+                    _binary = false;
+                    this.onMessage(_stream.toByteArray(), 0, _stream.size());
+                    _stream.reset();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onHandshake(FrameConnection connection) {
+            _frame = connection;
+        }
+    }
+
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         _factory = new WebSocketClientFactory();
+        // not change
+//      _factory.setBufferSize(8192);
         _conn = new SparseArray<Connection>();
         try {
             start();
@@ -130,39 +182,97 @@ public class WebSocket extends CordovaPlugin {
         }
 
         try {
-            client.open(complementPort(url), new org.eclipse.jetty.websocket.WebSocket.OnTextMessage() {
+            client.open(complementPort(url), new JettyWebSocket() {
                 @Override
                 public void onOpen(Connection conn) {
-                    if (!callbackContext.isFinished()) {
-                        _conn.put(callbackId, conn);
-                        String callbackString = createCallbackString("onopen");
-                        PluginResult result = new PluginResult(Status.OK, callbackString);
-                        result.setKeepCallback(true);
-                        callbackContext.sendPluginResult(result);
-                    }
+                    super.onOpen(conn);
+
+                    _conn.put(callbackId, conn);
+                    String callbackString = createCallback("onopen");
+                    sendCallback(callbackString, true);
                 }
+
                 @Override
                 public void onMessage(String data) {
+                    String callbackString = createCallback("onmessage", data);
+                    sendCallback(callbackString, true);
+                }
+
+                @Override
+                public void onMessage(byte[] data, int offset, int length) {
+                    String callbackString = createCallback("onmessage", data);
+                    sendCallback(callbackString, true);
+                }
+
+                @Override
+                public void onClose(int code, String reason) {
+                    super.onClose(code, reason);
+
+                    if (_conn.indexOfKey(callbackId) >= 0) {
+                        _conn.remove(callbackId);
+                    }
+                    String callbackString = createCallback("onclose", code, reason);
+                    sendCallback(callbackString, false);
+                }
+
+                /**
+                 * Send plugin result.
+                 * @param callbackString
+                 * @param keepCallback
+                 */
+                private void sendCallback(String callbackString, boolean keepCallback) {
                     if (!callbackContext.isFinished()) {
-                        String callbackString = createCallbackString("onmessage", data);
                         PluginResult result = new PluginResult(Status.OK, callbackString);
-                        result.setKeepCallback(true);
+                        result.setKeepCallback(keepCallback);
                         callbackContext.sendPluginResult(result);
                     }
                 }
-                @Override
-                public void onClose(int code, String reason) {
-                    boolean wasClean = false;
-                    if (_conn.indexOfKey(callbackId) >= 0) {
-                        _conn.remove(callbackId);
-                        wasClean = true;
-                    }
-                    if (!callbackContext.isFinished()) {
-                        reason = reason == null ? "" : reason;
-                        String callbackString = createCallbackString("onclose", wasClean, code, reason);
-                        PluginResult result = new PluginResult(Status.OK, callbackString);
-                        callbackContext.sendPluginResult(result);
-                    }
+
+                /**
+                 * Create Callback JSON String.
+                 * @param event
+                 * @return JSON String
+                 */
+                private String createCallback(String event) {
+                    String json = "{\"event\":\"%s\"}";
+                    return String.format(json, event);
+                }
+
+                /**
+                 * Create Callback JSON String.
+                 * @param event
+                 * @param data
+                 * @return JSON String
+                 */
+                private String createCallback(String event, String data) {
+                    String json = "{\"event\":\"%s\",\"data\":\"%s\"}";
+                    return String.format(json, event, data.replaceAll("\"", "\\\\\""));
+                }
+
+                /**
+                 * Create Callback JSON String.
+                 * @param event
+                 * @param input
+                 * @return JSON String
+                 */
+                private String createCallback(String event, byte[] input) {
+                    String json = "{\"event\":\"%s\",\"data\":\"%s\",\"binary\":true}";
+                    String data = Base64.encodeToString(input, Base64.NO_WRAP);
+                    return String.format(json, event, data);
+                }
+
+                /**
+                 * Create Callback JSON String.
+                 * @param event
+                 * @param code
+                 * @param reason
+                 * @return JSON String
+                 */
+                private String createCallback(String event, int code, String reason) {
+                    String json = "{\"event\":\"%s\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
+                    boolean wasClean = code == 1000;
+                    reason = reason == null ? "" : reason;
+                    return String.format(json, event, wasClean, code, reason.replaceAll("\"", "\\\\\""));
                 }
             }, CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -190,76 +300,55 @@ public class WebSocket extends CordovaPlugin {
             } else if ("wss".equals(uri.getScheme())) {
                 port = 443;
             }
-            uri = URIUtils.createURI(uri.getScheme(), uri.getHost(), port, uri.getPath(), uri.getQuery(), uri.getFragment());
+            uri = new URI(uri.getScheme(), "", uri.getHost(), port, uri.getPath(), uri.getQuery(), "");
         }
         return uri;
     }
 
     /**
-     * Sending any data.
+     * Send text message.
      * @param callbackId
      * @param data
      * @throws IOException 
      */
     private void send(int callbackId, String data) throws IOException {
-        Connection conn = _conn.get(callbackId);
+        send(callbackId, data, false);
+    }
 
+    /**
+     * Send text/binary data.
+     * @param callbackId
+     * @param data
+     * @param binaryString
+     * @throws IOException
+     */
+    private void send(int callbackId, String data, boolean binaryString) throws IOException {
+        Connection conn = _conn.get(callbackId);
         if (conn != null) {
-            conn.sendMessage(data);
+            if (binaryString) {
+                byte[] binary = Base64.decode(data, Base64.NO_WRAP);
+                conn.sendMessage(binary, 0, binary.length);
+            } else {
+                conn.sendMessage(data);
+            }
         }
     }
 
     /**
-     * Closing connection.
+     * Close a connection.
      * @param callbackId
      * @param code
      * @param reason
      */
     private void close(int callbackId, int code, String reason) {
         Connection conn = _conn.get(callbackId);
-
         if (conn != null) {
-            _conn.remove(callbackId);
             if (code > 0) {
                 conn.close(code, reason);
             } else {
                 conn.close();
             }
         }
-    }
-
-    /**
-     * Create Callback JSON String.
-     * @param event
-     * @return JSON String
-     */
-    private String createCallbackString(String event) {
-        String json = "{\"event\":\"%s\"}";
-        return String.format(json, event);
-    }
-
-    /**
-     * Create Callback JSON String.
-     * @param event
-     * @param data
-     * @return JSON String
-     */
-    private String createCallbackString(String event, String data) {
-        String json = "{\"event\":\"%s\",\"data\":\"%s\"}";
-        return String.format(json, event, data.replaceAll("\"", "\\\\\""));
-    }
-
-    /**
-     * Create Callback JSON String.
-     * @param event
-     * @param wasClean
-     * @param code
-     * @param reason
-     * @return JSON String
-     */
-    private String createCallbackString(String event, boolean wasClean, int code, String reason) {
-        String json = "{\"event\":\"%s\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
-        return String.format(json, event, wasClean, code, reason.replaceAll("\"", "\\\\\""));
     }
 
     /**

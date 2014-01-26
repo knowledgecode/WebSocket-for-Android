@@ -64,6 +64,25 @@
             }
             return evt;
         },
+        stringToBinary = function (data, binaryType) {
+            var i, len, array, blob;
+
+            data = window.atob(data);
+            len = data.length;
+            array = new window.Uint8Array(len);
+            for (i = 0; i < len; i++) {
+                array[i] = data.charCodeAt(i);
+            }
+            if (binaryType === 'arraybuffer') {
+                return array.buffer;
+            }
+            if (binaryType === 'blob') {
+                blob = new window.WebKitBlobBuilder();
+                blob.append(array.buffer);
+                return blob;
+            }
+            throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', binaryType));
+        },
         WebSocket = function (url, protocols, origin) {
             var that = this;
 
@@ -73,6 +92,7 @@
                     'this DOM object constructor cannot be called as a function.');
             }
             this.url = url;
+            this.binaryType = 'blob';
             this.onopen = null;
             this.onmessage = null;
             this.onerror = null;
@@ -107,6 +127,9 @@
                         break;
                     case 'onmessage':
                         if (typeof that.onmessage === 'function') {
+                            if (data.binary) {
+                                data.data = stringToBinary(data.data, that.binaryType);
+                            }
                             that.onmessage(createMessage('message', data, url));
                         }
                         break;
