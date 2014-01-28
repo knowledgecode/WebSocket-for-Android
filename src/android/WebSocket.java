@@ -63,7 +63,7 @@ public class WebSocket extends CordovaPlugin {
         private ByteArrayOutputStream _stream;
 
         @Override
-        public void onOpen(Connection arg0) {
+        public void onOpen(Connection conn) {
             _stream = new ByteArrayOutputStream(BUFFER_SIZE);
         }
 
@@ -122,7 +122,7 @@ public class WebSocket extends CordovaPlugin {
                     if ("create".equals(action)) {
                         create(callbackContext, args.getInt(0), args.getString(1), args.getString(2), args.getString(3));
                     } else if ("send".equals(action)) {
-                        send(args.getInt(0), args.getString(1));
+                        send(args.getInt(0), args.getString(1), args.getBoolean(2));
                         callbackContext.success();
                     } else if ("close".equals(action)) {
                         close(args.getInt(0), args.getInt(1), args.getString(2));
@@ -303,16 +303,6 @@ public class WebSocket extends CordovaPlugin {
             uri = new URI(uri.getScheme(), "", uri.getHost(), port, uri.getPath(), uri.getQuery(), "");
         }
         return uri;
-    }
-
-    /**
-     * Send text message.
-     * @param callbackId
-     * @param data
-     * @throws IOException 
-     */
-    private void send(int callbackId, String data) throws IOException {
-        send(callbackId, data, false);
     }
 
     /**

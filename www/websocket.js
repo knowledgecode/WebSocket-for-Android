@@ -18,7 +18,7 @@
  */
 
 /*jslint browser: true, nomen: true, plusplus: true */
-/*global require, module */
+/*global require, module, Uint8Array, WebKitBlobBuilder, Blob, FileReader, ArrayBuffer */
 (function () {
     'use strict';
     var exec = require('cordova/exec'),
@@ -69,7 +69,7 @@
 
             data = window.atob(data);
             len = data.length;
-            array = new window.Uint8Array(len);
+            array = new Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
@@ -77,11 +77,28 @@
                 return array.buffer;
             }
             if (binaryType === 'blob') {
-                blob = new window.WebKitBlobBuilder();
+                blob = new WebKitBlobBuilder();
                 blob.append(array.buffer);
-                return blob;
+                return blob.getBlob();
             }
             throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', binaryType));
+        },
+        binaryToString = function (data, onComplete) {
+            var blob, r;
+
+            if (data instanceof ArrayBuffer || data.buffer instanceof ArrayBuffer) {
+                blob = new WebKitBlobBuilder();
+                blob.append(data);
+            } else if (data instanceof Blob) {
+                blob = data;
+            } else {
+                throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', typeof data));
+            }
+            r = new FileReader();
+            r.onload = function () {
+                onComplete(this.result.substring(this.result.indexOf(',') + 1));
+            };
+            r.readAsDataURL(blob);
         },
         WebSocket = function (url, protocols, origin) {
             var that = this;
@@ -104,7 +121,13 @@
                 this.protocol = protocols || '';
             }
             WebSocket.prototype.send = function (data) {
-                exec(null, null, 'WebSocket', 'send', [this._getId(), data]);
+                if (typeof data === 'string') {
+                    exec(null, null, 'WebSocket', 'send', [this._getId(), data, false]);
+                } else {
+                    binaryToString(data, function (blob) {
+                        exec(null, null, 'WebSocket', 'send', [that._getId(), blob, true]);
+                    });
+                }
             };
             WebSocket.prototype.close = function (code, reason) {
                 exec(null, null, 'WebSocket', 'close', [this._getId(), code || 0, reason || '']);
