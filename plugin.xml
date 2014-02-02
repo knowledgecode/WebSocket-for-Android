@@ -9,8 +9,12 @@
   <license>Apache 2.0</license>
   <keywords>cordova,phonegap,websocket,android</keywords>
 
+  <engines>
+    <engine name="cordova" version=">=3.0.0" />
+  </engines>
+
   <js-module src="www/websocket.js" name="websocket">
-    <clobbers target="WebSocket" />
+    <merges target="WebSocket" />
   </js-module>
 
   <platform name="android">
