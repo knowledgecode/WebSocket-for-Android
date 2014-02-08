@@ -64,7 +64,7 @@ Append the following to the AndroidManifest.xml.
 
 ## Usage
 ### WebSocket(url[, protocols, options])
-The WebSocket(url, protocols, options) constructor takes one, two or three arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings. The Third, options, is the unique argument of this plugin is object. Details are as follows.  
+The WebSocket(url, protocols, options) constructor takes one, two or three arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings. The Third, options, is the unique argument of this plugin is object. Options details are as follows.  
 
     var options = {
         origin: 'websocket-is-fun.com',
@@ -106,16 +106,16 @@ That is as follows.
 
 ### send(data[, asBinary])
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually not use.  
-In Android 2.2 and 2.3, binary message cannot send because both blob and arraybuffer are not supported. However, can send it by Base64 encoding.  
+In Android 2.2 and 2.3, binary message cannot send because both blob and arraybuffer are not supported. However, can send it to encode by Base64.  
 
-    var data = btoa(binaryString);  // Base64 encoding
+    var data = btoa(binaryString);  // Encode by Base64.
     ws.send(data, true);            // If omit the second argument, this is sent as text message.
 
 #### Notes
 If receive binary message in Android 2.2 and 2.3, these are strings which are encoded by Base64.  
 
     ws.onmessage = function (event) {
-        // For example, the receiving data can use as data URI scheme.
+        // For example, the receiving data can be used as data URI scheme.
         img.src = 'data:image/jpeg;base64,' + event.data;
     };
 
