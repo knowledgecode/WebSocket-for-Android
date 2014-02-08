@@ -176,8 +176,8 @@ public class WebSocket extends CordovaPlugin {
      * Connect to server.
      */
     private static class Creation implements Runnable {
-        WebSocketClient client;
-        Map<Integer, Connection> map;
+        private WebSocketClient client;
+        private Map<Integer, Connection> map;
         private CallbackContext ctx;
         private String rawArgs;
 
@@ -339,7 +339,7 @@ public class WebSocket extends CordovaPlugin {
      * Send text/binary data.
      */
     private static class Send implements Runnable {
-        Map<Integer, Connection> map;
+        private Map<Integer, Connection> map;
         private CallbackContext ctx;
         private String rawArgs;
 
@@ -375,7 +375,7 @@ public class WebSocket extends CordovaPlugin {
      * Close a connection.
      */
     private static class Close implements Runnable {
-        Map<Integer, Connection> map;
+        private Map<Integer, Connection> map;
         private CallbackContext ctx;
         private String rawArgs;
 
