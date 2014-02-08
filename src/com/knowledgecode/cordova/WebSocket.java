@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.knowledgecode.cordova.websocket;
+package com.knowledgecode.cordova;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
