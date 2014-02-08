@@ -1,25 +1,45 @@
 # WebSocket for Android
-WebSocket for Android is a PhoneGap plugin that makes possible to use the WebSocket (RFC 6455) on an Android WebView.  
-It is using Jetty 8 under the terms of the Apache License v2.0.  
+WebSocket for Android is a Cordova/PhoneGap plugin that makes possible to use WebSocket (RFC 6455) on Android.  
+This is using Jetty under the terms of the Apache License v2.0.  
 
-## Product requirements
- - Java 1.6  
- - Android 2.1 (API 7) or higher (recommend 4.0 (API 14) or higher)  
- - PhoneGap 2.2.0 or higher (not available on 3.0+)  
+## Requirements
+ - Java 1.6 or higher  
+ - Android 2.2 or higher (recommend 4.0 or higher)  
+ - Cordova/PhoneGap 2.2.0 - 2.9.x  
 
-## Preparation for use in Android
-### src/org/apache/cordova/plugin/
-Add `WebSocket.java` to your Android PhoneGap project.  
+The version for Cordova/PhoneGap 3 is [here](https://github.com/knowledgecode/WebSocket-for-Android/tree/master).  
 
-### assets/www/
-Add `webSocket.min.js` to your Android PhoneGap project.  
-And append it to html files as follows.  
+## Correspondence Table
+| Android | ws protocol        | wss protocol       | text message       | binary message      |
+|:-------:|:------------------:|:------------------:|:------------------:|:-------------------:|
+| 2.2     | support            | not support [1]    | support            | limited support [2] |
+| 2.3     | support            | not support [1]    | support            | limited support [2] |
+| 3.0     | -- [3]             | -- [3]             | -- [3]             | -- [3]              |
+| 3.1     | -- [3]             | -- [3]             | -- [3]             | -- [3]              |
+| 3.2     | -- [3]             | -- [3]             | -- [3]             | -- [3]              |
+| 4.0     | support            | support            | support            | support             |
+| 4.1     | support            | support            | support            | support             |
+| 4.2     | support            | support            | support            | support             |
+| 4.3     | support            | support            | support            | support             |
+| 4.4     | native support [4] | native support [4] | native support [4] | native support [4]  |
 
-    <script src="cordova-2.x.x.js"></script>
-    <script src="webSocket.min.js"></script>
+[1] Due to SSL issue with Android.  
+[2] Only supports Base64 encoded data.  
+[3] May work. But not tested. 
+[4] WebSocket has been supported by WebView since Android 4.4. The native WebSocket of these devices are used in preference to this plugin.  
 
-### libs/
-Add jetty-websocket-8.x.jar and slf4j-android-x.jar to your Android PhoneGap project.  
+## Preparation
+### src/com/knowledgecode/cordova/WebSocket.java
+Copy `src/com/knowledgecode/cordova/WebSocket.java` to your project.  
+
+### assets/www/websocket.js
+Copy `assets/www/websocket.js` to your project. And append it to html files as follows.  
+
+    <script src="cordova.js"></script>
+    <script src="websocket.js"></script>
+
+### libs/jetty-websocket-8.x.jar
+Copy `libs/jetty-websocket-8.x.jar` to your project.  
 
 ### res/xml/config.xml
 Append the following to the config.xml.  
@@ -28,9 +48,14 @@ Append the following to the config.xml.
         // ...
         // some other plugins
         // ...
-
-        <plugin name="WebSocket" value="org.apache.cordova.plugin.WebSocket" />
+        <plugin name="WebSocket" value="com.knowledgecode.cordova.WebSocket" />
     </plugins>
+
+In the case of Cordova/Phonegap 2.8.0 or higher.  
+
+    <feature name="WebSocket">
+      <param name="android-package" value="com.knowledgecode.cordova.WebSocket" />
+    </feature>
 
 ### AndroidManifest.xml
 Append the following to the AndroidManifest.xml.  
@@ -38,56 +63,87 @@ Append the following to the AndroidManifest.xml.
     <uses-permission android:name="android.permission.INTERNET" />
 
 ## Usage
-### plugins.WebSocket(uri[, protocol, origin])
-Create a new socket.  
-The uri is a URI which to connect.  
-The protocol is a sub protocol. If don't need this parameter, can omit it.  
-The origin is an Origin header field. If don't need this parameter, can omit it.  
-For example,  
+### WebSocket(url[, protocols, options])
+The WebSocket(url, protocols, options) constructor takes one, two or three arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings. The Third, options, is the unique argument of this plugin is object. Details are as follows.  
 
-    var ws = new plugins.WebSocket('ws://echo.websocket.org');
-
-    // onopen callback
-    ws.onopen = function () {
-        console.log('onopen');
-        this.send('hello');
+    var options = {
+        origin: 'websocket-is-fun.com',
+        maxConnectTime: 20000,              // 20sec
+        maxTextMessageSize: 32768,          // 32kb
+        maxBinaryMessageSize: 32768         // 32kb
     };
 
-    // onmessage callback
-    ws.onmessage = function (data) {
-        // The data is received text
-        console.log(data);  // hello
+All these parameters are omissible. The origin is set empty when omit it. The maxConnectTime is the wait time for connection. The default value is 20,000 milliseconds when omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values are 32,768 bytes when omit them.  
+
+Now, simple codes are as follows.  
+
+    var ws = new WebSocket('ws://echo.websocket.org');
+
+    ws.onopen = function () {
+        console.log('onopen');
+        this.send('hello');         // send "hello" after connected
+    };
+
+    ws.onmessage = function (event) {
+        console.log(event.data);    // will be "hello"
         this.close();
     };
 
-    // onerror callback
-    ws.onerror = function (message) {
-        // The message is the reason of error
-        console.log(message);
+    ws.onerror = function () {
+        console.log('error occurred!');
     };
 
-    // onclose callback
-    ws.onclose = function (code) {
-        // The code is the reason code of disconnection
-        console.log(code);  // 1000
+    ws.onclose = function (event) {
+        console.log(event.code);
+        console.log(event.reason);
     };
 
-The onopen is called when it has been connected a server.  
-The onmessage is called when it has been received any data.  
-The onerror is called when the connection has failed. Need not implement if don't handle errors.  
-The onclose is called when it has been closed.  
+#### Notes
+The second argument, protocols, cannot omit if set options.  
+That is as follows.  
 
-### ws.send(message)
-Send a message.  
-The message is UTF-8 text.  
-If you want to send JSON object, need to serialize it by use of JSON.stringify().  
+    var ws = new WebSocket('ws://echo.websocket.org', '', { origin: 'websocket-is-fun.com' });
 
-### ws.close()
-Close the socket.  
+### send(data[, asBinary])
+Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually not use.  
+In Android 2.2 and 2.3, binary message cannot send because both blob and arraybuffer are not supported. However, can send it by Base64 encoding.  
 
-## Notes
-At the moment, this plugin is not supported binary data.  
-Also maybe the wss protocol will not work on Android 2.x devices.  
+    var data = btoa(binaryString);  // Base64 encoding
+    ws.send(data, true);            // If omit the second argument, this is sent as text message.
+
+#### Notes
+If receive binary message in Android 2.2 and 2.3, these are strings which are encoded by Base64.  
+
+    ws.onmessage = function (event) {
+        // For example, the receiving data can use as data URI scheme.
+        img.src = 'data:image/jpeg;base64,' + event.data;
+    };
+
+### close([code, reason])
+Closes the WebSocket connection or connection attempt, if any.  
+
+## Change log
+#### 0.4.0
+* Cordova/Phonegap 3 support  
+* binary support  
+* event listener support  
+* more compliant with the WebSocket API requirements  
+* license change from MIT to Apache v2.0  
+
+#### 0.3.2
+* bug fix
+
+#### 0.3.1
+* bug fix
+
+#### 0.3.0
+* origin support
+
+#### 0.2.0
+* comply with the WebSocket API requirements  
+
+#### 0.1.0
+* first release
 
 ## License
-WebSocket for Android is available under the terms of the MIT license.  
+This plugin is available under the terms of the Apache License Version 2.0.
