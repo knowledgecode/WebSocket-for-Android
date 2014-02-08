@@ -24,8 +24,8 @@ The version for Cordova/PhoneGap 3 is [here](https://github.com/knowledgecode/We
 | 4.4     | native support [4] | native support [4] | native support [4] | native support [4]  |
 
 [1] Due to SSL issue with Android.  
-[2] Only supports Base64 encoded data.  
-[3] May work. But not tested. 
+[2] Supports Base64 encoded data only.  
+[3] May work. But not tested.  
 [4] WebSocket has been supported by WebView since Android 4.4. The native WebSocket of these devices are used in preference to this plugin.  
 
 ## Preparation
@@ -122,7 +122,7 @@ If receive binary message in Android 2.2 and 2.3, these are strings which are en
 ### close([code, reason])
 Closes the WebSocket connection or connection attempt, if any.  
 
-## Change log
+## Change Log
 #### 0.4.0
 * Cordova/Phonegap 3 support  
 * binary support  
