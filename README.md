@@ -105,14 +105,14 @@ That is as follows.
     var ws = new WebSocket('ws://echo.websocket.org', '', { origin: 'websocket-is-fun.com' });
 
 ### send(data[, asBinary])
-Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually not use.  
-In Android 2.2 and 2.3, binary message cannot send because both blob and arraybuffer are not supported. However, can send it to encode by Base64.  
+Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually is not used.  
+In Android 2.2 and 2.3, binary message cannot be sent because both blob and arraybuffer are not supported. However, can be sent by encoding in Base64.  
 
-    var data = btoa(binaryString);  // Encode by Base64.
+    var data = btoa(binaryString);  // encoded in Base64
     ws.send(data, true);            // If omit the second argument, this is sent as text message.
 
 #### Notes
-If receive binary message in Android 2.2 and 2.3, these are strings which are encoded by Base64.  
+If receives binary message in Android 2.2 and 2.3, encodes them in base64.  
 
     ws.onmessage = function (event) {
         // For example, the receiving data can be used as data URI scheme.
