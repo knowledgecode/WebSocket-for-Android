@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.4.0
+ * @version 0.4.1
  */
 (function () {
     'use strict';
@@ -133,7 +133,7 @@
                 exec(null, null, 'WebSocket', 'close', [this.__getId__(), code || 0, reason || '']);
             };
         },
-        F = function (url, protocols, options) {
+        F = function (url, protocols) {
             var that = this, listeners = {}, stringToBinary;
 
             if (this === window) {
@@ -234,13 +234,14 @@
                         that.dispatchEvent(evt);
                     }
                 });
-            }, 'WebSocket', 'create', [identifier++, url, this.protocol, options || {}]);
+            }, 'WebSocket', 'create', [identifier++, url, this.protocol, F.pluginOptions || {}]);
         };
 
     WebSocket.prototype = new EventTarget();
     WebSocket.prototype.constructor = WebSocket;
     F.prototype = new WebSocket();
     F.prototype.constructor = F;
+    F.pluginOptions = {};
 
     if (!window.WebSocket) {
         window.addEventListener('message', listener, true);
