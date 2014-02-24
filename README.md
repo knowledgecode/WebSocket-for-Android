@@ -38,18 +38,8 @@ or
     phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 
 ## Usage
-### WebSocket(url[, protocols, options])
-The WebSocket(url, protocols, options) constructor takes one, two or three arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings. The Third, options, is the unique argument of this plugin is object. Options details are as follows.  
-
-    var options = {
-        origin: 'websocket-is-fun.com',
-        maxConnectTime: 20000,              // 20sec
-        maxTextMessageSize: 32768,          // 32kb
-        maxBinaryMessageSize: 32768         // 32kb
-    };
-
-All these parameters are omissible. The origin is set empty when omit it. The maxConnectTime is the wait time for connection. The default value is 20,000 milliseconds when omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values are 32,768 bytes when omit them.  
-
+### WebSocket(url[, protocols])
+The WebSocket(url, protocols) constructor takes one or two arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings.  
 Now, simple codes are as follows.  
 
     var ws = new WebSocket('ws://echo.websocket.org');
@@ -73,11 +63,24 @@ Now, simple codes are as follows.
         console.log(event.reason);
     };
 
-#### Notes
-The second argument, protocols, cannot omit if set options.  
-That is as follows.  
+Also, this plugin has options. Details are as follows.  
 
-    var ws = new WebSocket('ws://echo.websocket.org', '', { origin: 'websocket-is-fun.com' });
+    WebSocket.pluginOptions = {
+        origin: 'websocket-is-fun.com',
+        maxConnectTime: 20000,              // 20sec
+        maxTextMessageSize: 32768,          // 32kb
+        maxBinaryMessageSize: 32768         // 32kb
+    };
+
+All these parameters are omissible. The origin will be set empty if omit it. The maxConnectTime is the wait time for connection. The default value will be 20,000 milliseconds if omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
+Recommend to do as the following to make same codes available to devices  such as Android 4.4 and iOS 6 or higher which support the native WebSocket api.  
+
+    if (WebSocket.pluginOptions) {
+        WebSocket.pluginoptions = {
+            origin: 'chatterchatter.org'
+        };
+    }
+    var ws = new WebSocket('ws://chatterchatter.org');
 
 ### send(data[, asBinary])
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually is not used.  
@@ -86,7 +89,7 @@ In Android 2.2 and 2.3, binary message cannot be sent because both blob and arra
     var data = btoa(binaryString);  // encoded in Base64
     ws.send(data, true);            // If omit the second argument, this is sent as text message.
 
-#### Notes
+#### Note
 If receives binary message in Android 2.2 and 2.3, encodes them in base64.  
 
     ws.onmessage = function (event) {
@@ -98,6 +101,9 @@ If receives binary message in Android 2.2 and 2.3, encodes them in base64.
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.4.1
+* change the way to set plugin options  
+
 #### 0.4.0
 * Cordova/Phonegap 3 support  
 * binary support  
