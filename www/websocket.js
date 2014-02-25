@@ -22,14 +22,14 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.4.1
+ * @version 0.4.2
  */
 (function () {
     'use strict';
     var exec = require('cordova/exec'),
         uuid = require('cordova/utils').createUUID(),
         identifier = 0,
-        socks = [],
+        listeners = [],
         tasks = [],
         post = function (fn) {
             tasks.push(fn);
@@ -46,20 +46,13 @@
         createMessage = function (type, data, origin) {
             var evt = document.createEvent('Event');
 
+            evt.initEvent(type, false, false);
             switch (type) {
-            case 'open':
-                evt.initEvent(type, false, false);
-                break;
             case 'message':
-                evt.initEvent(type, false, false);
                 evt.data = data.data;
                 evt.origin = origin;
                 break;
-            case 'error':
-                evt.initEvent(type, false, false);
-                break;
             case 'close':
-                evt.initEvent(type, false, false);
                 evt.wasClean = data.wasClean;
                 evt.code = data.code;
                 evt.reason = data.reason;
@@ -69,16 +62,15 @@
         },
         EventTarget = function () {
             this.addEventListener = function (type, listener) {
-                var el = this.__getListener__()[type] || [];
+                var el = listeners[this.__getId__()][type] || [];
 
                 if (el.indexOf(listener) < 0) {
                     el.push(listener);
-                    this.__getListener__()[type] = el;
+                    listeners[this.__getId__()][type] = el;
                 }
-
             };
             this.removeEventListener = function (type, listener) {
-                var i, el = this.__getListener__()[type] || [];
+                var i, el = listeners[this.__getId__()][type] || [];
 
                 i = el.indexOf(listener);
                 if (i >= 0) {
@@ -86,14 +78,14 @@
                 }
             };
             this.dispatchEvent = function (evt) {
-                var i, len, el = this.__getListener__()[evt.type] || [];
+                var i, len, el = listeners[this.__getId__()][evt.type] || [];
 
                 for (i = 0, len = el.length; i < len; i++) {
                     el[i](evt);
                 }
             };
         },
-        WebSocket = function () {
+        WebSocketPrototype = function () {
             var binaryToString;
 
             binaryToString = function (data, onComplete) {
@@ -133,15 +125,14 @@
                 exec(null, null, 'WebSocket', 'close', [this.__getId__(), code || 0, reason || '']);
             };
         },
-        F = function (url, protocols) {
-            var that = this, listeners = {}, stringToBinary;
+        WebSocket = function (url, protocols) {
+            var that = this, id = identifier, stringToBinary;
 
             if (this === window) {
                 throw new TypeError('Failed to construct \'WebSocket\': ' +
                     'Please use the \'new\' operator, ' +
                     'this DOM object constructor cannot be called as a function.');
             }
-            socks[identifier] = this;
 
             this.url = url;
             this.binaryType = window.WebKitBlobBuilder ? 'blob' : window.ArrayBuffer ? 'arraybuffer' : 'text';
@@ -179,14 +170,10 @@
                 }
                 throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', binaryType));
             };
-            this.__getId__ = (function (id) {
-                return function () {
-                    return id;
-                };
-            }(identifier));
-            this.__getListener__ = function () {
-                return listeners;
+            this.__getId__ = function () {
+                return id;
             };
+            listeners[id] = {};
 
             exec(function (data) {
                 post(function () {
@@ -220,7 +207,7 @@
                         } else {
                             that.dispatchEvent(evt);
                         }
-                        socks[that.__getId__()] = undefined;
+                        listeners[that.__getId__()] = undefined;
                         break;
                     }
                 });
@@ -234,17 +221,17 @@
                         that.dispatchEvent(evt);
                     }
                 });
-            }, 'WebSocket', 'create', [identifier++, url, this.protocol, F.pluginOptions || {}]);
+            }, 'WebSocket', 'create', [identifier++, url, this.protocol, WebSocket.pluginOptions || {}]);
         };
 
-    WebSocket.prototype = new EventTarget();
+    WebSocketPrototype.prototype = new EventTarget();
+    WebSocketPrototype.prototype.constructor = WebSocketPrototype;
+    WebSocket.prototype = new WebSocketPrototype();
     WebSocket.prototype.constructor = WebSocket;
-    F.prototype = new WebSocket();
-    F.prototype.constructor = F;
-    F.pluginOptions = {};
+    WebSocket.pluginOptions = {};
 
     if (!window.WebSocket) {
         window.addEventListener('message', listener, true);
     }
-    module.exports = F;
+    module.exports = WebSocket;
 }());
