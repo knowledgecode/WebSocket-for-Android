@@ -98,7 +98,7 @@ public class WebSocket extends CordovaPlugin {
          * @return check result
          */
         private boolean binaryMessageTooLarge(int currentSize, int length) {
-            if (currentSize + length > getMaxBinaryMessageSize()) {
+            if (getMaxBinaryMessageSize() >= 0 && currentSize + length > getMaxBinaryMessageSize()) {
                 LOG.w("CordovaLog", "Binary message too large > " + getMaxBinaryMessageSize() + "B");
                 _frame.close(1009, "Message size > " + getMaxBinaryMessageSize());
                 return false;
