@@ -18,8 +18,6 @@
  */
 package com.knowledgecode.cordova.websocket;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -33,6 +31,7 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.LOG;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
+import org.apache.http.util.ByteArrayBuffer;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -45,7 +44,7 @@ import android.util.Base64;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.4.1
+ * @version 0.4.2
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -60,10 +59,10 @@ public class WebSocket extends CordovaPlugin {
 
         private FrameConnection _frame;
         private boolean _binary;
-        private ByteArrayOutputStream _stream;
+        private ByteArrayBuffer _buffer;
 
         public JettyWebSocket() {
-            _stream = new ByteArrayOutputStream(BUFFER_SIZE);
+            _buffer = new ByteArrayBuffer(BUFFER_SIZE);
         }
 
         public abstract int getMaxBinaryMessageSize();
@@ -72,13 +71,13 @@ public class WebSocket extends CordovaPlugin {
         public boolean onFrame(byte flags, byte opcode, byte[] data, int offset, int length) {
             if (_frame.isBinary(opcode) || (_frame.isContinuation(opcode) && _binary)) {
                 _binary = true;
-                if (binaryMessageTooLarge(_stream.size(), length - offset)) {
-                    _stream.write(data, offset, length);
+                if (binaryMessageTooLarge(_buffer.length(), length - offset)) {
+                    _buffer.append(data, offset, length);
                 }
                 if (_frame.isMessageComplete(flags)) {
                     _binary = false;
-                    this.onMessage(_stream.toByteArray(), 0, _stream.size());
-                    _stream.reset();
+                    this.onMessage(_buffer.buffer(), 0, _buffer.length());
+                    _buffer.clear();
                 }
                 return true;
             } else if (_frame.isClose(opcode)) {
@@ -111,13 +110,8 @@ public class WebSocket extends CordovaPlugin {
          * Release resources.
          */
         private void release() {
-            if (_stream != null) {
-                try {
-                    _stream.close();
-                } catch (IOException e) {
-                }
-                _stream = null;
-            }
+            _buffer.clear();
+            _buffer = null;
             if (_frame.isOpen()) {
                 _frame.close();
             }
