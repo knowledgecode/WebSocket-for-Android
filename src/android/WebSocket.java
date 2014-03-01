@@ -45,7 +45,7 @@ import android.util.Base64;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.4.0
+ * @version 0.4.1
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -214,19 +214,19 @@ public class WebSocket extends CordovaPlugin {
                     @Override
                     public void onOpen(Connection conn) {
                         map.put(id, conn);
-                        String callbackString = createCallback("onopen");
+                        String callbackString = createJsonForOpen(conn.getProtocol());
                         sendCallback(callbackString, true);
                     }
 
                     @Override
                     public void onMessage(String data) {
-                        String callbackString = createCallback("onmessage", data);
+                        String callbackString = createJsonForMessage(data);
                         sendCallback(callbackString, true);
                     }
 
                     @Override
                     public void onMessage(byte[] data, int offset, int length) {
-                        String callbackString = createCallback("onmessage", data);
+                        String callbackString = createJsonForMessage(data);
                         sendCallback(callbackString, true);
                     }
 
@@ -235,7 +235,7 @@ public class WebSocket extends CordovaPlugin {
                         if (map.containsKey(id)) {
                             map.remove(id);
                         }
-                        String callbackString = createCallback("onclose", code, reason);
+                        String callbackString = createJsonForClose(code, reason);
                         sendCallback(callbackString, false);
                     }
 
@@ -259,49 +259,46 @@ public class WebSocket extends CordovaPlugin {
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
+                     * @param protocol
                      * @return JSON String
                      */
-                    private String createCallback(String event) {
-                        String json = "{\"event\":\"%s\"}";
-                        return String.format(json, event);
+                    private String createJsonForOpen(String protocol) {
+                        String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        return String.format(json, protocol.replaceAll("\"", "\\\\\""));
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param data
                      * @return JSON String
                      */
-                    private String createCallback(String event, String data) {
-                        String json = "{\"event\":\"%s\",\"data\":\"%s\"}";
-                        return String.format(json, event, data.replaceAll("\"", "\\\\\""));
+                    private String createJsonForMessage(String data) {
+                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\"}";
+                        return String.format(json, data.replaceAll("\"", "\\\\\""));
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param input
                      * @return JSON String
                      */
-                    private String createCallback(String event, byte[] input) {
-                        String json = "{\"event\":\"%s\",\"data\":\"%s\",\"binary\":true}";
+                    private String createJsonForMessage(byte[] input) {
+                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\",\"binary\":true}";
                         String data = Base64.encodeToString(input, Base64.NO_WRAP);
-                        return String.format(json, event, data);
+                        return String.format(json, data);
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param code
                      * @param reason
                      * @return JSON String
                      */
-                    private String createCallback(String event, int code, String reason) {
-                        String json = "{\"event\":\"%s\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
+                    private String createJsonForClose(int code, String reason) {
+                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
                         boolean wasClean = code == 1000;
                         reason = reason == null ? "" : reason;
-                        return String.format(json, event, wasClean, code, reason.replaceAll("\"", "\\\\\""));
+                        return String.format(json, wasClean, code, reason.replaceAll("\"", "\\\\\""));
                     }
                 }, maxConnectTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
