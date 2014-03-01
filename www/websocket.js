@@ -144,7 +144,10 @@
                 }
             };
             this.close = function (code, reason) {
-                exec(null, null, 'WebSocket', 'close', [this.__getId__(), code || 0, reason || '']);
+                if (this.readyState === this.CONNECTING || this.readyState === this.OPEN) {
+                    this.readyState = this.CLOSING;
+                    exec(null, null, 'WebSocket', 'close', [this.__getId__(), code || 0, reason || '']);
+                }
             };
         },
         WebSocket = function (url, protocols) {
@@ -198,6 +201,7 @@
                     switch (data.event) {
                     case 'onopen':
                         that.protocol = data.protocol;
+                        that.readyState = that.OPEN;
                         evt = createMessage('open');
                         if (that.onopen) {
                             that.onopen(evt);
@@ -215,6 +219,7 @@
                         that.dispatchEvent(evt);
                         break;
                     case 'onclose':
+                        that.readyState = that.CLOSED;
                         evt = createMessage('close', data);
                         if (that.onclose) {
                             that.onclose(evt);
