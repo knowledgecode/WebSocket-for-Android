@@ -29,11 +29,21 @@ The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/
 ## Installing
 Use the Cordova/PhoneGap Command-Line interface.  
 
-    cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
+    $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 
 or  
 
-    phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
+    $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
+
+### Upgrading from previous versions
+
+    $ cordova plugin remove com.knowledgecode.cordova.websocket
+    $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
+
+or  
+
+    $ phonegap plugin remove com.knowledgecode.cordova.websocket
+    $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 
 ## Usage
 ### WebSocket(url[, protocols])
