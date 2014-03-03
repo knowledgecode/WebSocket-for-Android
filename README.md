@@ -27,7 +27,7 @@ The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/
 `*4` WebSocket is supported by WebView in KitKat. The native API of these devices is used in preference to this plugin.  
 
 ## Installing
-Use the Cordova/PhoneGap Command-Line interface.  
+Use the Cordova/PhoneGap Command-Line interface:  
 
     $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 
@@ -80,7 +80,7 @@ And then, this plugin has options. Details are as follows:
     };
 
 All these parameters are omissible. The origin will be set empty if omit it. The maxConnectTime is a wait time for connection. The default value will be 20,000 milliseconds if omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
-Recommend to do as the following to make common source code available for devices such as Android 4.4 and iOS 6 or greater which support the native API.  
+Recommend to do as the following to make common source code available for devices such as Android 4.4 and iOS 6 or greater which support the native API:  
 
     if (WebSocket.pluginOptions) {
         WebSocket.pluginoptions = {
@@ -90,6 +90,8 @@ Recommend to do as the following to make common source code available for device
     var ws = new WebSocket('ws://chatterchatter.org');
 
 ### send(data[, asBinary])
+`deprecated` *the second argument will be removed soon!*  
+
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually is not used.  
 In Android 2.2 and 2.3, cannot transmit binary messages because both blob and arraybuffer are not supported. Therefore, needs to transmit them by Base64 encoding.  
 
@@ -111,7 +113,7 @@ Closes the WebSocket connection or connection attempt, if any.
 #### 0.5.0
 * change the way to set plugin options  
 * multiple subprotocol support  
-* readyState property support (thank for @jrpereirajr)  
+* readyState property support (thanks to @jrpereirajr)  
 
 #### 0.4.0
 * Cordova/Phonegap 3 support  
