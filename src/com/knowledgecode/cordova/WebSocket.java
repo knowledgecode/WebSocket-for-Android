@@ -18,8 +18,6 @@
  */
 package com.knowledgecode.cordova;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -33,6 +31,7 @@ import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.LOG;
 import org.apache.cordova.api.PluginResult;
 import org.apache.cordova.api.PluginResult.Status;
+import org.apache.http.util.ByteArrayBuffer;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -45,7 +44,7 @@ import android.util.Base64;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.4.0
+ * @version 0.5.0
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -60,10 +59,10 @@ public class WebSocket extends CordovaPlugin {
 
         private FrameConnection _frame;
         private boolean _binary;
-        private ByteArrayOutputStream _stream;
+        private ByteArrayBuffer _buffer;
 
         public JettyWebSocket() {
-            _stream = new ByteArrayOutputStream(BUFFER_SIZE);
+            _buffer = new ByteArrayBuffer(BUFFER_SIZE);
         }
 
         public abstract int getMaxBinaryMessageSize();
@@ -72,13 +71,13 @@ public class WebSocket extends CordovaPlugin {
         public boolean onFrame(byte flags, byte opcode, byte[] data, int offset, int length) {
             if (_frame.isBinary(opcode) || (_frame.isContinuation(opcode) && _binary)) {
                 _binary = true;
-                if (binaryMessageTooLarge(_stream.size(), length - offset)) {
-                    _stream.write(data, offset, length);
+                if (binaryMessageTooLarge(_buffer.length(), length - offset)) {
+                    _buffer.append(data, offset, length);
                 }
                 if (_frame.isMessageComplete(flags)) {
                     _binary = false;
-                    this.onMessage(_stream.toByteArray(), 0, _stream.size());
-                    _stream.reset();
+                    this.onMessage(_buffer.buffer(), 0, _buffer.length());
+                    _buffer.clear();
                 }
                 return true;
             } else if (_frame.isClose(opcode)) {
@@ -99,7 +98,7 @@ public class WebSocket extends CordovaPlugin {
          * @return check result
          */
         private boolean binaryMessageTooLarge(int currentSize, int length) {
-            if (currentSize + length > getMaxBinaryMessageSize()) {
+            if (getMaxBinaryMessageSize() >= 0 && currentSize + length > getMaxBinaryMessageSize()) {
                 LOG.w("CordovaLog", "Binary message too large > " + getMaxBinaryMessageSize() + "B");
                 _frame.close(1009, "Message size > " + getMaxBinaryMessageSize());
                 return false;
@@ -111,13 +110,8 @@ public class WebSocket extends CordovaPlugin {
          * Release resources.
          */
         private void release() {
-            if (_stream != null) {
-                try {
-                    _stream.close();
-                } catch (IOException e) {
-                }
-                _stream = null;
-            }
+            _buffer.clear();
+            _buffer = null;
             if (_frame.isOpen()) {
                 _frame.close();
             }
@@ -214,19 +208,19 @@ public class WebSocket extends CordovaPlugin {
                     @Override
                     public void onOpen(Connection conn) {
                         map.put(id, conn);
-                        String callbackString = createCallback("onopen");
+                        String callbackString = createJsonForOpen(conn.getProtocol());
                         sendCallback(callbackString, true);
                     }
 
                     @Override
                     public void onMessage(String data) {
-                        String callbackString = createCallback("onmessage", data);
+                        String callbackString = createJsonForMessage(data);
                         sendCallback(callbackString, true);
                     }
 
                     @Override
                     public void onMessage(byte[] data, int offset, int length) {
-                        String callbackString = createCallback("onmessage", data);
+                        String callbackString = createJsonForMessage(data);
                         sendCallback(callbackString, true);
                     }
 
@@ -235,7 +229,7 @@ public class WebSocket extends CordovaPlugin {
                         if (map.containsKey(id)) {
                             map.remove(id);
                         }
-                        String callbackString = createCallback("onclose", code, reason);
+                        String callbackString = createJsonForClose(code, reason);
                         sendCallback(callbackString, false);
                     }
 
@@ -259,49 +253,46 @@ public class WebSocket extends CordovaPlugin {
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
+                     * @param protocol
                      * @return JSON String
                      */
-                    private String createCallback(String event) {
-                        String json = "{\"event\":\"%s\"}";
-                        return String.format(json, event);
+                    private String createJsonForOpen(String protocol) {
+                        String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        return String.format(json, protocol.replaceAll("\"", "\\\\\""));
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param data
                      * @return JSON String
                      */
-                    private String createCallback(String event, String data) {
-                        String json = "{\"event\":\"%s\",\"data\":\"%s\"}";
-                        return String.format(json, event, data.replaceAll("\"", "\\\\\""));
+                    private String createJsonForMessage(String data) {
+                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\"}";
+                        return String.format(json, data.replaceAll("\"", "\\\\\""));
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param input
                      * @return JSON String
                      */
-                    private String createCallback(String event, byte[] input) {
-                        String json = "{\"event\":\"%s\",\"data\":\"%s\",\"binary\":true}";
+                    private String createJsonForMessage(byte[] input) {
+                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\",\"binary\":true}";
                         String data = Base64.encodeToString(input, Base64.NO_WRAP);
-                        return String.format(json, event, data);
+                        return String.format(json, data);
                     }
 
                     /**
                      * Create Callback JSON String.
-                     * @param event
                      * @param code
                      * @param reason
                      * @return JSON String
                      */
-                    private String createCallback(String event, int code, String reason) {
-                        String json = "{\"event\":\"%s\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
+                    private String createJsonForClose(int code, String reason) {
+                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
                         boolean wasClean = code == 1000;
                         reason = reason == null ? "" : reason;
-                        return String.format(json, event, wasClean, code, reason.replaceAll("\"", "\\\\\""));
+                        return String.format(json, wasClean, code, reason.replaceAll("\"", "\\\\\""));
                     }
                 }, maxConnectTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
