@@ -258,6 +258,7 @@ public class WebSocket extends CordovaPlugin {
                      */
                     private String createJsonForOpen(String protocol) {
                         String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        protocol = protocol == null ? "" : protocol;
                         return String.format(json, protocol.replaceAll("\"", "\\\\\""));
                     }
 
