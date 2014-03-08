@@ -44,7 +44,7 @@ import android.util.Base64;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.5.0
+ * @version 0.5.1
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -258,6 +258,7 @@ public class WebSocket extends CordovaPlugin {
                      */
                     private String createJsonForOpen(String protocol) {
                         String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        protocol = protocol == null ? "" : protocol;
                         return String.format(json, protocol.replaceAll("\"", "\\\\\""));
                     }
 
