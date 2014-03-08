@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.5.0
+ * @version 0.5.2
  */
 (function () {
     'use strict';
@@ -123,7 +123,7 @@
                 var i, len, el = listeners[this.__getId__()][evt.type] || [];
 
                 for (i = 0, len = el.length; i < len; i++) {
-                    el[i](evt);
+                    el[i].call(this, evt);
                 }
             };
         },
@@ -239,16 +239,18 @@
                     that.dispatchEvent(evt);
                 });
             }, 'WebSocket', 'create', [identifier++, url, protocols, WebSocket.pluginOptions || {}]);
-        };
+        },
+        ver = navigator.userAgent.match(/Android (\d+\.\d+)\.\d+/);
 
-    WebSocketPrototype.prototype = new EventTarget();
-    WebSocketPrototype.prototype.constructor = WebSocketPrototype;
-    WebSocket.prototype = new WebSocketPrototype();
-    WebSocket.prototype.constructor = WebSocket;
-    WebSocket.pluginOptions = {};
-
-    if (!window.WebSocket) {
+    if ((ver && parseFloat(ver[1]) < 4.4) || !window.WebSocket) {
+        WebSocketPrototype.prototype = new EventTarget();
+        WebSocketPrototype.prototype.constructor = WebSocketPrototype;
+        WebSocket.prototype = new WebSocketPrototype();
+        WebSocket.prototype.constructor = WebSocket;
+        WebSocket.pluginOptions = {};
+        module.exports = WebSocket;
         window.addEventListener('message', taskQueue.listener, true);
+    } else {
+        module.exports = window.WebSocket;
     }
-    module.exports = WebSocket;
 }());

@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.knowledgecode.cordova.websocket"
-  version="0.5.1">
+  version="0.5.2">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
@@ -14,7 +14,7 @@
   </engines>
 
   <js-module src="www/websocket.js" name="websocket">
-    <merges target="WebSocket" />
+    <clobbers target="WebSocket" />
   </js-module>
 
   <platform name="android">
