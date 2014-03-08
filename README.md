@@ -112,6 +112,7 @@ Closes the WebSocket connection or connection attempt, if any.
 ## Change Log
 #### 0.5.2
 * forcing the WebSocket of plugin in Android 4.3 or lower  
+* bug fix  
 
 #### 0.5.1
 * bug fix  
