@@ -240,7 +240,7 @@
                 });
             }, 'WebSocket', 'create', [identifier++, url, protocols, WebSocket.pluginOptions || {}]);
         },
-        ver = navigator.userAgent.match(/Android (\d+\.\d+)\.\d+/);
+        ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
 
     if ((ver && parseFloat(ver[1]) < 4.4) || !window.WebSocket) {
         WebSocketPrototype.prototype = new EventTarget();
