@@ -44,7 +44,7 @@ import android.util.Base64;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.5.1
+ * @version 0.5.2
  */
 public class WebSocket extends CordovaPlugin {
 
