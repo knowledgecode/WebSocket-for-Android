@@ -240,15 +240,15 @@
                     that.dispatchEvent(evt);
                 });
             }, 'WebSocket', 'create', [identifier++, url, protocols, WebSocket.pluginOptions || {}]);
-        };
+        },
+        ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
 
-    WebSocketPrototype.prototype = new EventTarget();
-    WebSocketPrototype.prototype.constructor = WebSocketPrototype;
-    WebSocket.prototype = new WebSocketPrototype();
-    WebSocket.prototype.constructor = WebSocket;
-    WebSocket.pluginOptions = {};
-
-    if (!window.WebSocket) {
+    if ((ver && parseFloat(ver[1]) < 4.4) || !window.WebSocket) {
+        WebSocketPrototype.prototype = new EventTarget();
+        WebSocketPrototype.prototype.constructor = WebSocketPrototype;
+        WebSocket.prototype = new WebSocketPrototype();
+        WebSocket.prototype.constructor = WebSocket;
+        WebSocket.pluginOptions = {};
         window.addEventListener('message', taskQueue.listener, true);
         window.WebSocket = WebSocket;
     }
