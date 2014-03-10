@@ -124,7 +124,7 @@
                 var i, len, el = listeners[this.__getId__()][evt.type] || [];
 
                 for (i = 0, len = el.length; i < len; i++) {
-                    el[i](evt);
+                    el[i].call(this, evt);
                 }
             };
         },
