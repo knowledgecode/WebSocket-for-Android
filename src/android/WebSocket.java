@@ -39,12 +39,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.util.Base64;
+import android.webkit.CookieManager;
 
 /**
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.5.2
+ * @version 0.6.0
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -194,6 +195,7 @@ public class WebSocket extends CordovaPlugin {
                 long maxConnectTime =  options.optLong("maxConnectTime", 20000);
                 int maxTextMessageSize = options.optInt("maxTextMessageSize", 32 * 1024);
                 final int maxBinaryMessageSize = options.optInt("maxBinaryMessageSize", 32 * 1024);
+                URI uri = complementPort(url);
 
                 if (protocol.length() > 0) {
                     client.setProtocol(protocol);
@@ -203,8 +205,9 @@ public class WebSocket extends CordovaPlugin {
                 }
                 client.setMaxTextMessageSize(maxTextMessageSize);
                 client.setMaxBinaryMessageSize(-1);
+                setCookie(client.getCookies(), uri.getHost());
 
-                client.open(complementPort(url), new JettyWebSocket() {
+                client.open(uri, new JettyWebSocket() {
                     @Override
                     public void onOpen(Connection conn) {
                         map.put(id, conn);
@@ -324,6 +327,25 @@ public class WebSocket extends CordovaPlugin {
                 uri = new URI(uri.getScheme(), "", uri.getHost(), port, uri.getPath(), uri.getQuery(), "");
             }
             return uri;
+        }
+
+        /**
+         * Set cookies, if any.
+         * @param cookies
+         * @param url
+         */
+        private void setCookie(Map<String, String> cookies, String url) {
+            String cookie = CookieManager.getInstance().getCookie(url);
+
+            if (cookie != null) {
+                for (String c : cookie.split(";")) {
+                    String[] pair = c.split("=");
+
+                    if (pair.length == 2) {
+                        cookies.put(pair[0], pair[1]);
+                    }
+                }
+            }
         }
     }
 
