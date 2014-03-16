@@ -133,11 +133,11 @@
             this.OPEN = 1;
             this.CLOSING = 2;
             this.CLOSED = 3;
-            this.send = function (data, asBinary) {
+            this.send = function (data) {
                 var that = this;
 
                 if (typeof data === 'string') {
-                    exec(null, null, 'WebSocket', 'send', [this.__getId__(), data, !!asBinary]);
+                    exec(null, null, 'WebSocket', 'send', [this.__getId__(), data, false]);
                 } else {
                     binaryToString(data, function (blob) {
                         exec(null, null, 'WebSocket', 'send', [that.__getId__(), blob, true]);
