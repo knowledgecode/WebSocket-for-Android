@@ -61,7 +61,7 @@ Append the following to the AndroidManifest.xml.
     <uses-permission android:name="android.permission.INTERNET" />
 
 ## Usage
-### WebSocket(url[, protocols])
+### *WebSocket(url[, protocols])*
 The WebSocket(url, protocols) constructor takes one or two arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings.  
 A simple code is as follows:  
 
@@ -104,27 +104,26 @@ Recommend to do as the following to make common source code available for device
     }
     var ws = new WebSocket('ws://chatterchatter.org');
 
-### send(data[, asBinary])
-`deprecated` *the second argument will be removed soon!*  
-
-Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer. The second argument, asBinary, is the unique argument of this plugin. Usually is not used.  
-In Android 2.2 and 2.3, cannot transmit binary messages because both blob and arraybuffer are not supported. Therefore, needs to transmit them by Base64 encoding.  
-
-    var data = btoa(binaryString);  // Base64 encoding
-    ws.send(data, true);            // If omit the second argument, this is transmitted as text message.
+### *send(data)*
+Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer.  
+In devices that are not supported both a blob and an arraybuffer, cannot transmit binary messages. (ex. Android 2.2 and 2.3)  
 
 #### Note
-If receives binary messages in Android 2.2 and 2.3, automatically encodes them to Base64.  
+If receives binary messages in unsupported devices, automatically encodes them to Base64.  
 
     ws.onmessage = function (event) {
         // For example, the receiving data can be used as data URI scheme.
         img.src = 'data:image/jpeg;base64,' + event.data;
     };
 
-### close([code, reason])
+### *close([code, reason])*
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.6.0
+* cookie support (thanks to @ericfong)  
+* removed a second argument from the send() method  
+
 #### 0.5.2
 * forcing the WebSocket of plugin in Android 4.3 or lower  
 * bug fix  
