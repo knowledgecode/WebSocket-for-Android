@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.5.2
+ * @version 0.6.0
  * @requires cordova/phonegap 2.3.0 - 2.9.x
  */
 (function () {
