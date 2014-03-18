@@ -125,7 +125,7 @@ Closes the WebSocket connection or connection attempt, if any.
 * removed a second argument from the send() method  
 
 #### 0.5.2
-* forcing the WebSocket of plugin in Android 4.3 or lower  
+* forcing the WebSocket of plugin in Android 4.3 or lower (thanks to @rpastorvargas and @punj)  
 * bug fix  
 
 #### 0.5.1
@@ -144,19 +144,19 @@ Closes the WebSocket connection or connection attempt, if any.
 * license change from MIT to Apache v2.0  
 
 #### 0.3.2
-* bug fix
+* bug fix  
 
 #### 0.3.1
-* bug fix
+* bug fix  
 
 #### 0.3.0
-* origin support
+* origin support (thanks to @rgillan)  
 
 #### 0.2.0
 * comply with the WebSocket API requirements  
 
 #### 0.1.0
-* first release
+* first release  
 
 ## License
 This plugin is available under the terms of the Apache License Version 2.0.
