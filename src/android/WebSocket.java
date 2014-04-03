@@ -45,7 +45,7 @@ import android.webkit.CookieManager;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.6.0
+ * @version 0.6.1
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -262,7 +262,7 @@ public class WebSocket extends CordovaPlugin {
                     private String createJsonForOpen(String protocol) {
                         String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
                         protocol = protocol == null ? "" : protocol;
-                        return String.format(json, protocol.replaceAll("\"", "\\\\\""));
+                        return String.format(json, quote(protocol));
                     }
 
                     /**
@@ -272,7 +272,7 @@ public class WebSocket extends CordovaPlugin {
                      */
                     private String createJsonForMessage(String data) {
                         String json = "{\"event\":\"onmessage\",\"data\":\"%s\"}";
-                        return String.format(json, data.replaceAll("\"", "\\\\\""));
+                        return String.format(json, quote(data));
                     }
 
                     /**
@@ -296,7 +296,49 @@ public class WebSocket extends CordovaPlugin {
                         String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
                         boolean wasClean = code == 1000;
                         reason = reason == null ? "" : reason;
-                        return String.format(json, wasClean, code, reason.replaceAll("\"", "\\\\\""));
+                        return String.format(json, wasClean, code, quote(reason));
+                    }
+
+                    /**
+                     * Quote.
+                     * @param data
+                     * @return Quoted String
+                     */
+                    private String quote(String data) {
+                        StringBuilder out = new StringBuilder();
+                        for (int i = 0; i < data.length(); i++) {
+                            char c = data.charAt(i);
+                            switch (c) {
+                            case '"':
+                            case '\\':
+                            case '/':
+                                out.append('\\').append(c);
+                                break;
+                            case '\t':
+                                out.append("\\t");
+                                break;
+                            case '\b':
+                                out.append("\\b");
+                                break;
+                            case '\n':
+                                out.append("\\n");
+                                break;
+                            case '\r':
+                                out.append("\\r");
+                                break;
+                            case '\f':
+                                out.append("\\f");
+                                break;
+                            default:
+                                if (c <= 0x1F) {
+                                    out.append(String.format("\\u%04x", (int) c));
+                                } else {
+                                    out.append(c);
+                                }
+                                break;
+                            }
+                        }
+                        return out.toString();
                     }
                 }, maxConnectTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
