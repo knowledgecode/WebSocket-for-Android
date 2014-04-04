@@ -105,6 +105,9 @@ If receives binary messages in unsupported devices, automatically encodes them t
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.6.1
+* added escaping of special characters (thanks to @odbol)  
+
 #### 0.6.0
 * cookie support (thanks to @ericfong)  
 * removed a second argument from the send() method  
