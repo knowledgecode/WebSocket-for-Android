@@ -260,9 +260,9 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForOpen(String protocol) {
-                        String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        String json = "{\"event\":\"onopen\",\"protocol\":%s}";
                         protocol = protocol == null ? "" : protocol;
-                        return String.format(json, quote(protocol));
+                        return String.format(json, JSONObject.quote(protocol));
                     }
 
                     /**
@@ -271,8 +271,8 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForMessage(String data) {
-                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\"}";
-                        return String.format(json, quote(data));
+                        String json = "{\"event\":\"onmessage\",\"data\":%s}";
+                        return String.format(json, JSONObject.quote(data));
                     }
 
                     /**
@@ -293,52 +293,10 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForClose(int code, String reason) {
-                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
+                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":%s}";
                         boolean wasClean = code == 1000;
                         reason = reason == null ? "" : reason;
-                        return String.format(json, wasClean, code, quote(reason));
-                    }
-
-                    /**
-                     * Quote.
-                     * @param data
-                     * @return Quoted String
-                     */
-                    private String quote(String data) {
-                        StringBuilder out = new StringBuilder();
-                        for (int i = 0; i < data.length(); i++) {
-                            char c = data.charAt(i);
-                            switch (c) {
-                            case '"':
-                            case '\\':
-                            case '/':
-                                out.append('\\').append(c);
-                                break;
-                            case '\t':
-                                out.append("\\t");
-                                break;
-                            case '\b':
-                                out.append("\\b");
-                                break;
-                            case '\n':
-                                out.append("\\n");
-                                break;
-                            case '\r':
-                                out.append("\\r");
-                                break;
-                            case '\f':
-                                out.append("\\f");
-                                break;
-                            default:
-                                if (c <= 0x1F) {
-                                    out.append(String.format("\\u%04x", (int) c));
-                                } else {
-                                    out.append(c);
-                                }
-                                break;
-                            }
-                        }
-                        return out.toString();
+                        return String.format(json, wasClean, code, JSONObject.quote(reason));
                     }
                 }, maxConnectTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
