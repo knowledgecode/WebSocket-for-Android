@@ -3,8 +3,8 @@ WebSocket for Android is a Cordova/PhoneGap plugin that makes possible to use We
 This is using Jetty under the terms of the Apache License v2.0.  
 
 ## Requirements
- - Java 1.6 or greater  
- - Android 2.2 or greater (recommend 4.0 or greater)  
+ - Java 1.6 or later  
+ - Android 2.2 or later (recommend 4.0 or later)  
  - Cordova/PhoneGap 2.3.0 - 2.9.x  
 
 The version for Cordova/PhoneGap 3 is [here](https://github.com/knowledgecode/WebSocket-for-Android/tree/master).  
@@ -31,40 +31,41 @@ The version for Cordova/PhoneGap 3 is [here](https://github.com/knowledgecode/We
 Copy `src/com/knowledgecode/cordova/WebSocket.java` to your project.  
 
 ### assets/www/websocket.js
-Copy `assets/www/websocket.js` to your project. And append it to html files as follows.  
-
-    <script src="cordova.js"></script>
-    <script src="websocket.js"></script>
-
+Copy `assets/www/websocket.js` to your project. And append it to html files as follows:  
+```HTML
+<script src="cordova.js"></script>
+<script src="websocket.js"></script>
+```
 ### libs/jetty-websocket-8.x.jar
 Copy `libs/jetty-websocket-8.x.jar` to your project.  
 
 ### res/xml/config.xml
-Append the following to the config.xml.  
-
-    <plugins>
-        // ...
-        // some other plugins
-        // ...
-        <plugin name="WebSocket" value="com.knowledgecode.cordova.WebSocket" />
-    </plugins>
-
-In the case of Cordova/Phonegap 2.8.0 or higher.  
-
-    <feature name="WebSocket">
-      <param name="android-package" value="com.knowledgecode.cordova.WebSocket" />
-    </feature>
-
+Append the following to the config.xml:  
+```XML
+<plugins>
+  // ...
+  // some other plugins
+  // ...
+  <plugin name="WebSocket" value="com.knowledgecode.cordova.WebSocket" />
+</plugins>
+```
+In the case of Cordova/Phonegap 2.8.0 or later:  
+```XML
+<feature name="WebSocket">
+  <param name="android-package" value="com.knowledgecode.cordova.WebSocket" />
+</feature>
+```
 ### AndroidManifest.xml
-Append the following to the AndroidManifest.xml.  
-
-    <uses-permission android:name="android.permission.INTERNET" />
-
+Append the following to the AndroidManifest.xml:  
+```XML
+<uses-permission android:name="android.permission.INTERNET" />
+```
 ## Usage
 ### *WebSocket(url[, protocols])*
 The WebSocket(url, protocols) constructor takes one or two arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings.  
 A simple code is as follows:  
-
+```JavaScript
+document.addEventListener('deviceready', function () {
     var ws = new WebSocket('ws://echo.websocket.org');
 
     ws.onopen = function () {
@@ -84,42 +85,46 @@ A simple code is as follows:
     ws.onclose = function (event) {
         console.log('close code=' + event.code);
     };
-
+}, false);
+```
 And then, this plugin has options. Details are as follows:  
-
-    WebSocket.pluginOptions = {
-        origin: 'http://websocket-is-fun.com',
-        maxConnectTime: 20000,                // 20sec
-        maxTextMessageSize: 32768,            // 32kb
-        maxBinaryMessageSize: 32768           // 32kb
-    };
-
+```JavaScript
+WebSocket.pluginOptions = {
+    origin: 'http://websocket-is-fun.com',
+    maxConnectTime: 20000,                // 20sec
+    maxTextMessageSize: 32768,            // 32kb
+    maxBinaryMessageSize: 32768           // 32kb
+};
+```
 All these parameters are omissible. The origin will be set empty if omit it. The maxConnectTime is a wait time for connection. The default value will be 20,000 milliseconds if omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
-Recommend to do as the following to make common source code available for devices such as Android 4.4 and iOS 6 or greater which support the native API:  
-
-    if (WebSocket.pluginOptions) {
-        WebSocket.pluginoptions = {
-            origin: 'http://chatterchatter.org'
-        };
-    }
-    var ws = new WebSocket('ws://chatterchatter.org');
-
+Recommend to do as the following to make common source code available for devices such as Android 4.4 and iOS 6 or later which support the native API (RFC 6455):  
+```JavaScript
+if (WebSocket.pluginOptions) {
+    WebSocket.pluginoptions = {
+        origin: 'http://chatterchatter.org'
+    };
+}
+var ws = new WebSocket('ws://chatterchatter.org');
+```
 ### *send(data)*
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer.  
 In devices that are not supported both a blob and an arraybuffer, cannot transmit binary messages. (ex. Android 2.2 and 2.3)  
 
 #### Note
 If receives binary messages in unsupported devices, automatically encodes them to Base64.  
-
-    ws.onmessage = function (event) {
-        // For example, the receiving data can be used as data URI scheme.
-        img.src = 'data:image/jpeg;base64,' + event.data;
-    };
-
+```JavaScript
+ws.onmessage = function (event) {
+    // For example, the receiving data can be used as data URI scheme.
+    img.src = 'data:image/jpeg;base64,' + event.data;
+};
+```
 ### *close([code, reason])*
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.6.1
+* added escaping of special characters (thanks to @odbol)  
+
 #### 0.6.0
 * cookie support (thanks to @ericfong)  
 * removed a second argument from the send() method  
