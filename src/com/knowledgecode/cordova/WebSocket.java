@@ -45,7 +45,7 @@ import android.webkit.CookieManager;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.6.0
+ * @version 0.6.1
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -260,9 +260,9 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForOpen(String protocol) {
-                        String json = "{\"event\":\"onopen\",\"protocol\":\"%s\"}";
+                        String json = "{\"event\":\"onopen\",\"protocol\":%s}";
                         protocol = protocol == null ? "" : protocol;
-                        return String.format(json, protocol.replaceAll("\"", "\\\\\""));
+                        return String.format(json, JSONObject.quote(protocol));
                     }
 
                     /**
@@ -271,8 +271,8 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForMessage(String data) {
-                        String json = "{\"event\":\"onmessage\",\"data\":\"%s\"}";
-                        return String.format(json, data.replaceAll("\"", "\\\\\""));
+                        String json = "{\"event\":\"onmessage\",\"data\":%s}";
+                        return String.format(json, JSONObject.quote(data));
                     }
 
                     /**
@@ -293,10 +293,10 @@ public class WebSocket extends CordovaPlugin {
                      * @return JSON String
                      */
                     private String createJsonForClose(int code, String reason) {
-                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":\"%s\"}";
+                        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":%s}";
                         boolean wasClean = code == 1000;
                         reason = reason == null ? "" : reason;
-                        return String.format(json, wasClean, code, reason.replaceAll("\"", "\\\\\""));
+                        return String.format(json, wasClean, code, JSONObject.quote(reason));
                     }
                 }, maxConnectTime, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
