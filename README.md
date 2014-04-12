@@ -1,6 +1,6 @@
 # WebSocket for Android
-WebSocket for Android is a Cordova/PhoneGap plugin that makes possible to use WebSocket (RFC 6455) on Android.  
-This is using Jetty under the terms of the Apache License v2.0.  
+WebSocket for Android is a Cordova/PhoneGap plugin that makes it possible to use WebSockets (RFC 6455) on Android.  
+This is using [Jetty](https://github.com/eclipse/jetty.project) under the terms of the Apache License v2.0.  
 
 ## Requirements
  - Java 1.6 or later  
@@ -107,6 +107,9 @@ ws.onmessage = function (event) {
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.6.2
+* updated Jetty WebSocket library  
+
 #### 0.6.1
 * added escaping of special characters (thanks to @odbol)  
 
