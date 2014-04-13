@@ -21,10 +21,10 @@ The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/
 | 4.3     | support            | support            | support            | support             |
 | 4.4     | native support `*4`| native support `*4`| native support `*4`| native support `*4` |
 
-`*1` Due to SSL issue with Android.  
+`*1` Due to Android SSL issues.  
 `*2` Supports Base64-encoded data only.  
 `*3` May work. But not tested.  
-`*4` WebSocket is supported by WebView in KitKat. The native API of these devices is used in preference to this plugin.  
+`*4` In KitKat, WebSocket API has been officially supported. The native API of these devices is used in preference to this plugin.  
 
 ## Installing
 Use the Cordova/PhoneGap Command-Line interface:  
@@ -82,7 +82,7 @@ WebSocket.pluginOptions = {
 };
 ```
 All these parameters are omissible. The origin will be set empty if omit it. The maxConnectTime is a wait time for connection. The default value will be 20,000 milliseconds if omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
-Recommend to do as the following to make common source code available for devices such as Android 4.4 and iOS 6 or later which support the native API (RFC 6455):  
+To work with common source code for devices supporting the native API (such as Android 4.4 and iOS 6 or later), it is recommended to write as the following:  
 ```JavaScript
 if (WebSocket.pluginOptions) {
     WebSocket.pluginoptions = {
