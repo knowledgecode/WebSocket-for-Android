@@ -168,3 +168,4 @@ Closes the WebSocket connection or connection attempt, if any.
 
 ## License
 This plugin is available under the terms of the Apache License Version 2.0.
+
