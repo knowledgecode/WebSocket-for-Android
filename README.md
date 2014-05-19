@@ -46,7 +46,7 @@ $ phonegap plugin remove com.knowledgecode.cordova.websocket
 $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
 #### Note
-When you install this plugin, it adds INTERNET permission to AndroidManifest.xml. If you remove this plugin, the permission is also removed at the same time.  
+When you install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If you remove this plugin, the permission is also removed at the same time.  
 
 ## Usage
 ### *WebSocket(url[, protocols])*
