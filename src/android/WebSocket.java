@@ -45,7 +45,7 @@ import android.webkit.CookieManager;
  * Cordova WebSocket Plugin for Android
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.6.2
+ * @version 0.6.3
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -77,7 +77,8 @@ public class WebSocket extends CordovaPlugin {
                 }
                 if (_frame.isMessageComplete(flags)) {
                     _binary = false;
-                    this.onMessage(_buffer.buffer(), 0, _buffer.length());
+                    byte[] msg = _buffer.toByteArray();
+                    this.onMessage(msg, 0, msg.length);
                     _buffer.clear();
                 }
                 return true;
