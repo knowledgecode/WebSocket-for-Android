@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.6.2
+ * @version 0.6.3
  */
 (function () {
     'use strict';
