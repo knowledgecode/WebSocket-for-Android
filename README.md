@@ -35,7 +35,14 @@ or
 ```shell
 $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
+This plugin is for Android only. However, when you install this via the CLI, this is also installed all other platforms. It's a feature.  
+In fact, the CLI writes only an installation history in those platforms. (There are no tangible ill effects.)  
+If you mind that thing, recommended to use Cordova Plugman that can specify an installation platform. Execute this on a project root:  
+```shell
+$ plugman install --platform android --project platforms/android --plugin https://github.com/knowledgecode/WebSocket-for-Android.git --plugins_dir plugins
+```
 ### Upgrading from previous versions
+Just remove and reinstall.  
 ```shell
 $ cordova plugin remove com.knowledgecode.cordova.websocket
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
@@ -44,6 +51,11 @@ or
 ```shell
 $ phonegap plugin remove com.knowledgecode.cordova.websocket
 $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
+```
+in the case of Plugman:  
+```shell
+$ plugman uninstall --platform android --project platforms/android --plugin com.knowledgecode.cordova.websocket --plugins_dir plugins
+$ plugman install --platform android --project platforms/android --plugin https://github.com/knowledgecode/WebSocket-for-Android.git --plugins_dir plugins
 ```
 #### Note
 When you install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If you remove this plugin, the permission is also removed at the same time.  
