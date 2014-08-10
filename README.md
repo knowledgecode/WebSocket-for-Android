@@ -122,6 +122,9 @@ ws.onmessage = function (event) {
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.6.3
+* fix a bug of a receiving binary size  
+
 #### 0.6.2
 * updated Jetty WebSocket library  
 
