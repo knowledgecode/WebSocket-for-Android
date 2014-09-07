@@ -15,7 +15,7 @@ The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/
 | 2.2     | support            | not support `*1`   | support            | limited support `*2`|
 | 2.3     | support            | not support `*1`   | support            | limited support `*2`|
 | 3.x     | -- `*3`            | -- `*3`            | -- `*3`            | -- `*3`             |
-| 4.0     | support            | support            | support            | support             |
+| 4.0     | support            | not support `*5`   | support            | support             |
 | 4.1     | support            | support            | support            | support             |
 | 4.2     | support            | support            | support            | support             |
 | 4.3     | support            | support            | support            | support             |
@@ -25,6 +25,7 @@ The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/
 `*2` Supports Base64-encoded data only.  
 `*3` May work. But not tested.  
 `*4` In KitKat, WebSocket API has been officially supported. The native API of these devices is used in preference to this plugin.  
+`*5` Currently under investigation.  
 
 ## Installing
 Use the Cordova/PhoneGap Command-Line interface:  
