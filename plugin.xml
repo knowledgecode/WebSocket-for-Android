@@ -28,7 +28,7 @@
       <uses-permission android:name="android.permission.INTERNET" />
     </config-file>
 
-    <source-file src="libs/jetty-websocket-8.1.15.v20140411.jar" target-dir="libs" />
+    <source-file src="libs/jetty-websocket-8.1.16.v20140903.jar" target-dir="libs" />
     <source-file src="src/android/AbstractWebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/ConnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/DisconnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
