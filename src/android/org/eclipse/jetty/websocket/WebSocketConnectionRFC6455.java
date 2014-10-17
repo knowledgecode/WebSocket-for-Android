@@ -120,7 +120,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
     private final OnTextMessage _onTextMessage;
     private final OnControl _onControl;
     private final String _protocol;
-    private final int _draft;
     private final ClassLoader _context;
     private volatile int _closeCode;
     private volatile String _closeMessage;
@@ -159,7 +158,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
         _context=Thread.currentThread().getContextClassLoader();
 
-        _draft=draft;
         _endp.setMaxIdleTime(maxIdleTime);
 
         _webSocket = websocket;
@@ -602,12 +600,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         public boolean isPong(byte opcode)
         {
             return opcode==OP_PONG;
-        }
-
-        /* ------------------------------------------------------------ */
-        public void disconnect()
-        {
-            close(CLOSE_NORMAL,null);
         }
 
         /* ------------------------------------------------------------ */

@@ -35,8 +35,6 @@ public abstract class AbstractBuffer implements Buffer
 {
     private static final Logger LOG = Log.getLogger(AbstractBuffer.class);
 
-    private final static boolean __boundsChecking = Boolean.getBoolean("org.eclipse.jetty.io.AbstractBuffer.boundsChecking");
-    
     protected final static String 
     __IMMUTABLE = "IMMUTABLE", 
     __READONLY = "READONLY",

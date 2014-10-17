@@ -32,9 +32,9 @@ import org.eclipse.jetty.util.StringMap;
  */
 public class BufferCache
 {
-    private final HashMap _bufferMap=new HashMap();
+    private final HashMap<CachedBuffer, CachedBuffer> _bufferMap=new HashMap<CachedBuffer, CachedBuffer>();
     private final StringMap _stringMap=new StringMap(StringMap.CASE_INSENSTIVE);
-    private final ArrayList _index= new ArrayList();
+    private final ArrayList<CachedBuffer> _index= new ArrayList<CachedBuffer>();
 
     /* ------------------------------------------------------------------------------- */
     /** Add a buffer to the cache at the specified index.
@@ -87,7 +87,7 @@ public class BufferCache
     
     public CachedBuffer getBest(byte[] value, int offset, int maxLength)
     {
-        Entry entry = _stringMap.getBestEntry(value, offset, maxLength);
+        Entry<?, ?> entry = _stringMap.getBestEntry(value, offset, maxLength);
         if (entry!=null)
             return (CachedBuffer)entry.getValue();
         return null;
@@ -127,7 +127,7 @@ public class BufferCache
     public static class CachedBuffer extends ByteArrayBuffer.CaseInsensitive
     {
         private final int _ordinal;
-        private HashMap _associateMap=null;
+        private HashMap<Object, CachedBuffer> _associateMap=null;
         
         public CachedBuffer(String value, int ordinal)
         {
@@ -151,7 +151,7 @@ public class BufferCache
         public void setAssociate(Object key, CachedBuffer associate)
         {
             if (_associateMap==null)
-                _associateMap=new HashMap();
+                _associateMap=new HashMap<Object, CachedBuffer>();
             _associateMap.put(key,associate);
         }
     }

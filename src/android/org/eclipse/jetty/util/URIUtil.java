@@ -19,12 +19,6 @@
 package org.eclipse.jetty.util;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
-
-import org.eclipse.jetty.util.log.Log;
-
-
 
 /* ------------------------------------------------------------ */
 /** URI Holder.

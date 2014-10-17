@@ -114,11 +114,6 @@ public interface WebSocket
         String getProtocol();
         void sendMessage(String data) throws IOException;
         void sendMessage(byte[] data, int offset, int length) throws IOException;
-        
-        /**
-         * @deprecated Use {@link #close()}
-         */
-        void disconnect();
 
         /** 
          * Close the connection with normal close code.

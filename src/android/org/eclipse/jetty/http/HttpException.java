@@ -20,6 +20,7 @@ package org.eclipse.jetty.http;
 
 import java.io.IOException;
 
+@SuppressWarnings("serial")
 public class HttpException extends IOException
 {
     int _status;

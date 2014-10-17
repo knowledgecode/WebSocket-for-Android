@@ -38,7 +38,7 @@ import java.util.Set;
  *
  * This map is NOT synchronized.
  */
-public class StringMap extends AbstractMap implements Externalizable
+public class StringMap extends AbstractMap<Object, Object> implements Externalizable
 {
     public static final boolean CASE_INSENSTIVE=true;
     protected static final int __HASH_WIDTH=17;
@@ -49,8 +49,8 @@ public class StringMap extends AbstractMap implements Externalizable
     protected boolean _ignoreCase=false;
     protected NullEntry _nullEntry=null;
     protected Object _nullValue=null;
-    protected HashSet _entrySet=new HashSet(3);
-    protected Set _umEntrySet=Collections.unmodifiableSet(_entrySet);
+    protected HashSet<Entry<Object, Object>> _entrySet=new HashSet<Entry<Object, Object>>(3);
+    protected Set<Entry<Object, Object>> _umEntrySet=Collections.unmodifiableSet(_entrySet);
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -251,7 +251,7 @@ public class StringMap extends AbstractMap implements Externalizable
         if (key==null)
             return _nullValue;
         
-        Map.Entry entry = getEntry(key,0,key.length());
+        Map.Entry<Object, Object> entry = getEntry(key,0,key.length());
         if (entry==null)
             return null;
         return entry.getValue();
@@ -265,7 +265,7 @@ public class StringMap extends AbstractMap implements Externalizable
      * @return The Map.Entry for the key or null if the key is not in
      * the map.
      */
-    public Map.Entry getEntry(String key,int offset, int length)
+    public Map.Entry<Object, Object> getEntry(String key,int offset, int length)
     {
         if (key==null)
             return _nullEntry;
@@ -321,7 +321,7 @@ public class StringMap extends AbstractMap implements Externalizable
      * @return The Map.Entry for the key or null if the key is not in
      * the map.
      */
-    public Map.Entry getEntry(char[] key,int offset, int length)
+    public Map.Entry<Object, Object> getEntry(char[] key,int offset, int length)
     {
         if (key==null)
             return _nullEntry;
@@ -378,7 +378,7 @@ public class StringMap extends AbstractMap implements Externalizable
      * @return The Map.Entry for the key or null if the key is not in
      * the map.
      */
-    public Map.Entry getBestEntry(byte[] key,int offset, int maxLength)
+    public Map.Entry<Object, Object> getBestEntry(byte[] key,int offset, int maxLength)
     {
         if (key==null)
             return _nullEntry;
@@ -507,7 +507,7 @@ public class StringMap extends AbstractMap implements Externalizable
 
     /* ------------------------------------------------------------ */
     @Override
-    public Set entrySet()
+    public Set<Map.Entry<Object, Object>> entrySet()
     {
         return _umEntrySet;
     }
@@ -550,7 +550,7 @@ public class StringMap extends AbstractMap implements Externalizable
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private static class Node implements Map.Entry
+    private static class Node implements Map.Entry<Object, Object>
     {
         char[] _char;
         char[] _ochar;
@@ -664,7 +664,7 @@ public class StringMap extends AbstractMap implements Externalizable
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class NullEntry implements Map.Entry
+    private class NullEntry implements Map.Entry<Object, Object>
     {
         public Object getKey(){return null;}
         public Object getValue(){return _nullValue;}
@@ -678,7 +678,7 @@ public class StringMap extends AbstractMap implements Externalizable
     public void writeExternal(java.io.ObjectOutput out)
         throws java.io.IOException
     {
-        HashMap map = new HashMap(this);
+        HashMap<Object, Object> map = new HashMap<Object, Object>(this);
         out.writeBoolean(_ignoreCase);
         out.writeObject(map);
     }
@@ -688,7 +688,7 @@ public class StringMap extends AbstractMap implements Externalizable
         throws java.io.IOException, ClassNotFoundException
     {
         boolean ic=in.readBoolean();
-        HashMap map = (HashMap)in.readObject();
+        HashMap<?, ?> map = (HashMap<?, ?>)in.readObject();
         setIgnoreCase(ic);
         this.putAll(map);
     }

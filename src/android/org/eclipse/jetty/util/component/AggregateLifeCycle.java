@@ -261,6 +261,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
      * @param clazz
      * @return List of beans.
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> getBeans(Class<T> clazz)
     {
         ArrayList<T> beans = new ArrayList<T>();
@@ -280,6 +281,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
      * @param clazz
      * @return bean or null
      */
+    @SuppressWarnings("unchecked")
     public <T> T getBean(Class<T> clazz)
     {
         for (Bean b:_beans)

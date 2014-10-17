@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1119,11 +1118,11 @@ public class HttpFields
     {
         if (fields == null) return;
 
-        Enumeration e = fields.getFieldNames();
+        Enumeration<String> e = fields.getFieldNames();
         while (e.hasMoreElements())
         {
             String name = (String) e.nextElement();
-            Enumeration values = fields.getValues(name);
+            Enumeration<String> values = fields.getValues(name);
             while (values.hasMoreElements())
                 add(name, (String) values.nextElement());
         }
@@ -1204,11 +1203,12 @@ public class HttpFields
         if (value.charAt(qe++) == 'q')
         {
             qe++;
+            @SuppressWarnings("rawtypes")
             Map.Entry entry = __qualities.getEntry(value, qe, value.length() - qe);
             if (entry != null) return (Float) entry.getValue();
         }
 
-        HashMap params = new HashMap(3);
+        HashMap<String, String> params = new HashMap<String, String>(3);
         valueParameters(value, params);
         String qs = (String) params.get("q");
         Float q = (Float) __qualities.get(qs);
@@ -1233,7 +1233,8 @@ public class HttpFields
      * @param e Enumeration of values with quality parameters
      * @return values in quality order.
      */
-    public static List qualityList(Enumeration e)
+    @SuppressWarnings("unchecked")
+    public static List<Object> qualityList(Enumeration<?> e)
     {
         if (e == null || !e.hasMoreElements()) return Collections.EMPTY_LIST;
 
@@ -1253,10 +1254,10 @@ public class HttpFields
             }
         }
 
-        List vl = LazyList.getList(list, false);
+        List<Object> vl = LazyList.getList(list, false);
         if (vl.size() < 2) return vl;
 
-        List ql = LazyList.getList(qual, false);
+        List<Object> ql = LazyList.getList(qual, false);
 
         // sort list with swaps
         Float last = __zero;

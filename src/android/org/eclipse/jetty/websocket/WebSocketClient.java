@@ -92,22 +92,6 @@ public class WebSocketClient
 
     /* ------------------------------------------------------------ */
     /**
-     * <p>Creates a WebSocketClient from a private WebSocketClientFactory.</p>
-     * <p>This can be wasteful of resources if many clients are created.</p>
-     *
-     * @deprecated Use {@link WebSocketClientFactory#newWebSocketClient()}
-     * @throws Exception if the private WebSocketClientFactory fails to start
-     */
-    @Deprecated
-    public WebSocketClient() throws Exception
-    {
-        _factory=new WebSocketClientFactory();
-        _factory.start();
-        _maskGen=_factory.getMaskGen();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * <p>Creates a WebSocketClient with shared WebSocketClientFactory.</p>
      *
      * @param factory the shared {@link WebSocketClientFactory}

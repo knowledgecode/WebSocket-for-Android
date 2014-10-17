@@ -619,26 +619,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
 
     /* ------------------------------------------------------------ */
     /**
-     * @param id The thread ID to stop.
-     * @return true if the thread was found and stopped.
-     * @deprecated Use {@link #interruptThread(long)} in preference
-     */
-    @Deprecated
-    public boolean stopThread(long id)
-    {
-        for (Thread thread: _threads)
-        {
-            if (thread.getId()==id)
-            {
-                thread.stop();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @param id The thread ID to interrupt.
      * @return true if the thread was found and interrupted.
      */

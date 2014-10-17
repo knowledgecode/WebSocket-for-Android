@@ -426,6 +426,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     /*
      * Allows thread to block waiting for further events.
      */
+    @SuppressWarnings("serial")
     @Override
     public boolean blockReadable(long timeoutMs) throws IOException
     {
@@ -476,6 +477,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     /*
      * Allows thread to block waiting for further events.
      */
+    @SuppressWarnings("serial")
     @Override
     public boolean blockWritable(long timeoutMs) throws IOException
     {

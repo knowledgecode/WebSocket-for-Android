@@ -458,7 +458,6 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
             try
             {
-                int len = _handshake.length();
                 int flushed = _endp.flush(_handshake);
                 if (flushed<0)
                     throw new IOException("incomplete handshake");
