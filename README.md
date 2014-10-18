@@ -1,31 +1,30 @@
 # WebSocket for Android
 WebSocket for Android is a Cordova/PhoneGap plugin that makes it possible to use WebSockets (RFC 6455) on Android.  
-This is using [Jetty](https://github.com/eclipse/jetty.project) under the terms of the Apache License v2.0.  
+This is using [Jetty 8](https://github.com/eclipse/jetty.project/tree/jetty-8) under the terms of the Apache License v2.0.  
 
 ## Requirements
- - Java 1.6 or later  
- - Android 2.2 or later (recommend 4.0 or later)  
- - Cordova/PhoneGap 3.0.0 or later  
+ - Java 1.6 or higher  
+ - Android 2.2 or higher (recommended 4.0 or higher)  
+ - Cordova/PhoneGap 3.0.0 or higher  
 
-The version for Cordova/Phonegap 2.x is [here](https://github.com/knowledgecode/WebSocket-for-Android/tree/2.x).  
+The version for Cordova/Phonegap 2.x, [see here](https://github.com/knowledgecode/WebSocket-for-Android/tree/2.x).  
 
-## Supported Versions
-| version | ws protocol        | wss protocol       | text message       | binary message      |
-|:-------:|:------------------:|:------------------:|:------------------:|:-------------------:|
-| 2.2     | support            | not support `*1`   | support            | limited support `*2`|
-| 2.3     | support            | not support `*1`   | support            | limited support `*2`|
-| 3.x     | -- `*3`            | -- `*3`            | -- `*3`            | -- `*3`             |
-| 4.0     | support            | not support `*5`   | support            | support             |
-| 4.1     | support            | support            | support            | support             |
-| 4.2     | support            | support            | support            | support             |
-| 4.3     | support            | support            | support            | support             |
-| 4.4     | native support `*4`| native support `*4`| native support `*4`| native support `*4` |
+## Supported Features
+| version        | WS protocol | WSS protocol | text message | binary message |
+|:--------------:|:-----------:|:------------:|:------------:|:--------------:|
+| 2.2 (API 8)    | ✓           |              | ✓            |                |
+| 2.3.3 (API 10) | ✓           | ✓            | ✓            |                |
+| 4.0 (API 14)   | ✓           | ✓            | ✓            | ✓              |
+| 4.0.3 (API 15) | ✓           | ✓            | ✓            | ✓              |
+| 4.1.2 (API 16) | ✓           | ✓            | ✓            | ✓              |
+| 4.2.2 (API 17) | ✓           | ✓            | ✓            | ✓              |
+| 4.3.1 (API 18) | ✓           | ✓            | ✓            | ✓              |
+| 4.4.2 (API 19) | ✓           | ✓            | ✓            | ✓              |
 
-`*1` Due to Android SSL issues.  
-`*2` Supports Base64-encoded data only.  
-`*3` May work. But not tested.  
-`*4` In KitKat, WebSocket API has been officially supported. The native API of these devices is used in preference to this plugin.  
-`*5` Currently under investigation.  
+#### Notes
+ - The WSS protocol is now available on 2.3 or higher  
+ - 3.x devices are not supported (maybe work, but not tested).  
+ - The WebView has officially supported WebSockets since 4.4 (KitKat). Therefore this plugin is not used on those devices by default.  
 
 ## Installing
 Use the Cordova/PhoneGap Command-Line interface:  
@@ -36,9 +35,9 @@ or
 ```shell
 $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
-This plugin is for Android only. However, when you install this via the CLI, this is also installed all other platforms. It's a feature.  
-In fact, the CLI writes only an installation history in those platforms. (There are no tangible ill effects.)  
-If you mind that thing, recommended to use Cordova Plugman that can specify an installation platform. Execute this on a project root:  
+This plugin is for Android. However if install this via the CLI, it also affects all other platforms. This is a specification.  
+In fact, it writes only an installation history in those platforms. (There are no tangible ill effects.)  
+If you mind this thing, recommended to use Cordova Plugman that can specify an installation platform. Execute this on a project root:  
 ```shell
 $ plugman install --platform android --project platforms/android --plugin https://github.com/knowledgecode/WebSocket-for-Android.git --plugins_dir plugins
 ```
@@ -58,8 +57,8 @@ in the case of Plugman:
 $ plugman uninstall --platform android --project platforms/android --plugin com.knowledgecode.cordova.websocket --plugins_dir plugins
 $ plugman install --platform android --project platforms/android --plugin https://github.com/knowledgecode/WebSocket-for-Android.git --plugins_dir plugins
 ```
-#### Note
-When you install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If you remove this plugin, the permission is also removed at the same time.  
+#### Caution
+When install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If remove this plugin, the permission is also removed at the same time even if it is required for other plugins.  
 
 ## Usage
 ### *WebSocket(url[, protocols])*
@@ -88,43 +87,42 @@ document.addEventListener('deviceready', function () {
     };
 }, false);
 ```
-And then, this plugin has options. Details are as follows:  
+#### Options
+This plugin has the following options. All these parameters are omissible. Of course these don't affect the native WebSocket.  
+
+| key                  | default value | remarks                   |
+|:---------------------|:-------------:|:--------------------------|
+| origin               | (empty)       |                           |
+| maxConnectTime       | 20000         |                           |
+| maxTextMessageSize   | 32768         | scheduled to be abolished |
+| maxBinaryMessageSize | 32768         | scheduled to be abolished |
+
+The `origin` is a value to set the request header field.  
+The `maxConnectTime` is time to wait for connection. The default value will be 20,000 milliseconds if omit it.  
+The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
+If you want to change these parameters, need to do before creating a instance:  
 ```JavaScript
 WebSocket.pluginOptions = {
-    origin: 'http://websocket-is-fun.com',
-    maxConnectTime: 20000,                // 20sec
-    maxTextMessageSize: 32768,            // 32kb
-    maxBinaryMessageSize: 32768           // 32kb
+    origin: 'http://example.com',
+    maxConnectTime: 5000,
+    maxTextMessageSize: 65536,
+    maxBinaryMessageSize: 65536
 };
-```
-All these parameters are omissible. The origin will be set empty if omit it. The maxConnectTime is a wait time for connection. The default value will be 20,000 milliseconds if omit it. The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
-To work with common source code for devices supporting the native API (such as Android 4.4 and iOS 6 or later), it is recommended to write as the following:  
-```JavaScript
-if (WebSocket.pluginOptions) {
-    WebSocket.pluginoptions = {
-        origin: 'http://chatterchatter.org'
-    };
-}
-var ws = new WebSocket('ws://chatterchatter.org');
+
+var ws = new WebSocket('ws://echo.websocket.org');
 ```
 ### *send(data)*
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer.  
-In devices that are not supported both a blob and an arraybuffer, cannot transmit binary messages. (ex. Android 2.2 and 2.3)  
 
-#### Note
-If receives binary messages in unsupported devices, automatically encodes them to Base64.  
-```JavaScript
-ws.onmessage = function (event) {
-    // For example, the receiving data can be used as data URI scheme.
-    img.src = 'data:image/jpeg;base64,' + event.data;
-};
-```
-### *close([code, reason])*
+### *close([code[, reason]])*
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.7.0
+* resolved the issue of SSL on 4.0 and 2.3 (thanks to @agalazis and koush/AndroidAsync)  
+
 #### 0.6.3
-* fix a bug of a receiving binary size  
+* fixed a bug of a receiving binary size  
 
 #### 0.6.2a
 * limit installation target to Android (thanks to @peli44)  
@@ -140,7 +138,7 @@ Closes the WebSocket connection or connection attempt, if any.
 * removed a second argument from the send() method  
 
 #### 0.5.2
-* forcing the WebSocket of plugin in Android 4.3 or lower (thanks to @rpastorvargas and @punj)  
+* clobbered buggy websockets on 4.3 or lower (thanks to @rpastorvargas and @punj)  
 * bug fix  
 
 #### 0.5.1
