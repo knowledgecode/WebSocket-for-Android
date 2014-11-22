@@ -17,18 +17,18 @@
  * under the License.
  */
 
-/*jslint browser: true, nomen: true, plusplus: true */
-/*global require, module, ArrayBuffer, Uint8Array, Blob, WebKitBlobBuilder, FileReader */
+/*jslint bitwise: true, browser: true, nomen: true, plusplus: true */
+/*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.7.0
+ * @version 0.8.0
  */
-(function () {
+(function (window) {
     'use strict';
     var exec = require('cordova/exec'),
         identifier = 0,
-        listeners = [],
+        listeners = {},
         taskQueue = {
             uuid: require('cordova/utils').createUUID(),
             tasks: [],
@@ -39,7 +39,7 @@
             listener: function (event) {
                 if (event.source === window && event.data === taskQueue.uuid) {
                     event.stopPropagation();
-                    if (taskQueue.tasks.length > 0) {
+                    if (taskQueue.tasks.length) {
                         taskQueue.tasks.shift()();
                     }
                 }
@@ -51,13 +51,13 @@
             evt.initEvent(type, false, false);
             switch (type) {
             case 'message':
-                evt.data = data.data;
+                evt.data = data;
                 evt.origin = origin;
                 break;
             case 'close':
-                evt.wasClean = data.wasClean;
-                evt.code = data.code;
-                evt.reason = data.reason;
+                evt.wasClean = data.substring(0, 1) === '1';
+                evt.code = parseInt(data.substring(1, 5), 10) || 0;
+                evt.reason = data.substring(5);
                 break;
             }
             return evt;
@@ -65,16 +65,16 @@
         binaryToString = function (data, onComplete) {
             var blob, r;
 
-            if (data instanceof ArrayBuffer || data.buffer instanceof ArrayBuffer) {
-                blob = new WebKitBlobBuilder();
+            if (data instanceof window.ArrayBuffer || data.buffer instanceof window.ArrayBuffer) {
+                blob = new window.WebKitBlobBuilder();
                 blob.append(data);
                 blob = blob.getBlob();
-            } else if (data instanceof Blob) {
+            } else if (data instanceof window.Blob) {
                 blob = data;
             } else {
                 throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', typeof data));
             }
-            r = new FileReader();
+            r = new window.FileReader();
             r.onload = function () {
                 onComplete(this.result.substring(this.result.indexOf(',') + 1));
             };
@@ -88,7 +88,7 @@
             }
             data = window.atob(data);
             len = data.length;
-            array = new Uint8Array(len);
+            array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
@@ -96,7 +96,7 @@
                 return array.buffer;
             }
             if (binaryType === 'blob') {
-                blob = new WebKitBlobBuilder();
+                blob = new window.WebKitBlobBuilder();
                 blob.append(array.buffer);
                 return blob.getBlob();
             }
@@ -169,7 +169,7 @@
                     protocols = [String(protocols)];
                 }
                 for (i = 0, len = protocols.length; i < len; i++) {
-                    if (protocols[i].length === 0) {
+                    if (!protocols[i].length) {
                         throw new SyntaxError('Failed to construct \'WebSocket\': The subprotocol \'\' is invalid.');
                     }
                 }
@@ -194,38 +194,42 @@
             };
             listeners[id] = {};
 
-            exec(function (json) {
+            exec(function (data) {
                 taskQueue.push(function () {
-                    var evt, data = JSON.parse(json);
+                    var evt;
 
-                    switch (data.event) {
-                    case 'onopen':
-                        that.protocol = data.protocol;
+                    switch (data[0]) {
+                    case 'O':
                         that.readyState = that.OPEN;
+                        that.protocol = data.substring(1);
                         evt = createMessage('open');
                         if (that.onopen) {
                             that.onopen(evt);
                         }
                         that.dispatchEvent(evt);
                         break;
-                    case 'onmessage':
-                        if (data.binary) {
-                            data.data = stringToBinary(data.data, that.binaryType);
-                        }
-                        evt = createMessage('message', data, that.url);
+                    case 'T':
+                        evt = createMessage('message', data.substring(1), that.url);
                         if (that.onmessage) {
                             that.onmessage(evt);
                         }
                         that.dispatchEvent(evt);
                         break;
-                    case 'onclose':
+                    case 'B':
+                        evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+                        if (that.onmessage) {
+                            that.onmessage(evt);
+                        }
+                        that.dispatchEvent(evt);
+                        break;
+                    case 'C':
                         that.readyState = that.CLOSED;
-                        evt = createMessage('close', data);
+                        evt = createMessage('close', data.substring(1));
                         if (that.onclose) {
                             that.onclose(evt);
                         }
                         that.dispatchEvent(evt);
-                        listeners[that.__getId__()] = undefined;
+                        delete listeners[that.__getId__()];
                         break;
                     }
                 });
@@ -253,4 +257,4 @@
     } else {
         module.exports = window.WebSocket;
     }
-}());
+}(this));
