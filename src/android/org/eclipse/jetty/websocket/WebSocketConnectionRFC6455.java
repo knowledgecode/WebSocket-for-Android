@@ -640,7 +640,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
     private class WSFrameHandler implements WebSocketParser.FrameHandler
     {
         private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private final Utf8StringBuilder _utf8 = new Utf8StringBuilder(512); // TODO configure initial capacity
+        private final Utf8StringBuilder _utf8 = new Utf8StringBuilder(8192); // expanded the size of the buffer 512 -> 8192
         private ByteArrayBuffer _aggregate;
         private byte _opcode=-1;
 
