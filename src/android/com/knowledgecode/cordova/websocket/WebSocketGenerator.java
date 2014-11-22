@@ -21,7 +21,6 @@ package com.knowledgecode.cordova.websocket;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
-import org.json.JSONObject;
 
 import android.util.Base64;
 
@@ -52,11 +51,13 @@ class WebSocketGenerator extends AbstractWebSocket {
         _openListener = new OnOpenListener() {
             @Override
             public void onOpen(int id, Connection conn) {
+                // NOP
             }
         };
         _closeListener = new OnCloseListener() {
             @Override
             public void onClose(int id) {
+                // NOP
             }
         };
     }
@@ -79,53 +80,32 @@ class WebSocketGenerator extends AbstractWebSocket {
         _closeListener = l;
     }
 
-    /**
-     * Create Callback JSON String.
-     *
-     * @param protocol
-     * @return JSON String
-     */
-    private static String createJsonForOpen(String protocol) {
-        String json = "{\"event\":\"onopen\",\"protocol\":%s}";
+    @Override
+    public void onOpen(Connection conn) {
+        _openListener.onOpen(_id, conn);
+
+        String protocol = conn.getProtocol();
         protocol = protocol == null ? "" : protocol;
-        return String.format(json, JSONObject.quote(protocol));
+        sendCallback("O" + protocol, true);
     }
 
-    /**
-     * Create Callback JSON String.
-     *
-     * @param data
-     * @return JSON String
-     */
-    private static String createJsonForMessage(String data) {
-        String json = "{\"event\":\"onmessage\",\"data\":%s}";
-        return String.format(json, JSONObject.quote(data));
+    @Override
+    public void onMessage(String data) {
+        sendCallback("T" + data, true);
     }
 
-    /**
-     * Create Callback JSON String.
-     *
-     * @param input
-     * @return JSON String
-     */
-    private static String createJsonForMessage(byte[] input) {
-        String json = "{\"event\":\"onmessage\",\"data\":\"%s\",\"binary\":true}";
-        String data = Base64.encodeToString(input, Base64.NO_WRAP);
-        return String.format(json, data);
+    @Override
+    public void onMessage(byte[] data, int offset, int length) {
+        sendCallback("B" + Base64.encodeToString(data, Base64.NO_WRAP), true);
     }
 
-    /**
-     * Create Callback JSON String.
-     *
-     * @param code
-     * @param reason
-     * @return JSON String
-     */
-    private static String createJsonForClose(int code, String reason) {
-        String json = "{\"event\":\"onclose\",\"wasClean\":%b,\"code\":%d,\"reason\":%s}";
-        boolean wasClean = code == 1000;
+    @Override
+    public void onClose(int code, String reason) {
+        _closeListener.onClose(_id);
+
+        String wasClean = code == 1000 ? "1" : "0";
         reason = reason == null ? "" : reason;
-        return String.format(json, wasClean, code, JSONObject.quote(reason));
+        sendCallback(String.format("C%s%4d%s", wasClean, code, reason), false);
     }
 
     /**
@@ -140,31 +120,5 @@ class WebSocketGenerator extends AbstractWebSocket {
             result.setKeepCallback(keepCallback);
             _ctx.sendPluginResult(result);
         }
-    }
-
-    @Override
-    public void onOpen(Connection conn) {
-        _openListener.onOpen(_id, conn);
-        String callbackString = createJsonForOpen(conn.getProtocol());
-        sendCallback(callbackString, true);
-    }
-
-    @Override
-    public void onMessage(String data) {
-        String callbackString = createJsonForMessage(data);
-        sendCallback(callbackString, true);
-    }
-
-    @Override
-    public void onMessage(byte[] data, int offset, int length) {
-        String callbackString = createJsonForMessage(data);
-        sendCallback(callbackString, true);
-    }
-
-    @Override
-    public void onClose(int code, String reason) {
-        _closeListener.onClose(_id);
-        String callbackString = createJsonForClose(code, reason);
-        sendCallback(callbackString, false);
     }
 }

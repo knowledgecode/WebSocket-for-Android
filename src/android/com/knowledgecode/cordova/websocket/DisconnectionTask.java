@@ -26,6 +26,9 @@ import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 
 import android.util.SparseArray;
 
+/**
+ * Close a connection.
+ */
 class DisconnectionTask implements Task {
 
     private final SparseArray<Connection> _map;

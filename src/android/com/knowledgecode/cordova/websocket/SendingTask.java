@@ -27,6 +27,9 @@ import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 import android.util.Base64;
 import android.util.SparseArray;
 
+/**
+ * Send text/binary data.
+ */
 class SendingTask implements Task {
 
     private final SparseArray<Connection> _map;

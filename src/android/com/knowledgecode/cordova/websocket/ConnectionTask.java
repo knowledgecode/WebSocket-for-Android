@@ -39,6 +39,9 @@ import com.knowledgecode.cordova.websocket.WebSocketGenerator.OnOpenListener;
 import android.util.SparseArray;
 import android.webkit.CookieManager;
 
+/**
+ * Connect to server.
+ */
 class ConnectionTask implements Task {
 
     private static final long MAX_CONNECT_TIME = 75000;
@@ -53,8 +56,8 @@ class ConnectionTask implements Task {
      * @param map
      */
     public ConnectionTask(WebSocketClientFactory factory, SparseArray<Connection> map) {
-        this._factory = factory;
-        this._map = map;
+        _factory = factory;
+        _map = map;
     }
 
     /**
