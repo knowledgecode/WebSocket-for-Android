@@ -18,17 +18,18 @@
  */
 
 /*jslint browser: true, nomen: true, plusplus: true */
-/*global require, module, ArrayBuffer, Uint8Array, Blob, WebKitBlobBuilder, FileReader */
+/*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.7.0
+ * @version 0.8.0
  */
-(function () {
+(function (window) {
     'use strict';
-    var exec = require('cordova/exec'),
+    var BuiltinWebSocket = window.WebSocket,
+        exec = require('cordova/exec'),
         identifier = 0,
-        listeners = [],
+        listeners = {},
         taskQueue = {
             uuid: require('cordova/utils').createUUID(),
             tasks: [],
@@ -39,7 +40,7 @@
             listener: function (event) {
                 if (event.source === window && event.data === taskQueue.uuid) {
                     event.stopPropagation();
-                    if (taskQueue.tasks.length > 0) {
+                    if (taskQueue.tasks.length) {
                         taskQueue.tasks.shift()();
                     }
                 }
@@ -51,13 +52,13 @@
             evt.initEvent(type, false, false);
             switch (type) {
             case 'message':
-                evt.data = data.data;
+                evt.data = data;
                 evt.origin = origin;
                 break;
             case 'close':
-                evt.wasClean = data.wasClean;
-                evt.code = data.code;
-                evt.reason = data.reason;
+                evt.wasClean = data.substring(0, 1) === '1';
+                evt.code = parseInt(data.substring(1, 5), 10) || 0;
+                evt.reason = data.substring(5);
                 break;
             }
             return evt;
@@ -65,16 +66,16 @@
         binaryToString = function (data, onComplete) {
             var blob, r;
 
-            if (data instanceof ArrayBuffer || data.buffer instanceof ArrayBuffer) {
-                blob = new WebKitBlobBuilder();
+            if (data instanceof window.ArrayBuffer || data.buffer instanceof window.ArrayBuffer) {
+                blob = new window.WebKitBlobBuilder();
                 blob.append(data);
                 blob = blob.getBlob();
-            } else if (data instanceof Blob) {
+            } else if (data instanceof window.Blob) {
                 blob = data;
             } else {
                 throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', typeof data));
             }
-            r = new FileReader();
+            r = new window.FileReader();
             r.onload = function () {
                 onComplete(this.result.substring(this.result.indexOf(',') + 1));
             };
@@ -88,7 +89,7 @@
             }
             data = window.atob(data);
             len = data.length;
-            array = new Uint8Array(len);
+            array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
@@ -96,7 +97,7 @@
                 return array.buffer;
             }
             if (binaryType === 'blob') {
-                blob = new WebKitBlobBuilder();
+                blob = new window.WebKitBlobBuilder();
                 blob.append(array.buffer);
                 return blob.getBlob();
             }
@@ -136,7 +137,7 @@
                 var that = this;
 
                 if (typeof data === 'string') {
-                    exec(null, null, 'WebSocket', 'send', [this.__getId__(), data, false]);
+                    exec(null, null, 'WebSocket', 'send', [that.__getId__(), data, false]);
                 } else {
                     binaryToString(data, function (blob) {
                         exec(null, null, 'WebSocket', 'send', [that.__getId__(), blob, true]);
@@ -158,6 +159,9 @@
                     'Please use the \'new\' operator, ' +
                     'this DOM object constructor cannot be called as a function.');
             }
+            if (!WebSocket.pluginOptions.override && BuiltinWebSocket) {
+                return new BuiltinWebSocket(url, protocols);
+            }
             switch (arguments.length) {
             case 0:
                 throw new TypeError('Failed to construct \'WebSocket\': 1 argument required, but only 0 present.');
@@ -169,7 +173,7 @@
                     protocols = [String(protocols)];
                 }
                 for (i = 0, len = protocols.length; i < len; i++) {
-                    if (protocols[i].length === 0) {
+                    if (!protocols[i].length) {
                         throw new SyntaxError('Failed to construct \'WebSocket\': The subprotocol \'\' is invalid.');
                     }
                 }
@@ -194,41 +198,53 @@
             };
             listeners[id] = {};
 
-            exec(function (json) {
-                taskQueue.push(function () {
-                    var evt, data = JSON.parse(json);
+            exec(function (data) {
+                switch (data[0]) {
+                case 'O':
+                    taskQueue.push(function () {
+                        var evt = createMessage('open');
 
-                    switch (data.event) {
-                    case 'onopen':
-                        that.protocol = data.protocol;
                         that.readyState = that.OPEN;
-                        evt = createMessage('open');
+                        that.protocol = data.substring(1);
                         if (that.onopen) {
                             that.onopen(evt);
                         }
                         that.dispatchEvent(evt);
-                        break;
-                    case 'onmessage':
-                        if (data.binary) {
-                            data.data = stringToBinary(data.data, that.binaryType);
-                        }
-                        evt = createMessage('message', data, that.url);
+                    });
+                    break;
+                case 'T':
+                    taskQueue.push(function () {
+                        var evt = createMessage('message', data.substring(1), that.url);
+
                         if (that.onmessage) {
                             that.onmessage(evt);
                         }
                         that.dispatchEvent(evt);
-                        break;
-                    case 'onclose':
+                    });
+                    break;
+                case 'B':
+                    taskQueue.push(function () {
+                        var evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+
+                        if (that.onmessage) {
+                            that.onmessage(evt);
+                        }
+                        that.dispatchEvent(evt);
+                    });
+                    break;
+                case 'C':
+                    taskQueue.push(function () {
+                        var evt = createMessage('close', data.substring(1));
+
                         that.readyState = that.CLOSED;
-                        evt = createMessage('close', data);
                         if (that.onclose) {
                             that.onclose(evt);
                         }
                         that.dispatchEvent(evt);
-                        listeners[that.__getId__()] = undefined;
-                        break;
-                    }
-                });
+                        delete listeners[that.__getId__()];
+                    });
+                    break;
+                }
             }, function () {
                 taskQueue.push(function () {
                     var evt = createMessage('error');
@@ -242,15 +258,15 @@
         },
         ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
 
-    if ((ver && parseFloat(ver[1]) < 4.4) || !window.WebSocket) {
-        WebSocketPrototype.prototype = new EventTarget();
-        WebSocketPrototype.prototype.constructor = WebSocketPrototype;
-        WebSocket.prototype = new WebSocketPrototype();
-        WebSocket.prototype.constructor = WebSocket;
-        WebSocket.pluginOptions = {};
-        module.exports = WebSocket;
-        window.addEventListener('message', taskQueue.listener, true);
-    } else {
-        module.exports = window.WebSocket;
+    WebSocketPrototype.prototype = new EventTarget();
+    WebSocketPrototype.prototype.constructor = WebSocketPrototype;
+    WebSocket.prototype = new WebSocketPrototype();
+    WebSocket.prototype.constructor = WebSocket;
+    WebSocket.pluginOptions = {};
+    module.exports = WebSocket;
+    window.addEventListener('message', taskQueue.listener, true);
+
+    if (ver && parseFloat(ver[1]) < 4.4) {
+        BuiltinWebSocket = undefined;
     }
-}());
+}(this));
