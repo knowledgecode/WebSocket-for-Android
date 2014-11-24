@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/*jslint bitwise: true, browser: true, nomen: true, plusplus: true */
+/*jslint browser: true, nomen: true, plusplus: true */
 /*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
@@ -26,7 +26,8 @@
  */
 (function (window) {
     'use strict';
-    var exec = require('cordova/exec'),
+    var BuiltinWebSocket = window.WebSocket,
+        exec = require('cordova/exec'),
         identifier = 0,
         listeners = {},
         taskQueue = {
@@ -136,7 +137,7 @@
                 var that = this;
 
                 if (typeof data === 'string') {
-                    exec(null, null, 'WebSocket', 'send', [this.__getId__(), data, false]);
+                    exec(null, null, 'WebSocket', 'send', [that.__getId__(), data, false]);
                 } else {
                     binaryToString(data, function (blob) {
                         exec(null, null, 'WebSocket', 'send', [that.__getId__(), blob, true]);
@@ -157,6 +158,9 @@
                 throw new TypeError('Failed to construct \'WebSocket\': ' +
                     'Please use the \'new\' operator, ' +
                     'this DOM object constructor cannot be called as a function.');
+            }
+            if (!WebSocket.pluginOptions.override && BuiltinWebSocket) {
+                return new BuiltinWebSocket(url, protocols);
             }
             switch (arguments.length) {
             case 0:
@@ -195,44 +199,52 @@
             listeners[id] = {};
 
             exec(function (data) {
-                taskQueue.push(function () {
-                    var evt;
+                switch (data[0]) {
+                case 'O':
+                    taskQueue.push(function () {
+                        var evt = createMessage('open');
 
-                    switch (data[0]) {
-                    case 'O':
                         that.readyState = that.OPEN;
                         that.protocol = data.substring(1);
-                        evt = createMessage('open');
                         if (that.onopen) {
                             that.onopen(evt);
                         }
                         that.dispatchEvent(evt);
-                        break;
-                    case 'T':
-                        evt = createMessage('message', data.substring(1), that.url);
+                    });
+                    break;
+                case 'T':
+                    taskQueue.push(function () {
+                        var evt = createMessage('message', data.substring(1), that.url);
+
                         if (that.onmessage) {
                             that.onmessage(evt);
                         }
                         that.dispatchEvent(evt);
-                        break;
-                    case 'B':
-                        evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+                    });
+                    break;
+                case 'B':
+                    taskQueue.push(function () {
+                        var evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+
                         if (that.onmessage) {
                             that.onmessage(evt);
                         }
                         that.dispatchEvent(evt);
-                        break;
-                    case 'C':
+                    });
+                    break;
+                case 'C':
+                    taskQueue.push(function () {
+                        var evt = createMessage('close', data.substring(1));
+
                         that.readyState = that.CLOSED;
-                        evt = createMessage('close', data.substring(1));
                         if (that.onclose) {
                             that.onclose(evt);
                         }
                         that.dispatchEvent(evt);
                         delete listeners[that.__getId__()];
-                        break;
-                    }
-                });
+                    });
+                    break;
+                }
             }, function () {
                 taskQueue.push(function () {
                     var evt = createMessage('error');
@@ -246,15 +258,15 @@
         },
         ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
 
-    if ((ver && parseFloat(ver[1]) < 4.4) || !window.WebSocket) {
-        WebSocketPrototype.prototype = new EventTarget();
-        WebSocketPrototype.prototype.constructor = WebSocketPrototype;
-        WebSocket.prototype = new WebSocketPrototype();
-        WebSocket.prototype.constructor = WebSocket;
-        WebSocket.pluginOptions = {};
-        module.exports = WebSocket;
-        window.addEventListener('message', taskQueue.listener, true);
-    } else {
-        module.exports = window.WebSocket;
+    WebSocketPrototype.prototype = new EventTarget();
+    WebSocketPrototype.prototype.constructor = WebSocketPrototype;
+    WebSocket.prototype = new WebSocketPrototype();
+    WebSocket.prototype.constructor = WebSocket;
+    WebSocket.pluginOptions = {};
+    module.exports = WebSocket;
+    window.addEventListener('message', taskQueue.listener, true);
+
+    if (ver && parseFloat(ver[1]) < 4.4) {
+        BuiltinWebSocket = undefined;
     }
 }(this));
