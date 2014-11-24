@@ -1,5 +1,5 @@
 # WebSocket for Android
-WebSocket for Android is a Cordova/PhoneGap plugin that makes it possible to use WebSockets (RFC 6455) on Android.  
+WebSocket for Android is a Cordova/PhoneGap plugin that allows WebSockets (RFC 6455) to be used on Android.  
 This is using [Jetty 8](https://github.com/eclipse/jetty.project/tree/jetty-8) under the terms of the Apache License v2.0.  
 
 ## Requirements
@@ -22,7 +22,7 @@ The version for Cordova/Phonegap 2.x, [see here](https://github.com/knowledgecod
 | 4.4.2 (API 19) | ✓           | ✓            | ✓            | ✓              |
 
 #### Notes
- - The WSS protocol is now available on 2.3 or higher  
+ - The WSS protocol is now available on 2.3 or higher (SSLv3 is not supported. TLS only.)  
  - 3.x devices are not supported (maybe work, but not tested).  
  - The WebView has officially supported WebSockets since 4.4 (KitKat). Therefore this plugin is not used on those devices by default.  
 
@@ -35,7 +35,7 @@ or
 ```shell
 $ phonegap plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
-This plugin is for Android. However if install this via the CLI, it also affects all other platforms. This is a specification.  
+This plugin is for Android. However if install this via the CLI, it also affects all other platforms (such as iOS). This is a specification.  
 In fact, it writes only an installation history in those platforms. (There are no tangible ill effects.)  
 If you mind this thing, recommended to use Cordova Plugman that can specify an installation platform. Execute this on a project root:  
 ```shell
@@ -90,23 +90,21 @@ document.addEventListener('deviceready', function () {
 #### Options
 This plugin has the following options. All these parameters are omissible. Of course these don't affect the native WebSocket.  
 
-| key                  | default value | remarks                   |
-|:---------------------|:-------------:|:--------------------------|
-| origin               | (empty)       |                           |
-| maxConnectTime       | 20000         |                           |
-| maxTextMessageSize   | 32768         | scheduled to be abolished |
-| maxBinaryMessageSize | 32768         | scheduled to be abolished |
+| key                  | default value | remarks      |
+|:---------------------|:-------------:|:-------------|
+| origin               | (empty)       |              |
+| maxConnectTime       | 75000         |              |
+| override             | false         | since v0.8.0 |
 
 The `origin` is a value to set the request header field.  
-The `maxConnectTime` is time to wait for connection. The default value will be 20,000 milliseconds if omit it.  
-The maxTextMessageSize and the maxBinaryMessageSize are receivable maximum size from server. The default values will be 32,768 bytes if omit them.  
+The `maxConnectTime` is time to wait for connection. The default value will be 75,000 milliseconds if omit it.  
+The `override` is a flag to override the native WebSocket on 4.4 or higher devices. The default value will be false if omit it. Set to true if you want to enable the plugin WebSocket even though those support WebSockets.  
 If you want to change these parameters, need to do before creating a instance:  
 ```JavaScript
 WebSocket.pluginOptions = {
     origin: 'http://example.com',
     maxConnectTime: 5000,
-    maxTextMessageSize: 65536,
-    maxBinaryMessageSize: 65536
+    override: true
 };
 
 var ws = new WebSocket('ws://echo.websocket.org');
@@ -114,10 +112,20 @@ var ws = new WebSocket('ws://echo.websocket.org');
 ### *send(data)*
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer.  
 
+#### Notes
+The size of messages that can transmit and receive at a time depends on the heap memory on devices. You would be better to consider a way to split messages if those are large (hundreds of kilobytes).  
+
 ### *close([code[, reason]])*
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.8.0
+* performance tuning (about 5% to 15% faster than previous versions)  
+* deployed the sources of Jetty directly (instead the jar file)  
+* abolished the maxTextMessageSize/maxBinaryMessageSize options  
+* added the "override" option  
+* refactoring  
+
 #### 0.7.0
 * resolved the issue of SSL on 4.0 and 2.3 (thanks to @agalazis and koush/AndroidAsync)  
 
