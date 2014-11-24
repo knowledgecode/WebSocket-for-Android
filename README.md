@@ -22,7 +22,7 @@ The version for Cordova/Phonegap 2.x, [see here](https://github.com/knowledgecod
 | 4.4.2 (API 19) | ✓           | ✓            | ✓            | ✓              |
 
 #### Notes
- - The WSS protocol is now available on 2.3 or higher (SSLv3 is not supported. TLS only.)  
+ - The WSS protocol is now available on 2.3 or higher (SSLv3 is not supported. TLS only.).  
  - 3.x devices are not supported (maybe work, but not tested).  
  - The WebView has officially supported WebSockets since 4.4 (KitKat). Therefore this plugin is not used on those devices by default.  
 
@@ -57,6 +57,9 @@ in the case of Plugman:
 $ plugman uninstall --platform android --project platforms/android --plugin com.knowledgecode.cordova.websocket --plugins_dir plugins
 $ plugman install --platform android --project platforms/android --plugin https://github.com/knowledgecode/WebSocket-for-Android.git --plugins_dir plugins
 ```
+#### BUILD FAILED ?
+Try to delete all files (cache) in platforms/android/ant-build/.
+
 #### Caution
 When install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If remove this plugin, the permission is also removed at the same time even if it is required for other plugins.  
 
