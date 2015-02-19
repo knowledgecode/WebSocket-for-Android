@@ -122,7 +122,7 @@ class ConnectionTask implements Task {
             if (origin.length() > 0) {
                 client.setOrigin(origin);
             }
-            client.setMaxTextMessageSize(-1);
+            client.setMaxTextMessageSize(Integer.MAX_VALUE);
             client.setMaxBinaryMessageSize(-1);
 
             setCookie(client.getCookies(), uri.getHost());
