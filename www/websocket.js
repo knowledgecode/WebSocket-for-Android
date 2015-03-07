@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.0
+ * @version 0.8.1
  */
 (function (window) {
     'use strict';
@@ -63,13 +63,21 @@
             }
             return evt;
         },
+        Blob = (function () {
+            if (typeof window.WebKitBlobBuilder === 'function') {
+                return function (data) {
+                    var blob = new window.WebKitBlobBuilder();
+                    blob.append(data[0]);
+                    return blob.getBlob();
+                };
+            }
+            return window.Blob;
+        }()),
         binaryToString = function (data, onComplete) {
             var blob, r;
 
             if (data instanceof window.ArrayBuffer || data.buffer instanceof window.ArrayBuffer) {
-                blob = new window.WebKitBlobBuilder();
-                blob.append(data);
-                blob = blob.getBlob();
+                blob = new Blob([data.buffer || data]);
             } else if (data instanceof window.Blob) {
                 blob = data;
             } else {
@@ -82,7 +90,7 @@
             r.readAsDataURL(blob);
         },
         stringToBinary = function (data, binaryType) {
-            var i, len, array, blob;
+            var i, len, array;
 
             if (binaryType === 'text') {
                 return data;
@@ -97,9 +105,7 @@
                 return array.buffer;
             }
             if (binaryType === 'blob') {
-                blob = new window.WebKitBlobBuilder();
-                blob.append(array.buffer);
-                return blob.getBlob();
+                return new Blob([array.buffer]);
             }
             throw new TypeError('\'%s\' is not a valid value for binaryType.'.replace('%s', binaryType));
         },
@@ -184,7 +190,7 @@
             }
 
             this.url = url;
-            this.binaryType = window.WebKitBlobBuilder ? 'blob' : window.ArrayBuffer ? 'arraybuffer' : 'text';
+            this.binaryType = Blob ? 'blob' : window.ArrayBuffer ? 'arraybuffer' : 'text';
             this.readyState = 0;
             this.bufferedAmount = 0;
             this.onopen = null;
