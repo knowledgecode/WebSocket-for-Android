@@ -29,15 +29,15 @@ The plugin for Cordova 2.x, [see here](https://github.com/knowledgecode/WebSocke
 
 ## Installing
 Use Cordova Command-Line Interface (CLI) :  
-```shell
+```sh
 $ cordova plugin add com.knowledgecode.cordova.websocket
 ```
 or  
-```shell
+```sh
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
 If you are developing the iOS version in parallel, this plugin will be also installed there:  
-```shell
+```sh
 $ cordova plugin add com.knowledgecode.cordova.websocket
 Fetching plugin "com.knowledgecode.cordova.websocket" via plugin registry
 Installing "com.knowledgecode.cordova.websocket" for android
@@ -45,7 +45,7 @@ Installing "com.knowledgecode.cordova.websocket" for ios
 ```
 This is a feature of CLI. There are no tangible ill effects. If you want to avoid this thing, use Cordova Plugman:
 
-```shell
+```sh
 $ plugman install --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
 Fetching plugin "com.knowledgecode.cordova.websocket" via plugin registry
 npm http GET http://registry.cordova.io/com.knowledgecode.cordova.websocket
@@ -54,17 +54,17 @@ Installing "com.knowledgecode.cordova.websocket" for android
 ```
 ### Upgrading from previous versions
 Just remove and reinstall:  
-```shell
+```sh
 $ cordova plugin remove com.knowledgecode.cordova.websocket
 $ cordova plugin add com.knowledgecode.cordova.websocket
 ```
 or  
-```shell
+```sh
 $ cordova plugin remove com.knowledgecode.cordova.websocket
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
 or
-```shell
+```sh
 $ plugman uninstall --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
 $ plugman install --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
 ```
@@ -78,7 +78,7 @@ When install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`
 ### *WebSocket(url[, protocols])*
 The WebSocket(url, protocols) constructor takes one or two arguments. The first argument, url, specifies the URL to which to connect. The second, protocols, is either a string or an array of strings.  
 A simple code is as follows:  
-```JavaScript
+```javascript
 document.addEventListener('deviceready', function () {
     var ws = new WebSocket('ws://echo.websocket.org');
 
@@ -113,7 +113,7 @@ This plugin has the following options. All these parameters are optional. Of cou
 `origin` is a value to set the request header field. `maxConnectTime` is time to wait for connection. `override` is a flag to override the native WebSocket on Android 4.4 or later devices. Set to true if want to force them to use the plugin. In most cases, it is slower than the native WebSocket.  
 
 If want to change these parameters, need to do before creating a instance:  
-```JavaScript
+```javascript
 WebSocket.pluginOptions = {
     origin: 'http://example.com',
     maxConnectTime: 5000,
@@ -134,6 +134,7 @@ Closes the WebSocket connection or connection attempt, if any.
 ## Change Log
 #### 0.8.1
 * fixed frame aggregation error (thanks to @Atsyn)  
+* fixed binary transmission for the case of using the plugin on 4.4 or later  
 
 #### 0.8.0
 * performance tuning (about 5% to 15% faster than previous versions)  
