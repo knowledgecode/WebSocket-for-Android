@@ -22,7 +22,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.1
+ * @version 0.8.2
  */
 (function (window) {
     'use strict';
@@ -166,7 +166,7 @@
                     'this DOM object constructor cannot be called as a function.');
             }
             if (!WebSocket.pluginOptions.override && BuiltinWebSocket) {
-                return new BuiltinWebSocket(url, protocols);
+                return new (BuiltinWebSocket.bind.apply(BuiltinWebSocket, [].concat(this, Array.prototype.slice.call(arguments))))();
             }
             switch (arguments.length) {
             case 0:
