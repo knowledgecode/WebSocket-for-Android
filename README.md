@@ -132,6 +132,9 @@ The size of message that can transmit and receive at a time depends on heap size
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
+#### 0.8.3
+* fixed that difference between packages and directories structure (thanks to @digigm)  
+
 #### 0.8.2
 * fixed the constructor error on 4.4 or later (thanks to @digigm)  
 
