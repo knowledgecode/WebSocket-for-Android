@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="com.knowledgecode.cordova.websocket"
-  version="0.8.2">
+  version="0.8.3">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
@@ -84,9 +84,9 @@
     <source-file src="src/android/org/eclipse/jetty/util/QuotedStringTokenizer.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/StringMap.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/StringUtil.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/thread/QueuedThreadPool.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/thread/ThreadPool.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/thread/Timeout.java" target-dir="src/org/eclipse/jetty/util" />
+    <source-file src="src/android/org/eclipse/jetty/util/thread/QueuedThreadPool.java" target-dir="src/org/eclipse/jetty/util/thread" />
+    <source-file src="src/android/org/eclipse/jetty/util/thread/ThreadPool.java" target-dir="src/org/eclipse/jetty/util/thread" />
+    <source-file src="src/android/org/eclipse/jetty/util/thread/Timeout.java" target-dir="src/org/eclipse/jetty/util/thread" />
     <source-file src="src/android/org/eclipse/jetty/util/TypeUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/URIUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/Utf8Appendable.java" target-dir="src/org/eclipse/jetty/util" />
