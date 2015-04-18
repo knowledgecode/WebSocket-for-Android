@@ -46,13 +46,14 @@ import org.eclipse.jetty.io.nio.AsyncConnection;
 import org.eclipse.jetty.io.nio.SelectChannelEndPoint;
 import org.eclipse.jetty.io.nio.SelectorManager;
 import org.eclipse.jetty.io.nio.SslConnection;
-import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.component.AggregateLifeCycle;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
+
+import android.util.Base64;
 
 /* ------------------------------------------------------------ */
 /**
@@ -368,7 +369,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
             byte[] bytes = new byte[16];
             new Random().nextBytes(bytes);
-            _key = new String(B64Code.encode(bytes));
+            _key = new String(Base64.encodeToString(bytes, Base64.NO_WRAP));
 
             Buffers buffers = new SimpleBuffers(_buffers.getBuffer(), null);
             _parser = new HttpParser(buffers, _endp, new HttpParser.EventHandler()
@@ -424,7 +425,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 StringBuilder request = new StringBuilder(512);
                 request.append("GET ").append(path).append(" HTTP/1.1\r\n")
                 .append("Host: ").append(_future.getURI().getHost()).append(":");
-                
+
                 int port = _future.getURI().getPort();
                 if (port <= 0)
                 {
@@ -446,7 +447,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 }
 
                 request.append(port).append("\r\n");
-                
+
                 request.append("Upgrade: websocket\r\n")
                 .append("Connection: Upgrade\r\n")
                 .append("Sec-WebSocket-Key: ")

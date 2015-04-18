@@ -17,12 +17,11 @@
  * under the License.
  */
 
-/*jslint browser: true, nomen: true, plusplus: true */
 /*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.3
+ * @version 0.9.0
  */
 (function (window) {
     'use strict';
@@ -90,14 +89,8 @@
             r.readAsDataURL(blob);
         },
         stringToBinary = function (data, binaryType) {
-            var i, len, array;
+            var i, len = data.length, array = new window.Uint8Array(len);
 
-            if (binaryType === 'text') {
-                return data;
-            }
-            data = window.atob(data);
-            len = data.length;
-            array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
@@ -190,7 +183,7 @@
             }
 
             this.url = url;
-            this.binaryType = Blob ? 'blob' : window.ArrayBuffer ? 'arraybuffer' : 'text';
+            this.binaryType = Blob ? 'blob' : 'arraybuffer';
             this.readyState = 0;
             this.bufferedAmount = 0;
             this.onopen = null;

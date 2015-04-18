@@ -19,10 +19,8 @@
 package com.knowledgecode.cordova.websocket;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
@@ -31,11 +29,9 @@ import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 import com.knowledgecode.cordova.websocket.WebSocketGenerator.OnCloseListener;
 import com.knowledgecode.cordova.websocket.WebSocketGenerator.OnOpenListener;
-
 import android.util.SparseArray;
 import android.webkit.CookieManager;
 
@@ -58,28 +54,6 @@ class ConnectionTask implements Task {
     public ConnectionTask(WebSocketClientFactory factory, SparseArray<Connection> map) {
         _factory = factory;
         _map = map;
-    }
-
-    /**
-     * Complement default port number.
-     *
-     * @param url
-     * @return URI
-     * @throws URISyntaxException
-     */
-    private static URI complementPort(String url) throws URISyntaxException {
-        URI uri = new URI(url);
-        int port = uri.getPort();
-
-        if (port < 0) {
-            if ("ws".equals(uri.getScheme())) {
-                port = 80;
-            } else if ("wss".equals(uri.getScheme())) {
-                port = 443;
-            }
-            uri = new URI(uri.getScheme(), "", uri.getHost(), port, uri.getPath(), uri.getQuery(), "");
-        }
-        return uri;
     }
 
     /**
@@ -108,13 +82,11 @@ class ConnectionTask implements Task {
             WebSocketClient client = _factory.newWebSocketClient();
 
             int id = args.getInt(0);
-            String url = args.getString(1);
+            URI uri = new URI(args.getString(1));
             String protocol = args.getString(2);
             JSONObject options = args.getJSONObject(3);
             String origin = options.optString("origin", "");
             long maxConnectTime =  options.optLong("maxConnectTime", MAX_CONNECT_TIME);
-
-            URI uri = complementPort(url);
 
             if (protocol.length() > 0) {
                 client.setProtocol(protocol);
@@ -122,8 +94,6 @@ class ConnectionTask implements Task {
             if (origin.length() > 0) {
                 client.setOrigin(origin);
             }
-            client.setMaxTextMessageSize(Integer.MAX_VALUE);
-            client.setMaxBinaryMessageSize(-1);
 
             setCookie(client.getCookies(), uri.getHost());
 

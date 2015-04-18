@@ -18,13 +18,15 @@
  */
 package com.knowledgecode.cordova.websocket;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
 
-import android.util.Base64;
-
-class WebSocketGenerator extends AbstractWebSocket {
+class WebSocketGenerator implements
+    org.eclipse.jetty.websocket.WebSocket.OnTextMessage,
+    org.eclipse.jetty.websocket.WebSocket.OnBinaryMessage {
 
     interface OnOpenListener {
         public void onOpen(int id, Connection conn);
@@ -96,7 +98,10 @@ class WebSocketGenerator extends AbstractWebSocket {
 
     @Override
     public void onMessage(byte[] data, int offset, int length) {
-        sendCallback("B" + Base64.encodeToString(data, Base64.NO_WRAP), true);
+        try {
+            sendCallback("B" + new String(data, "ISO8859_1"), true);
+        } catch (UnsupportedEncodingException e) {
+        }
     }
 
     @Override

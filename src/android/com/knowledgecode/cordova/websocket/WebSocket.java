@@ -32,7 +32,7 @@ import android.util.SparseArray;
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  *
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.3
+ * @version 0.9.0
  */
 public class WebSocket extends CordovaPlugin {
 
@@ -43,13 +43,14 @@ public class WebSocket extends CordovaPlugin {
     private DisconnectionTask _close;
 
     @Override
-    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+    public void initialize(CordovaInterface cordova, final CordovaWebView webView) {
         super.initialize(cordova, webView);
         _factory = new WebSocketClientFactory();
         _conn = new SparseArray<Connection>();
         _create = new ConnectionTask(_factory, _conn);
         _send = new SendingTask(_conn);
         _close = new DisconnectionTask(_conn);
+
         try {
             start();
         } catch (Exception e) {
