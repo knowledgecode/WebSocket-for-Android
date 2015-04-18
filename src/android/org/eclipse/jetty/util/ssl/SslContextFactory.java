@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -54,7 +53,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
-
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.log.Log;
@@ -63,7 +61,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.CertificateUtils;
 import org.eclipse.jetty.util.security.CertificateValidator;
 import org.eclipse.jetty.util.security.Password;
-
+import android.annotation.SuppressLint;
 import android.os.Build;
 
 
@@ -89,31 +87,18 @@ public class SslContextFactory extends AbstractLifeCycle
 
         public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
         {
-        }
-    }};
-
-    /**
-     * Used @koush's workaround as a reference for Android 4.0.3 or lower.
-     * @see https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/AsyncSSLSocketWrapper.java
-     */
-    public final static TrustManager[] TRUST_NEARLY_ALL_CERTS = new X509TrustManager[]{new X509TrustManager()
-    {
-        public java.security.cert.X509Certificate[] getAcceptedIssuers()
-        {
-            return new java.security.cert.X509Certificate[]{};
-        }
-
-        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
-        {
-        }
-
-        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
-        {
-            for (java.security.cert.X509Certificate cert : certs)
-            {
-                if (cert != null && cert.getCriticalExtensionOIDs() != null)
+            /**
+             * This is a workaround for SSL bugs in 4.0.3 or lower.
+             * @author KNOWLEDGECODE
+             * @see https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/AsyncSSLSocketWrapper.java
+             */
+            if (Build.VERSION.SDK_INT <= 15) {
+                for (java.security.cert.X509Certificate cert : certs)
                 {
-                    cert.getCriticalExtensionOIDs().remove("2.5.29.15");
+                    if (cert != null && cert.getCriticalExtensionOIDs() != null)
+                    {
+                        cert.getCriticalExtensionOIDs().remove("2.5.29.15");
+                    }
                 }
             }
         }
@@ -264,6 +249,7 @@ public class SslContextFactory extends AbstractLifeCycle
      * Create the SSLContext object and start the lifecycle
      * @see org.eclipse.jetty.util.component.AbstractLifeCycle#doStart()
      */
+    @SuppressLint("TrulyRandom")
     @Override
     protected void doStart() throws Exception
     {
@@ -279,14 +265,10 @@ public class SslContextFactory extends AbstractLifeCycle
                     LOG.debug("No keystore or trust store configured.  ACCEPTING UNTRUSTED CERTIFICATES!!!!!");
                     // Create a trust manager that does not validate certificate chains
                     trust_managers = TRUST_ALL_CERTS;
-                    if (Build.VERSION.SDK_INT <= 15)
-                    {
-                        trust_managers = TRUST_NEARLY_ALL_CERTS;
-                    }
                 }
 
                 SecureRandom secureRandom = (_secureRandomAlgorithm == null)?null:SecureRandom.getInstance(_secureRandomAlgorithm);
-                _context = SSLContext.getInstance(_sslProtocol);
+                _context = (_sslProvider == null)?SSLContext.getInstance(_sslProtocol):SSLContext.getInstance(_sslProtocol,_sslProvider);
                 _context.init(null, trust_managers, secureRandom);
             }
             else
@@ -991,10 +973,7 @@ public class SslContextFactory extends AbstractLifeCycle
      * @param storePassword keystore password
      * @return created keystore
      * @throws Exception if the keystore cannot be obtained
-     *
-     * @deprecated
      */
-    @Deprecated
     protected KeyStore getKeyStore(InputStream storeStream, String storePath, String storeType, String storeProvider, String storePassword) throws Exception
     {
         return CertificateUtils.getKeyStore(storeStream, storePath, storeType, storeProvider, storePassword);
