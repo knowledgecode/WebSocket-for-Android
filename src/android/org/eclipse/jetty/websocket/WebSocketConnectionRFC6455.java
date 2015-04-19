@@ -18,10 +18,10 @@
 
 package org.eclipse.jetty.websocket;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -632,42 +632,73 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         }
     }
 
-    private class WSFrameHandler implements WebSocketParser.FrameHandler {
+    private class WSFrameHandler implements WebSocketParser.FrameHandler
+    {
         private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private static final int BUFFER_SIZE = 8192;
+        private final List<byte[]> _cache = new ArrayList<byte[]>();
+        private int _length = 0;
         private byte _opcode = -1;
-        private ByteArrayOutputStream _buffer;
 
-        public WSFrameHandler()
+        private void clearCache()
         {
-            _buffer = new ByteArrayOutputStream(BUFFER_SIZE);
+            _cache.clear();
+            _length = 0;
         }
 
-        public void onFrame(final byte flags, final byte opcode, final Buffer buffer) {
+        private void charge(byte[] array, int length)
+        {
+            _cache.add(array);
+            _length += length;
+        }
+
+        private byte[] discharge()
+        {
+            if (_cache.size() > 1)
+            {
+                byte[] byteBuffer = new byte[_length];
+                int index = 0;
+
+                for (byte[] b : _cache)
+                {
+                    System.arraycopy(b, 0, byteBuffer, index, b.length);
+                    index += b.length;
+                }
+                return byteBuffer;
+            }
+            return _cache.get(0);
+        }
+
+        public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
+        {
             boolean lastFrame = isLastFrame(flags);
 
-            synchronized (WebSocketConnectionRFC6455.this) {
+            synchronized (WebSocketConnectionRFC6455.this)
+            {
                 // Ignore incoming after a close
-                if (_closedIn) {
+                if (_closedIn)
+                {
                     return;
                 }
             }
 
             byte[] array = buffer.array();
 
-            if (isControlFrame(opcode) && buffer.length() > MAX_CONTROL_FRAME_PAYLOAD) {
+            if (isControlFrame(opcode) && buffer.length() > MAX_CONTROL_FRAME_PAYLOAD)
+            {
                 errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Control frame too large: " + buffer.length() + " > " + MAX_CONTROL_FRAME_PAYLOAD);
                 return;
             }
 
             // TODO: check extensions for RSV bit(s) meanings
-            if ((flags & 0x7) != 0) {
+            if ((flags & 0x7) != 0)
+            {
                 errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "RSV bits set 0x" + Integer.toHexString(flags));
                 return;
             }
 
             // Ignore all frames after error close
-            if (_closeCode != 0 && _closeCode != CLOSE_NORMAL && opcode != OP_CLOSE) {
+            if (_closeCode != 0 && _closeCode != CLOSE_NORMAL && opcode != OP_CLOSE)
+            {
                 return;
             }
 
@@ -675,22 +706,27 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
             if (_onFrame!=null)
             {
                 if (_onFrame.onFrame(flags,opcode,array,buffer.getIndex(),buffer.length()))
-                    return;
-            }
-
-            if (_onControl != null && isControlFrame(opcode)) {
-                if (_onControl.onControl(opcode, array, buffer.getIndex(), buffer.length())) {
+                {
                     return;
                 }
             }
 
-            switch (opcode) {
+            if (_onControl != null && isControlFrame(opcode))
+            {
+                if (_onControl.onControl(opcode, array, buffer.getIndex(), buffer.length()))
+                {
+                    return;
+                }
+            }
+
+            switch (opcode)
+            {
                 case WebSocketConnectionRFC6455.OP_TEXT:
                 case WebSocketConnectionRFC6455.OP_BINARY:
                 {
                     if (_opcode != -1)
                     {
-                        _buffer.reset();
+                        clearCache();
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Expected Continuation" + Integer.toHexString(opcode));
                         return;
                     }
@@ -700,33 +736,31 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 {
                     if (_opcode == -1)
                     {
-                        _buffer.reset();
+                        clearCache();
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Bad Continuation");
                         return;
                     }
-                    _buffer.write(buffer.array(), buffer.getIndex(), buffer.length());
+                    charge(buffer.asArray(), buffer.length());
                     if (lastFrame)
                     {
+                        byte[] msg = discharge();
+                        clearCache();
                         switch (_opcode)
                         {
                             case WebSocketConnectionRFC6455.OP_TEXT:
                                 try
                                 {
-                                    _onTextMessage.onMessage(_buffer.toString("UTF8"));
+                                    _onTextMessage.onMessage(new String(msg, "UTF-8"));
                                 }
                                 catch (Throwable e)
                                 {
-                                    _buffer.reset();
                                     errorClose(WebSocketConnectionRFC6455.CLOSE_BAD_PAYLOAD, "Invalid UTF-8");
-                                    return;
                                 }
                                 break;
                             case WebSocketConnectionRFC6455.OP_BINARY:
-                                byte[] msg = _buffer.toByteArray();
                                 _onBinaryMessage.onMessage(msg, 0, msg.length);
                                 break;
                         }
-                        _buffer = new ByteArrayOutputStream(BUFFER_SIZE);
                         _opcode = -1;
                     }
                     break;

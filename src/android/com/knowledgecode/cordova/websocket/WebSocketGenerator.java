@@ -18,8 +18,9 @@
  */
 package com.knowledgecode.cordova.websocket;
 
-import java.io.UnsupportedEncodingException;
-
+import android.annotation.TargetApi;
+import android.os.Build;
+import java.nio.charset.Charset;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
@@ -38,6 +39,7 @@ class WebSocketGenerator implements
 
     private final int _id;
     private final CallbackContext _ctx;
+    private final Charset _iso88591;
     private OnOpenListener _openListener;
     private OnCloseListener _closeListener;
 
@@ -50,6 +52,7 @@ class WebSocketGenerator implements
     public WebSocketGenerator(int id, CallbackContext ctx) {
         _id = id;
         _ctx = ctx;
+        _iso88591 = Charset.forName("ISO-8859-1");
         _openListener = new OnOpenListener() {
             @Override
             public void onOpen(int id, Connection conn) {
@@ -96,12 +99,10 @@ class WebSocketGenerator implements
         sendCallback("T" + data, true);
     }
 
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @Override
     public void onMessage(byte[] data, int offset, int length) {
-        try {
-            sendCallback("B" + new String(data, "ISO8859_1"), true);
-        } catch (UnsupportedEncodingException e) {
-        }
+        sendCallback("B" + new String(data, _iso88591), true);
     }
 
     @Override
