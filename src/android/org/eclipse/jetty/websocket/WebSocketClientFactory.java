@@ -449,17 +449,36 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 request.append(port).append("\r\n");
 
                 request.append("Upgrade: websocket\r\n")
-                .append("Connection: Upgrade\r\n")
-                .append("Sec-WebSocket-Key: ")
-                .append(_key).append("\r\n");
+                .append("Connection: Upgrade\r\n");
 
                 if (origin != null)
                     request.append("Origin: ").append(origin).append("\r\n");
 
-                request.append("Sec-WebSocket-Version: ").append(WebSocketConnectionRFC6455.VERSION).append("\r\n");
-
                 if (_future.getProtocol() != null)
                     request.append("Sec-WebSocket-Protocol: ").append(_future.getProtocol()).append("\r\n");
+
+                /**
+                 * append pragma
+                 * @author KNOWLEDGECODE
+                 */
+                request.append("pragma: no-cache\r\n");
+
+                /**
+                 * append cache-control
+                 * @author KNOWLEDGECODE
+                 */
+                request.append("cache-control: no-cache\r\n");
+
+                request.append("Sec-WebSocket-Key: ").append(_key).append("\r\n");
+
+                request.append("Sec-WebSocket-Version: ").append(WebSocketConnectionRFC6455.VERSION).append("\r\n");
+
+                /**
+                 * append user-agent
+                 * @author KNOWLEDGECODE
+                 */
+                if (_future.getAgent() != null)
+                    request.append("user-agent: ").append(_future.getAgent()).append("\r\n");
 
                 Map<String, String> cookies = _future.getCookies();
                 if (cookies != null && cookies.size() > 0)

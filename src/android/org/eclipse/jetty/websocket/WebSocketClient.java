@@ -84,6 +84,7 @@ public class WebSocketClient
     private final List<String> _extensions=new CopyOnWriteArrayList<String>();
     private String _origin;
     private String _protocol;
+    private String _agent;
     private int _maxIdleTime=-1;
     private int _maxTextMessageSize=16*1024;
     private int _maxBinaryMessageSize=-1;
@@ -270,6 +271,26 @@ public class WebSocketClient
     public void setMaxBinaryMessageSize(int maxBinaryMessageSize)
     {
         _maxBinaryMessageSize = maxBinaryMessageSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * get user-agent
+     * @author KNOWLEDGECODE
+     */
+    public String getAgent()
+    {
+        return _agent;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * set user-agent
+     * @author KNOWLEDGECODE
+     */
+    public void setAgent(String _agent)
+    {
+        this._agent = _agent;
     }
 
     /* ------------------------------------------------------------ */
@@ -485,6 +506,15 @@ public class WebSocketClient
         public MaskGen getMaskGen()
         {
             return _client.getMaskGen();
+        }
+
+        /**
+         * get user-agent
+         * @author KNOWLEDGECODE
+         */
+        public String getAgent()
+        {
+            return _client.getAgent();
         }
 
         @Override

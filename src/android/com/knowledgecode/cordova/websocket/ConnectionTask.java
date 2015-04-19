@@ -20,20 +20,29 @@ package com.knowledgecode.cordova.websocket;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
+import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 import com.knowledgecode.cordova.websocket.WebSocketGenerator.OnCloseListener;
 import com.knowledgecode.cordova.websocket.WebSocketGenerator.OnOpenListener;
+
+import android.app.Activity;
 import android.util.SparseArray;
 import android.webkit.CookieManager;
+import android.webkit.WebView;
 
 /**
  * Connect to server.
@@ -43,6 +52,8 @@ class ConnectionTask implements Task {
     private static final long MAX_CONNECT_TIME = 75000;
 
     private final WebSocketClientFactory _factory;
+    private final Activity _view;
+    private final WebView _webView;
     private final SparseArray<Connection> _map;
 
     /**
@@ -51,9 +62,52 @@ class ConnectionTask implements Task {
      * @param factory
      * @param map
      */
-    public ConnectionTask(WebSocketClientFactory factory, SparseArray<Connection> map) {
+    public ConnectionTask(WebSocketClientFactory factory, Activity view, WebView webView, SparseArray<Connection> map) {
         _factory = factory;
+        _view = view;
+        _webView = webView;
         _map = map;
+    }
+
+    /**
+     * Get default origin.
+     *
+     * @return
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    private String getOrigin() throws InterruptedException, ExecutionException {
+        Callable<String> origin = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                URI uri = new URI(_webView.getUrl());
+                return String.format("%s://%s", uri.getScheme(), StringUtil.nonNull(uri.getHost()));
+            }
+        };
+        FutureTask<String> task = new FutureTask<String>(origin);
+
+        _view.runOnUiThread(task);
+        return task.get();
+    }
+
+    /**
+     * Get default user-agent
+     *
+     * @return
+     * @throws ExecutionException 
+     * @throws InterruptedException 
+     */
+    private String getAgent() throws InterruptedException, ExecutionException {
+        Callable<String> agent = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return _webView.getSettings().getUserAgentString();
+            }
+        };
+        FutureTask<String> task = new FutureTask<String>(agent);
+
+        _view.runOnUiThread(task);
+        return task.get();
     }
 
     /**
@@ -85,7 +139,8 @@ class ConnectionTask implements Task {
             URI uri = new URI(args.getString(1));
             String protocol = args.getString(2);
             JSONObject options = args.getJSONObject(3);
-            String origin = options.optString("origin", "");
+            String origin = options.optString("origin", getOrigin());
+            String agent = options.optString("agent", getAgent());
             long maxConnectTime =  options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
             if (protocol.length() > 0) {
@@ -94,7 +149,9 @@ class ConnectionTask implements Task {
             if (origin.length() > 0) {
                 client.setOrigin(origin);
             }
-
+            if (agent.length() > 0) {
+                client.setAgent(agent);
+            }
             setCookie(client.getCookies(), uri.getHost());
 
             WebSocketGenerator gen = new WebSocketGenerator(id, ctx);

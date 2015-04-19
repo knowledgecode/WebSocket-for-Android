@@ -47,7 +47,7 @@ public class WebSocket extends CordovaPlugin {
         super.initialize(cordova, webView);
         _factory = new WebSocketClientFactory();
         _conn = new SparseArray<Connection>();
-        _create = new ConnectionTask(_factory, _conn);
+        _create = new ConnectionTask(_factory, cordova.getActivity(), webView, _conn);
         _send = new SendingTask(_conn);
         _close = new DisconnectionTask(_conn);
 
