@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+/*eslint complexity: 0 no-mixed-requires: 0 */
 /*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
@@ -253,7 +253,7 @@
                     }
                     that.dispatchEvent(evt);
                 });
-            }, 'WebSocket', 'create', [identifier++, url, protocols, WebSocket.pluginOptions || {}]);
+            }, 'WebSocket', 'create', [identifier++, url, protocols, location.origin, navigator.userAgent, WebSocket.pluginOptions || {}]);
         },
         ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
 
