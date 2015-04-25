@@ -84,7 +84,7 @@
             }
             r = new window.FileReader();
             r.onload = function () {
-                onComplete(this.result.substring(this.result.indexOf(',') + 1));
+                onComplete(this.result);
             };
             r.readAsDataURL(blob);
         },
