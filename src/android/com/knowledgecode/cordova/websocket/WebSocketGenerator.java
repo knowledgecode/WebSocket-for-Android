@@ -18,8 +18,6 @@
  */
 package com.knowledgecode.cordova.websocket;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import java.nio.charset.Charset;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -99,7 +97,6 @@ class WebSocketGenerator implements
         sendCallback("T" + data, true);
     }
 
-    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @Override
     public void onMessage(byte[] data, int offset, int length) {
         sendCallback("B" + new String(data, _iso88591), true);

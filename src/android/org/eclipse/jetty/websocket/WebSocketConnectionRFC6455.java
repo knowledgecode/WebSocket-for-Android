@@ -19,9 +19,9 @@
 package org.eclipse.jetty.websocket;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -126,16 +126,12 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
     private int _maxTextMessageSize=-1;
     private int _maxBinaryMessageSize=-1;
 
+    private static final Charset _iso88591 = Charset.forName("ISO-8859-1");
+    private static final Charset _utf8 = Charset.forName("UTF-8");
+
     static
     {
-        try
-        {
-            MAGIC="258EAFA5-E914-47DA-95CA-C5AB0DC85B11".getBytes("ISO-8859-1");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new RuntimeException(e);
-        }
+        MAGIC="258EAFA5-E914-47DA-95CA-C5AB0DC85B11".getBytes(_iso88591);
     }
 
     private final WebSocket.FrameConnection _connection = new WSFrameConnection();
@@ -372,7 +368,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                         code = WebSocketConnectionRFC6455.CLOSE_NORMAL;
                     }
 
-                    byte[] bytes = ("xx"+(message==null?"":message)).getBytes("ISO-8859-1");
+                    byte[] bytes = ("xx"+(message==null?"":message)).getBytes(_iso88591);
                     bytes[0]=(byte)(code/0x100);
                     bytes[1]=(byte)(code%0x100);
                     _outbound.addFrame((byte)FLAG_FIN,WebSocketConnectionRFC6455.OP_CLOSE,bytes,0,code>0?bytes.length:0);
@@ -431,7 +427,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         {
             if (_closedOut)
                 throw new IOException("closedOut "+_closeCode+":"+_closeMessage);
-            byte[] data = content.getBytes("UTF-8");
+            byte[] data = content.getBytes(_utf8);
             _outbound.addFrame((byte)FLAG_FIN,WebSocketConnectionRFC6455.OP_TEXT,data,0,data.length);
             checkWriteable();
         }
@@ -634,39 +630,47 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
     private class WSFrameHandler implements WebSocketParser.FrameHandler
     {
-        private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private final List<byte[]> _cache = new ArrayList<byte[]>();
-        private int _length = 0;
-        private byte _opcode = -1;
-
-        private void clearCache()
+        public class ByteArrayBuffer
         {
-            _cache.clear();
-            _length = 0;
-        }
+            private byte[] _buffer;
+            private int _index;
 
-        private void charge(byte[] array, int length)
-        {
-            _cache.add(array);
-            _length += length;
-        }
-
-        private byte[] discharge()
-        {
-            if (_cache.size() > 1)
+            public ByteArrayBuffer(int capacity)
             {
-                byte[] byteBuffer = new byte[_length];
-                int index = 0;
-
-                for (byte[] b : _cache)
-                {
-                    System.arraycopy(b, 0, byteBuffer, index, b.length);
-                    index += b.length;
-                }
-                return byteBuffer;
+                _buffer = new byte[capacity];
+                _index = 0;
             }
-            return _cache.get(0);
+
+            public ByteArrayBuffer append(final byte[] array, int offset, int length)
+            {
+                if (length > _buffer.length - _index)
+                {
+                    _buffer = Arrays.copyOf(_buffer, Math.max(_buffer.length << 1, _index + length));
+                }
+                System.arraycopy(array, offset, _buffer, _index, length);
+                _index += length;
+                return this;
+            }
+
+            public byte[] toArray()
+            {
+                return Arrays.copyOf(_buffer, _index);
+            }
+
+            public void clear()
+            {
+                _index = 0;
+            }
+
+            public boolean isEmpty()
+            {
+                return _index == 0;
+            }
         }
+        private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
+        private static final int INITIAL_CAPACITY = 8192;
+        private ByteArrayBuffer _buffer = new ByteArrayBuffer(INITIAL_CAPACITY);
+        private byte _opcode = -1;
 
         public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
         {
@@ -719,6 +723,9 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 }
             }
 
+            int offset = buffer.getIndex();
+            int length = buffer.length();
+
             switch (opcode)
             {
                 case WebSocketConnectionRFC6455.OP_TEXT:
@@ -726,7 +733,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 {
                     if (_opcode != -1)
                     {
-                        clearCache();
+                        _buffer.clear();
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Expected Continuation" + Integer.toHexString(opcode));
                         return;
                     }
@@ -736,32 +743,42 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 {
                     if (_opcode == -1)
                     {
-                        clearCache();
+                        _buffer.clear();
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Bad Continuation");
                         return;
                     }
-                    charge(buffer.asArray(), buffer.length());
                     if (lastFrame)
                     {
-                        byte[] msg = discharge();
-                        clearCache();
                         switch (_opcode)
                         {
                             case WebSocketConnectionRFC6455.OP_TEXT:
-                                try
+                                if (_buffer.isEmpty())
                                 {
-                                    _onTextMessage.onMessage(new String(msg, "UTF-8"));
+                                    _onTextMessage.onMessage(new String(array, offset, offset + length, _utf8));
                                 }
-                                catch (Throwable e)
+                                else
                                 {
-                                    errorClose(WebSocketConnectionRFC6455.CLOSE_BAD_PAYLOAD, "Invalid UTF-8");
+                                    _onTextMessage.onMessage(new String(_buffer.append(array, offset, length).toArray(), _utf8));
                                 }
                                 break;
                             case WebSocketConnectionRFC6455.OP_BINARY:
-                                _onBinaryMessage.onMessage(msg, 0, msg.length);
+                                if (_buffer.isEmpty())
+                                {
+                                    _onBinaryMessage.onMessage(array, offset, length);
+                                }
+                                else
+                                {
+                                    byte[] msg = _buffer.append(array, offset, length).toArray();
+                                    _onBinaryMessage.onMessage(msg, 0, msg.length);
+                                }
                                 break;
                         }
                         _opcode = -1;
+                        _buffer.clear();
+                    }
+                    else
+                    {
+                        _buffer.append(array, offset, length);
                     }
                     break;
                 }
@@ -773,7 +790,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                     {
                         try
                         {
-                            _connection.sendControl(WebSocketConnectionRFC6455.OP_PONG,buffer.array(),buffer.getIndex(),buffer.length());
+                            _connection.sendControl(WebSocketConnectionRFC6455.OP_PONG, array, offset, length);
                         }
                         catch (Throwable e)
                         {
@@ -791,11 +808,11 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
                 case WebSocketConnectionRFC6455.OP_CLOSE:
                 {
-                    int code=WebSocketConnectionRFC6455.CLOSE_NO_CODE;
-                    String message=null;
-                    if (buffer.length()>=2)
+                    int code = WebSocketConnectionRFC6455.CLOSE_NO_CODE;
+                    String message = null;
+                    if (length >= 2)
                     {
-                        code=(0xff&buffer.array()[buffer.getIndex()])*0x100+(0xff&buffer.array()[buffer.getIndex()+1]);
+                        code=(0xff & array[offset]) * 0x100 + (0xff & array[offset + 1]);
 
                         // Validate close status codes.
                         if (code < WebSocketConnectionRFC6455.CLOSE_NORMAL ||
@@ -815,7 +832,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL,"Invalid payload length of 1");
                         return;
                     }
-                    closeIn(code,message);
+                    closeIn(code, message);
                     break;
                 }
 
@@ -861,7 +878,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         try
         {
             MessageDigest md = MessageDigest.getInstance("SHA1");
-            md.update(key.getBytes("UTF-8"));
+            md.update(key.getBytes(_utf8));
             md.update(MAGIC);
             return Base64.encodeToString(md.digest(), Base64.NO_WRAP);
         }
