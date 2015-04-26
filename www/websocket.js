@@ -255,7 +255,7 @@
                 });
             }, 'WebSocket', 'create', [identifier++, url, protocols, location.origin, navigator.userAgent, WebSocket.pluginOptions || {}]);
         },
-        ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
+        ver = /Chrome\/(\d+)/.exec(navigator.userAgent);
 
     WebSocketPrototype.prototype = new EventTarget();
     WebSocketPrototype.prototype.constructor = WebSocketPrototype;
@@ -265,7 +265,7 @@
     module.exports = WebSocket;
     window.addEventListener('message', taskQueue.listener, true);
 
-    if (ver && parseFloat(ver[1]) < 4.4) {
+    if (!ver || parseInt(ver[1], 10) < 30) {
         BuiltinWebSocket = undefined;
     }
 }(this));
