@@ -86,7 +86,7 @@ public class WebSocketClient
     private String _protocol;
     private String _agent;
     private int _maxIdleTime=-1;
-    private int _maxTextMessageSize=16*1024;
+    private int _maxTextMessageSize=-1;
     private int _maxBinaryMessageSize=-1;
     private MaskGen _maskGen;
     private SocketAddress _bindAddress;

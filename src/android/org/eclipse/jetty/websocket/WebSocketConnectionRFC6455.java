@@ -662,13 +662,27 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 _index = 0;
             }
 
-            public boolean isEmpty()
+            public int length()
             {
-                return _index == 0;
+                return _index;
             }
         }
+
+        private boolean excess(int opcode, int length)
+        {
+            switch (opcode)
+            {
+                case WebSocketConnectionRFC6455.OP_TEXT:
+                    return _maxTextMessageSize > 0 && _maxTextMessageSize < length;
+                case WebSocketConnectionRFC6455.OP_BINARY:
+                    return _maxBinaryMessageSize > 0 && _maxBinaryMessageSize < length;
+                default:
+                    return false;
+            }
+        }
+
         private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private static final int INITIAL_CAPACITY = 8192;
+        private static final int INITIAL_CAPACITY = 16384;
         private ByteArrayBuffer _buffer = new ByteArrayBuffer(INITIAL_CAPACITY);
         private byte _opcode = -1;
 
@@ -747,12 +761,24 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Bad Continuation");
                         return;
                     }
+                    if (excess(_opcode, _buffer.length() + length - offset))
+                    {
+                        switch (_opcode)
+                        {
+                            case WebSocketConnectionRFC6455.OP_TEXT:
+                                _connection.close(WebSocketConnectionRFC6455.CLOSE_MESSAGE_TOO_LARGE, "Text message size > " + _maxTextMessageSize + " chars");
+                                return;
+                            case WebSocketConnectionRFC6455.OP_BINARY:
+                                _connection.close(WebSocketConnectionRFC6455.CLOSE_MESSAGE_TOO_LARGE, "Message size > " + _maxBinaryMessageSize);
+                                return;
+                        }
+                    }
                     if (lastFrame)
                     {
                         switch (_opcode)
                         {
                             case WebSocketConnectionRFC6455.OP_TEXT:
-                                if (_buffer.isEmpty())
+                                if (_buffer.length() == 0)
                                 {
                                     _onTextMessage.onMessage(new String(array, offset, offset + length, _utf8));
                                 }
@@ -762,7 +788,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                                 }
                                 break;
                             case WebSocketConnectionRFC6455.OP_BINARY:
-                                if (_buffer.isEmpty())
+                                if (_buffer.length() == 0)
                                 {
                                     _onBinaryMessage.onMessage(array, offset, length);
                                 }

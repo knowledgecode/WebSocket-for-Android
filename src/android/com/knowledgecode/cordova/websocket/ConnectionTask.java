@@ -44,6 +44,8 @@ import android.webkit.CookieManager;
 class ConnectionTask implements Task {
 
     private static final long MAX_CONNECT_TIME = 75000;
+    private static final int MAX_TEXT_MESSAGE_SIZE = -1;
+    private static final int MAX_BINARY_MESSAGE_SIZE = -1;
 
     private final WebSocketClientFactory _factory;
     private final SparseArray<Connection> _map;
@@ -92,6 +94,8 @@ class ConnectionTask implements Task {
             String agent = options.optString("agent", args.getString(4));
             long maxConnectTime =  options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
+            client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));
+            client.setMaxBinaryMessageSize(options.optInt("maxBinaryMessageSize", MAX_BINARY_MESSAGE_SIZE));
             if (protocol.length() > 0) {
                 client.setProtocol(protocol);
             }
