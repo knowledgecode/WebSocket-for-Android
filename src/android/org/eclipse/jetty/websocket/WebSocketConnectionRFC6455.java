@@ -761,7 +761,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Bad Continuation");
                         return;
                     }
-                    if (excess(_opcode, _buffer.length() + length - offset))
+                    if (excess(_opcode, _buffer.length() + length))
                     {
                         switch (_opcode)
                         {
@@ -780,7 +780,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                             case WebSocketConnectionRFC6455.OP_TEXT:
                                 if (_buffer.length() == 0)
                                 {
-                                    _onTextMessage.onMessage(new String(array, offset, offset + length, _utf8));
+                                    _onTextMessage.onMessage(new String(array, offset, length, _utf8));
                                 }
                                 else
                                 {
