@@ -31,6 +31,7 @@
     <source-file src="src/android/com/knowledgecode/cordova/websocket/ConnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/DisconnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/SendingTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
+    <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskBean.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskRunner.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocketGenerator.java" target-dir="src/com/knowledgecode/cordova/websocket" />
