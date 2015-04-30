@@ -51,9 +51,9 @@ public class WebSocket extends CordovaPlugin {
         _conn = new SparseArray<Connection>();
         _executor = Executors.newSingleThreadExecutor();
         _runner = new TaskRunner();
-        _runner.addTask("create", new ConnectionTask(_factory, _conn));
-        _runner.addTask("send", new SendingTask(_conn));
-        _runner.addTask("close", new DisconnectionTask(_conn));
+        _runner.setTask("create", new ConnectionTask(_factory, _conn));
+        _runner.setTask("send", new SendingTask(_conn));
+        _runner.setTask("close", new DisconnectionTask(_conn));
         _executor.execute(_runner);
         _executor.shutdown();
         start();
@@ -61,12 +61,7 @@ public class WebSocket extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, String rawArgs, CallbackContext ctx) {
-        try {
-            _runner.getTaskQueue().put(new TaskBean(action, rawArgs, ctx));
-        } catch (InterruptedException e) {
-            return false;
-        }
-        return true;
+        return _runner.addTaskQueue(new TaskBean(action, rawArgs, ctx));
     };
 
     /**

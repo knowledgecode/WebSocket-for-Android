@@ -41,12 +41,17 @@ class TaskRunner implements Runnable {
         _map = new HashMap<String, Task>();
     }
 
-    public void addTask(String action, Task task) {
+    public void setTask(String action, Task task) {
         _map.put(action, task);
     }
 
-    public BlockingQueue<TaskBean> getTaskQueue() {
-        return _queue;
+    public boolean addTaskQueue(TaskBean bean) {
+        try {
+            _queue.put(bean);
+        } catch (InterruptedException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override
