@@ -18,6 +18,9 @@
  */
 package com.knowledgecode.cordova.websocket;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -32,52 +35,45 @@ import android.util.SparseArray;
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  *
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.3
+ * @version 0.9.0
  */
 public class WebSocket extends CordovaPlugin {
 
     private WebSocketClientFactory _factory;
     private SparseArray<Connection> _conn;
-    private ConnectionTask _create;
-    private SendingTask _send;
-    private DisconnectionTask _close;
+    private ExecutorService _executor;
+    private TaskRunner _runner;
 
     @Override
-    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+    public void initialize(CordovaInterface cordova, final CordovaWebView webView) {
         super.initialize(cordova, webView);
         _factory = new WebSocketClientFactory();
         _conn = new SparseArray<Connection>();
-        _create = new ConnectionTask(_factory, _conn);
-        _send = new SendingTask(_conn);
-        _close = new DisconnectionTask(_conn);
-        try {
-            start();
-        } catch (Exception e) {
-        }
+        _executor = Executors.newSingleThreadExecutor();
+        _runner = new TaskRunner();
+        _runner.setTask("create", new ConnectionTask(_factory, _conn));
+        _runner.setTask("send", new SendingTask(_conn));
+        _runner.setTask("close", new DisconnectionTask(_conn));
+        _executor.execute(_runner);
+        _executor.shutdown();
+        start();
     }
 
     @Override
     public boolean execute(String action, String rawArgs, CallbackContext ctx) {
-        if ("send".equals(action)) {
-            cordova.getThreadPool().execute(new TaskRunner(_send, rawArgs, ctx));
-        } else if ("create".equals(action)) {
-            cordova.getThreadPool().execute(new TaskRunner(_create, rawArgs, ctx));
-        } else if ("close".equals(action)) {
-            cordova.getThreadPool().execute(new TaskRunner(_close, rawArgs, ctx));
-        } else {
-            return false;
-        }
-        return true;
+        return _runner.addTaskQueue(new TaskBean(action, rawArgs, ctx));
     };
 
     /**
      * Start WebSocketClientFactory.
      *
      * @return WebSocket
-     * @throws Exception
      */
-    private WebSocket start() throws Exception {
-        _factory.start();
+    private WebSocket start() {
+        try {
+            _factory.start();
+        } catch (Exception e) {
+        }
         return this;
     }
 
@@ -85,9 +81,8 @@ public class WebSocket extends CordovaPlugin {
      * Stop WebSocketClientFactory.
      *
      * @return WebSocket
-     * @throws Exception
      */
-    private WebSocket stop() throws Exception {
+    private WebSocket stop() {
         if (_conn != null) {
             for (int i = 0; i < _conn.size(); i++) {
                 int key = _conn.keyAt(i);
@@ -98,27 +93,27 @@ public class WebSocket extends CordovaPlugin {
             }
             _conn.clear();
         }
-        _factory.stop();
+        try {
+            _factory.stop();
+        } catch (Exception e) {
+        }
         return this;
     }
 
     @Override
     public void onReset() {
-        try {
-            if (_factory != null) {
-                stop().start();
-            }
-        } catch (Exception e) {
+        if (_factory != null) {
+            stop().start();
         }
     }
 
     @Override
     public void onDestroy() {
-        try {
-            stop();
-        } catch (Exception e) {
-        }
+        stop();
         _conn = null;
+        _executor.shutdownNow();
+        _executor = null;
+        _runner = null;
         _factory.destroy();
         _factory = null;
     }

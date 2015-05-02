@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-/*jslint browser: true, nomen: true, plusplus: true */
+/*eslint complexity: 0 no-mixed-requires: 0 */
 /*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.8.3
+ * @version 0.9.0
  */
 (function (window) {
     'use strict';
@@ -85,19 +84,13 @@
             }
             r = new window.FileReader();
             r.onload = function () {
-                onComplete(this.result.substring(this.result.indexOf(',') + 1));
+                onComplete(this.result);
             };
             r.readAsDataURL(blob);
         },
         stringToBinary = function (data, binaryType) {
-            var i, len, array;
+            var i, len = data.length, array = new window.Uint8Array(len);
 
-            if (binaryType === 'text') {
-                return data;
-            }
-            data = window.atob(data);
-            len = data.length;
-            array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
@@ -190,7 +183,7 @@
             }
 
             this.url = url;
-            this.binaryType = Blob ? 'blob' : window.ArrayBuffer ? 'arraybuffer' : 'text';
+            this.binaryType = Blob ? 'blob' : 'arraybuffer';
             this.readyState = 0;
             this.bufferedAmount = 0;
             this.onopen = null;
@@ -260,9 +253,9 @@
                     }
                     that.dispatchEvent(evt);
                 });
-            }, 'WebSocket', 'create', [identifier++, url, protocols, WebSocket.pluginOptions || {}]);
+            }, 'WebSocket', 'create', [identifier++, url, protocols, location.origin, navigator.userAgent, WebSocket.pluginOptions || {}]);
         },
-        ver = navigator.userAgent.match(/Android (\d+\.\d+)/);
+        ver = /Chrome\/(\d+)/.exec(navigator.userAgent);
 
     WebSocketPrototype.prototype = new EventTarget();
     WebSocketPrototype.prototype.constructor = WebSocketPrototype;
@@ -272,7 +265,7 @@
     module.exports = WebSocket;
     window.addEventListener('message', taskQueue.listener, true);
 
-    if (ver && parseFloat(ver[1]) < 4.4) {
+    if (!ver || parseInt(ver[1], 10) < 30) {
         BuiltinWebSocket = undefined;
     }
 }(this));

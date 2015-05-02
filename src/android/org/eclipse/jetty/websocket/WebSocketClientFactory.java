@@ -46,13 +46,14 @@ import org.eclipse.jetty.io.nio.AsyncConnection;
 import org.eclipse.jetty.io.nio.SelectChannelEndPoint;
 import org.eclipse.jetty.io.nio.SelectorManager;
 import org.eclipse.jetty.io.nio.SslConnection;
-import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
 import org.eclipse.jetty.util.component.AggregateLifeCycle;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
+
+import android.util.Base64;
 
 /* ------------------------------------------------------------ */
 /**
@@ -368,7 +369,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
             byte[] bytes = new byte[16];
             new Random().nextBytes(bytes);
-            _key = new String(B64Code.encode(bytes));
+            _key = new String(Base64.encodeToString(bytes, Base64.NO_WRAP));
 
             Buffers buffers = new SimpleBuffers(_buffers.getBuffer(), null);
             _parser = new HttpParser(buffers, _endp, new HttpParser.EventHandler()
@@ -423,20 +424,61 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
                 StringBuilder request = new StringBuilder(512);
                 request.append("GET ").append(path).append(" HTTP/1.1\r\n")
-                .append("Host: ").append(_future.getURI().getHost()).append(":")
-                .append(_future.getURI().getPort()).append("\r\n")
-                .append("Upgrade: websocket\r\n")
-                .append("Connection: Upgrade\r\n")
-                .append("Sec-WebSocket-Key: ")
-                .append(_key).append("\r\n");
+                .append("Host: ").append(_future.getURI().getHost()).append(":");
+
+                int port = _future.getURI().getPort();
+                if (port <= 0)
+                {
+                    // fix it
+                    String scheme = _future.getURI().getScheme();
+
+                    if ("ws".equalsIgnoreCase(scheme))
+                    {
+                        port = 80;
+                    }
+                    else if ("wss".equalsIgnoreCase(scheme))
+                    {
+                        port = 443;
+                    }
+                    else
+                    {
+                        throw new RuntimeException("No valid port provided for scheme [" + scheme + "]");
+                    }
+                }
+
+                request.append(port).append("\r\n");
+
+                request.append("Upgrade: websocket\r\n")
+                .append("Connection: Upgrade\r\n");
 
                 if (origin != null)
                     request.append("Origin: ").append(origin).append("\r\n");
 
-                request.append("Sec-WebSocket-Version: ").append(WebSocketConnectionRFC6455.VERSION).append("\r\n");
-
                 if (_future.getProtocol() != null)
                     request.append("Sec-WebSocket-Protocol: ").append(_future.getProtocol()).append("\r\n");
+
+                /**
+                 * append pragma
+                 * @author KNOWLEDGECODE
+                 */
+                request.append("pragma: no-cache\r\n");
+
+                /**
+                 * append cache-control
+                 * @author KNOWLEDGECODE
+                 */
+                request.append("cache-control: no-cache\r\n");
+
+                request.append("Sec-WebSocket-Key: ").append(_key).append("\r\n");
+
+                request.append("Sec-WebSocket-Version: ").append(WebSocketConnectionRFC6455.VERSION).append("\r\n");
+
+                /**
+                 * append user-agent
+                 * @author KNOWLEDGECODE
+                 */
+                if (_future.getAgent() != null)
+                    request.append("user-agent: ").append(_future.getAgent()).append("\r\n");
 
                 Map<String, String> cookies = _future.getCookies();
                 if (cookies != null && cookies.size() > 0)
@@ -453,7 +495,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
                 _handshake=new ByteArrayBuffer(request.toString(), false);
             }
-            
+
             // TODO extensions
 
             try

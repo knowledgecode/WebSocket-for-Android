@@ -53,7 +53,7 @@ class SendingTask implements Task {
 
             if (conn != null) {
                 if (binaryString) {
-                    byte[] binary = Base64.decode(data, Base64.NO_WRAP);
+                    byte[] binary = Base64.decode(data.substring(data.indexOf(',') + 1), Base64.NO_WRAP);
                     conn.sendMessage(binary, 0, binary.length);
                 } else {
                     conn.sendMessage(data);

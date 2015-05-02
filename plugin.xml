@@ -2,8 +2,8 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
-  id="com.knowledgecode.cordova.websocket"
-  version="0.8.3">
+  id="cordova-plugin-websocket"
+  version="0.9.0">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
@@ -28,10 +28,10 @@
       <uses-permission android:name="android.permission.INTERNET" />
     </config-file>
 
-    <source-file src="src/android/com/knowledgecode/cordova/websocket/AbstractWebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/ConnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/DisconnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/SendingTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
+    <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskBean.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskRunner.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocketGenerator.java" target-dir="src/com/knowledgecode/cordova/websocket" />
@@ -75,7 +75,6 @@
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectChannelEndPoint.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectorManager.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SslConnection.java" target-dir="src/org/eclipse/jetty/io/nio" />
-    <source-file src="src/android/org/eclipse/jetty/util/B64Code.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/BlockingArrayQueue.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/DateCache.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/IO.java" target-dir="src/org/eclipse/jetty/util" />
@@ -89,8 +88,6 @@
     <source-file src="src/android/org/eclipse/jetty/util/thread/Timeout.java" target-dir="src/org/eclipse/jetty/util/thread" />
     <source-file src="src/android/org/eclipse/jetty/util/TypeUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/URIUtil.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/Utf8Appendable.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/Utf8StringBuilder.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AbstractLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AggregateLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />

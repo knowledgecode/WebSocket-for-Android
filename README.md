@@ -1,17 +1,17 @@
-# WebSocket for Android
+# WebSocket for Android [![GitHub version](https://badge.fury.io/gh/knowledgecode%2FWebSocket-for-Android.svg)](http://badge.fury.io/gh/knowledgecode%2FWebSocket-for-Android)
 WebSocket for Android is a Cordova plugin that allows WebSockets (RFC 6455) to be used on Android.  
-This is using [Jetty 8](https://github.com/eclipse/jetty.project/tree/jetty-8) under the terms of the Apache License v2.0.  
+This is based on [Jetty 8](https://github.com/eclipse/jetty.project/tree/jetty-8) under the terms of the Apache License v2.0.  
 
 ## Requirements
- - Android 2.2 or later (recommended 4.1 or later)  
- - Apache Cordova Android 3.0.0 or later or compatible framework  
+ - Android 2.3 or later (recommended 4.1 or later)  
+ - `cordova-android@3.0.0` or later or compatible framework  
+ - `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist` (since `cordova-android@4.0.0`)  
 
-The plugin for Cordova 2.x, [see here](https://github.com/knowledgecode/WebSocket-for-Android/tree/2.x).  
+The plugin for Cordova 2.x can be found [here](https://github.com/knowledgecode/WebSocket-for-Android/tree/2.x).  
 
 ## Supported Features
 | version        | WS protocol | WSS protocol | text message | binary message |
 |:--------------:|:-----------:|:------------:|:------------:|:--------------:|
-| 2.2 (API 8)    | ✓           |              | ✓            |                |
 | 2.3.3 (API 10) | ✓           | ✓            | ✓            |                |
 | 4.0 (API 14)   | ✓           | ✓            | ✓            | ✓              |
 | 4.0.3 (API 15) | ✓           | ✓            | ✓            | ✓              |
@@ -20,59 +20,54 @@ The plugin for Cordova 2.x, [see here](https://github.com/knowledgecode/WebSocke
 | 4.3.1 (API 18) | ✓           | ✓            | ✓            | ✓              |
 | 4.4.2 (API 19) | -           | -            | -            | -              |
 | 5.0.1 (API 21) | -           | -            | -            | -              |
+| 5.1.1 (API 22) | -           | -            | -            | -              |
 
 #### Notes
- - The WSS protocol is now available on 2.3 or later (SSLv3 is not supported. TLS only.).  
- - 3.x devices are not supported (maybe work, but not tested).  
- - The WebView has officially supported WebSockets since Android 4.4. Therefore this plugin is **NOT** used on them by default.  
- - If target Android 5.0, would be better to build with Cordova Android 3.7.1 or later.  
+ - WSS protocol is only supported TLS. SSLv3 is not.  
+ - Android 3.x (Honeycomb) are not supported (maybe work, but not tested).  
+ - A new WebView based on Chromium supports WebSockets. Specifically Android 4.4 (KitKat) or later support them, so this plugin is **NOT** used on them by default.  
+ - This plugin can be used [Crosswalk](https://crosswalk-project.org/) together in `cordova-android@4.0.0`. In this case also this is not used by default because it supports WebSockets.  
+ - If target Android 5.x (Lolipop), would be better to build with `cordova-android@3.7.1` or later.  
 
-## Installing
-Use Cordova Command-Line Interface (CLI) :  
+## Installation
+Use Cordova Command-Line Interface (CLI):
 ```sh
-$ cordova plugin add com.knowledgecode.cordova.websocket
+$ cordova plugin add cordova-plugin-websocket
 ```
-or  
+Can also install this from the GitHub repository:  
 ```sh
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
-If you are developing the iOS version in parallel, this plugin will be also installed there:  
-```sh
-$ cordova plugin add com.knowledgecode.cordova.websocket
-Fetching plugin "com.knowledgecode.cordova.websocket" via plugin registry
-Installing "com.knowledgecode.cordova.websocket" for android
-Installing "com.knowledgecode.cordova.websocket" for ios
-```
-This is a feature of CLI. There are no tangible ill effects. If you want to avoid this thing, use Cordova Plugman:
 
-```sh
-$ plugman install --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
-Fetching plugin "com.knowledgecode.cordova.websocket" via plugin registry
-npm http GET http://registry.cordova.io/com.knowledgecode.cordova.websocket
-npm http 200 http://registry.cordova.io/com.knowledgecode.cordova.websocket
-Installing "com.knowledgecode.cordova.websocket" for android
+#### Caveats
+Previous plugin id `com.knowledgecode.cordova.websocket` is deprecated. It will be installed old version of this if use it.  
+
+#### Setting a Content-Security-Policy (CSP)
+`cordova-android@4.0.0` supports SCP. In order to permit WebSocket access using `cordova-plugin-whitelist`, append `connect-src` directive in `index.html`:
+```html
+connect-src ws://example.com wss://example.com
 ```
-### Upgrading from previous versions
-Just remove and reinstall:  
+For example:
+```html
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; connect-src ws://example.com wss://example.com">
+```
+
+## Upgrading from previous versions
+Just remove and re-install:  
+```sh
+$ cordova plugin remove cordova-plugin-websocket
+$ cordova plugin add cordova-plugin-websocket
+```
+If using v0.8.x or earlier, the plugin id is different:
 ```sh
 $ cordova plugin remove com.knowledgecode.cordova.websocket
-$ cordova plugin add com.knowledgecode.cordova.websocket
+$ cordova plugin add cordova-plugin-websocket
 ```
-or  
-```sh
-$ cordova plugin remove com.knowledgecode.cordova.websocket
-$ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
-```
-or
-```sh
-$ plugman uninstall --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
-$ plugman install --platform android --project ./platforms/android --plugins_dir ./plugins --plugin com.knowledgecode.cordova.websocket
-```
-#### BUILD FAILED ?
-Delete all files in ./platforms/android/ant-build/. These are cache.
+Also will need to install `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist`.
 
-#### Caution
-When install this plugin, it adds `INTERNET` permission to `AndroidManifest.xml`. If remove this plugin, the permission is also removed at the same time even if it is required for other plugins.  
+#### Caveats
+When install this plugin, it adds `INTERNET` permission to `platforms/android/AndroidManifest.xml`. If remove this plugin, the permission is also removed at the same time even if it is required for other plugins.  
 
 ## Usage
 ### *WebSocket(url[, protocols])*
@@ -102,17 +97,24 @@ document.addEventListener('deviceready', function () {
 }, false);
 ```
 #### Options
-This plugin has the following options. All these parameters are optional. Of course these don't affect the native WebSocket.  
+This plugin has the following options. All these parameters are optional. Of course these don't affect native WebSocket.  
 
-| key                  | default value |
-|:---------------------|:-------------:|
-| origin               | (empty)       |
-| maxConnectTime       | 75000         |
-| override             | false         |
+| key                  | default value        | supported version        |
+|:---------------------|:---------------------|:-------------------------|
+| origin               | file:// (usually)    | v0.3.0 ~                 |
+| maxConnectTime       | 75000                | v0.4.0 ~                 |
+| maxTextMessageSize   | -1                   | v0.4.0 ~ (except v0.8.x) |
+| maxBinaryMessageSize | -1                   | v0.4.0 ~ (except v0.8.x) |
+| override             | false                | v0.8.0 ~                 |
+| agent                | (depends on devices) | v0.9.0 ~                 |
 
-`origin` is a value to set the request header field. `maxConnectTime` is time to wait for connection. `override` is a flag to override the native WebSocket on Android 4.4 or later devices. Set to true if want to force them to use the plugin. In most cases, it is slower than the native WebSocket.  
+`origin` is a value to set the request header field. Default value is usually `file://`. This is the same value as when using native WebSocket.  
+`maxConnectTime` is time to wait for connection. A unit is millisecond.  
+`maxTextMessageSize` and `maxBinaryMessageSize` are receivable maximum size from a server. Default value is -1 (unlimited. depends on heap size of devices). A unit is byte.  
+`override` is a flag to force WebView to use this plugin even if supports WebSockets. For example, in case that want to apply them these options. However will be slower than native WebSocket.  
+`agent` is user-agent to set the request header field. Default value depends on devices. This is the same value as when using native WebSocket.  
 
-If want to change these parameters, need to do before creating a instance:  
+If change these parameters, need to do before creating a instance:  
 ```javascript
 WebSocket.pluginOptions = {
     origin: 'http://example.com',
@@ -132,75 +134,7 @@ The size of message that can transmit and receive at a time depends on heap size
 Closes the WebSocket connection or connection attempt, if any.  
 
 ## Change Log
-#### 0.8.3
-* fixed that difference between packages and directories structure (thanks to @digigm)  
-
-#### 0.8.2
-* fixed the constructor error on 4.4 or later (thanks to @digigm)  
-
-#### 0.8.1
-* fixed the frame aggregation error (thanks to @Atsyn)  
-* fixed the binary transmission for the case of using the plugin on 4.4 or later  
-
-#### 0.8.0
-* performance tuning (about 5% to 15% faster than previous versions)  
-* deployed the sources of Jetty directly (instead the jar file)  
-* abolished the maxTextMessageSize/maxBinaryMessageSize options  
-* added the "override" option  
-* refactor  
-
-#### 0.7.0
-* resolved the issue of SSL on 4.0 and 2.3 (thanks to @agalazis and koush/AndroidAsync)  
-
-#### 0.6.3
-* fixed a bug of a receiving binary size  
-
-#### 0.6.2a
-* limit installation target to Android (thanks to @peli44)  
-
-#### 0.6.2
-* updated Jetty WebSocket library  
-
-#### 0.6.1
-* added escaping of special characters (thanks to @odbol)  
-
-#### 0.6.0
-* cookie support (thanks to @ericfong)  
-* removed a second argument from the send() method  
-
-#### 0.5.2
-* clobbered buggy websockets on 4.3 or lower (thanks to @rpastorvargas and @punj)  
-* bug fix  
-
-#### 0.5.1
-* bug fix  
-
-#### 0.5.0
-* change the way to set plugin options  
-* multiple subprotocol support  
-* readyState property support (thanks to @jrpereirajr)  
-
-#### 0.4.0
-* Cordova/Phonegap 3 support  
-* binary support  
-* event listener support  
-* more compliant with the WebSocket API requirements  
-* license change from MIT to Apache v2.0  
-
-#### 0.3.2
-* bug fix  
-
-#### 0.3.1
-* bug fix  
-
-#### 0.3.0
-* origin support (thanks to @rgillan)  
-
-#### 0.2.0
-* comply with the WebSocket API requirements  
-
-#### 0.1.0
-* first release  
+See [CHANGELOG.md](https://github.com/knowledgecode/WebSocket-for-Android/blob/master/CHANGELOG.md).
 
 ## License
 This plugin is available under the terms of the Apache License Version 2.0.

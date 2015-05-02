@@ -31,7 +31,6 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.eclipse.jetty.util.B64Code;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.Loader;
 import org.eclipse.jetty.util.StringUtil;
@@ -39,9 +38,8 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
-
 /* ------------------------------------------------------------ */
-/** 
+/**g
  * Abstract resource class.
  */
 public abstract class Resource implements ResourceFactory
@@ -66,7 +64,7 @@ public abstract class Resource implements ResourceFactory
     {
         return __defaultUseCaches;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Construct a resource from a uri.
      * @param uri A URI.
@@ -78,7 +76,7 @@ public abstract class Resource implements ResourceFactory
     {
         return newResource(uri.toURL());
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Construct a resource from a url.
      * @param url A URL.
@@ -90,8 +88,8 @@ public abstract class Resource implements ResourceFactory
     {
         return newResource(url, __defaultUseCaches);
     }
-    
-    /* ------------------------------------------------------------ */   
+
+    /* ------------------------------------------------------------ */
     /**
      * Construct a resource from a url.
      * @param url the url for which to make the resource
@@ -129,8 +127,6 @@ public abstract class Resource implements ResourceFactory
         return new URLResource(url,null,useCaches);
     }
 
-    
-    
     /* ------------------------------------------------------------ */
     /** Construct a resource from a string.
      * @param resource A URL or filename.
@@ -141,14 +137,14 @@ public abstract class Resource implements ResourceFactory
     {
         return newResource(resource, __defaultUseCaches);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Construct a resource from a string.
      * @param resource A URL or filename.
      * @param useCaches controls URLConnection caching
      * @return A Resource object.
      */
-    public static Resource newResource (String resource, boolean useCaches)       
+    public static Resource newResource (String resource, boolean useCaches)
     throws MalformedURLException, IOException
     {
         URL url=null;
@@ -168,10 +164,10 @@ public abstract class Resource implements ResourceFactory
                     // It's a file.
                     if (resource.startsWith("./"))
                         resource=resource.substring(2);
-                    
+
                     File file=new File(resource).getCanonicalFile();
-                    url=Resource.toURL(file);            
-                    
+                    url=Resource.toURL(file);
+
                     URLConnection connection=url.openConnection();
                     connection.setUseCaches(useCaches);
                     return new FileResource(url,connection,file);
@@ -208,7 +204,7 @@ public abstract class Resource implements ResourceFactory
     /** Construct a system resource from a string.
      * The resource is tried as classloader resource before being
      * treated as a normal resource.
-     * @param resource Resource as string representation 
+     * @param resource Resource as string representation
      * @return The new Resource
      * @throws IOException Problem accessing resource.
      */
@@ -244,17 +240,17 @@ public abstract class Resource implements ResourceFactory
                     url=loader.getResource(resource.substring(1));
             }
         }
-        
+
         if (url==null)
         {
             url=ClassLoader.getSystemResource(resource);
             if (url==null && resource.startsWith("/"))
                 url=ClassLoader.getSystemResource(resource.substring(1));
         }
-        
+
         if (url==null)
             return null;
-        
+
         return newResource(url);
     }
 
@@ -274,21 +270,21 @@ public abstract class Resource implements ResourceFactory
      * Unlike {@link ClassLoader#getSystemResource(String)} this method does not check for normal resources.
      * @param name The relative name of the resource
      * @param useCaches True if URL caches are to be used.
-     * @param checkParents True if forced searching of parent Classloaders is performed to work around 
+     * @param checkParents True if forced searching of parent Classloaders is performed to work around
      * loaders with inverted priorities
      * @return Resource or null
      */
     public static Resource newClassPathResource(String name,boolean useCaches,boolean checkParents)
     {
         URL url=Resource.class.getResource(name);
-        
+
         if (url==null)
             url=Loader.getResource(Resource.class,name,checkParents);
         if (url==null)
             return null;
         return newResource(url,useCaches);
     }
-    
+
     /* ------------------------------------------------------------ */
     public static boolean isContainedIn (Resource r, Resource containingResource) throws MalformedURLException
     {
@@ -301,23 +297,23 @@ public abstract class Resource implements ResourceFactory
     {
         release();
     }
-    
+
     /* ------------------------------------------------------------ */
     public abstract boolean isContainedIn (Resource r) throws MalformedURLException;
-    
-    
+
+
     /* ------------------------------------------------------------ */
     /** Release any temporary resources held by the resource.
      */
     public abstract void release();
-    
+
 
     /* ------------------------------------------------------------ */
     /**
      * Returns true if the respresened resource exists.
      */
     public abstract boolean exists();
-    
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -339,7 +335,7 @@ public abstract class Resource implements ResourceFactory
      * Return the length of the resource
      */
     public abstract long length();
-    
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -362,7 +358,7 @@ public abstract class Resource implements ResourceFactory
             throw new RuntimeException(e);
         }
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -371,14 +367,14 @@ public abstract class Resource implements ResourceFactory
      */
     public abstract File getFile()
         throws IOException;
-    
+
 
     /* ------------------------------------------------------------ */
     /**
      * Returns the name of the resource
      */
     public abstract String getName();
-    
+
 
     /* ------------------------------------------------------------ */
     /**
@@ -393,21 +389,21 @@ public abstract class Resource implements ResourceFactory
      */
     public abstract OutputStream getOutputStream()
         throws java.io.IOException, SecurityException;
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Deletes the given resource
      */
     public abstract boolean delete()
         throws SecurityException;
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Rename the given resource
      */
     public abstract boolean renameTo( Resource dest)
         throws SecurityException;
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns a list of resource names contained in the given resource
@@ -420,7 +416,7 @@ public abstract class Resource implements ResourceFactory
      * Returns the resource contained inside the current resource with the
      * given name.
      * @param path The path segment to add, which should be encoded by the
-     * encode method. 
+     * encode method.
      */
     public abstract Resource addPath(String path)
         throws IOException,MalformedURLException;
@@ -448,14 +444,14 @@ public abstract class Resource implements ResourceFactory
     /* ------------------------------------------------------------ */
     /** Encode according to this resource type.
      * The default implementation calls URI.encodePath(uri)
-     * @param uri 
+     * @param uri
      * @return String encoded for this resource type.
      */
     public String encode(String uri)
     {
         return URIUtil.encodePath(uri);
     }
-        
+
     /* ------------------------------------------------------------ */
     public Object getAssociate()
     {
@@ -467,7 +463,7 @@ public abstract class Resource implements ResourceFactory
     {
         _associate=o;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return The canonical Alias of this resource or null if none.
@@ -476,7 +472,7 @@ public abstract class Resource implements ResourceFactory
     {
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the resource list as a HTML directory listing.
      * @param base The base URL
@@ -489,12 +485,12 @@ public abstract class Resource implements ResourceFactory
         base=URIUtil.canonicalPath(base);
         if (base==null || !isDirectory())
             return null;
-        
+
         String[] ls = list();
         if (ls==null)
             return null;
         Arrays.sort(ls);
-        
+
         String decodedBase = URIUtil.decodePath(base);
         String title = "Directory: "+deTag(decodedBase);
 
@@ -505,30 +501,30 @@ public abstract class Resource implements ResourceFactory
         buf.append("</TITLE></HEAD><BODY>\n<H1>");
         buf.append(title);
         buf.append("</H1>\n<TABLE BORDER=0>\n");
-        
+
         if (parent)
         {
             buf.append("<TR><TD><A HREF=\"");
             buf.append(URIUtil.addPaths(base,"../"));
             buf.append("\">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
         }
-        
+
         String encodedBase = hrefEncodeURI(base);
-        
+
         DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
                                                        DateFormat.MEDIUM);
         for (int i=0 ; i< ls.length ; i++)
         {
             Resource item = addPath(ls[i]);
-            
+
             buf.append("\n<TR><TD><A HREF=\"");
             String path=URIUtil.addPaths(encodedBase,URIUtil.encodePath(ls[i]));
-            
+
             buf.append(path);
-            
+
             if (item.isDirectory() && !path.endsWith("/"))
                 buf.append(URIUtil.SLASH);
-            
+
             // URIUtil.encodePath(buf,path);
             buf.append("\">");
             buf.append(deTag(ls[i]));
@@ -540,22 +536,22 @@ public abstract class Resource implements ResourceFactory
             buf.append("</TD></TR>");
         }
         buf.append("</TABLE>\n");
-	buf.append("</BODY></HTML>\n");
-        
+        buf.append("</BODY></HTML>\n");
+
         return buf.toString();
     }
-    
+
     /**
      * Encode any characters that could break the URI string in an HREF.
      * Such as <a href="/path/to;<script>Window.alert("XSS"+'%20'+"here");</script>">Link</a>
-     * 
+     *
      * The above example would parse incorrectly on various browsers as the "<" or '"' characters
      * would end the href attribute value string prematurely.
-     * 
+     *
      * @param raw the raw text to encode.
      * @return the defanged text.
      */
-    private static String hrefEncodeURI(String raw) 
+    private static String hrefEncodeURI(String raw)
     {
         StringBuffer buf = null;
 
@@ -578,7 +574,7 @@ public abstract class Resource implements ResourceFactory
 
         for (int i=0;i<raw.length();i++)
         {
-            char c=raw.charAt(i);       
+            char c=raw.charAt(i);
             switch(c)
             {
               case '"':
@@ -601,15 +597,15 @@ public abstract class Resource implements ResourceFactory
 
         return buf.toString();
     }
-    
-    private static String deTag(String raw) 
+
+    private static String deTag(String raw)
     {
         return StringUtil.replace( StringUtil.replace(raw,"<","&lt;"), ">", "&gt;");
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param out 
+    /**
+     * @param out
      * @param start First byte to write
      * @param count Bytes to write or -1 for all of them.
      */
@@ -629,8 +625,8 @@ public abstract class Resource implements ResourceFactory
         {
             in.close();
         }
-    }    
-    
+    }
+
     /* ------------------------------------------------------------ */
     public void copyTo(File destination)
         throws IOException
@@ -641,35 +637,10 @@ public abstract class Resource implements ResourceFactory
     }
 
     /* ------------------------------------------------------------ */
-    public String getWeakETag()
-    {
-        try
-        {
-            StringBuilder b = new StringBuilder(32);
-            b.append("W/\"");
-            
-            String name=getName();
-            int length=name.length();
-            long lhash=0;
-            for (int i=0; i<length;i++)
-                lhash=31*lhash+name.charAt(i);
-            
-            B64Code.encode(lastModified()^lhash,b);
-            B64Code.encode(length()^lhash,b);
-            b.append('"');
-            return b.toString();
-        } 
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Generate a properly encoded URL from a {@link File} instance.
-     * @param file Target file. 
+     * @param file Target file.
      * @return URL of the target file.
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
      */
     public static URL toURL(File file) throws MalformedURLException
     {

@@ -19,7 +19,6 @@
 package com.knowledgecode.cordova.websocket;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +44,8 @@ import android.webkit.CookieManager;
 class ConnectionTask implements Task {
 
     private static final long MAX_CONNECT_TIME = 75000;
+    private static final int MAX_TEXT_MESSAGE_SIZE = -1;
+    private static final int MAX_BINARY_MESSAGE_SIZE = -1;
 
     private final WebSocketClientFactory _factory;
     private final SparseArray<Connection> _map;
@@ -58,28 +59,6 @@ class ConnectionTask implements Task {
     public ConnectionTask(WebSocketClientFactory factory, SparseArray<Connection> map) {
         _factory = factory;
         _map = map;
-    }
-
-    /**
-     * Complement default port number.
-     *
-     * @param url
-     * @return URI
-     * @throws URISyntaxException
-     */
-    private static URI complementPort(String url) throws URISyntaxException {
-        URI uri = new URI(url);
-        int port = uri.getPort();
-
-        if (port < 0) {
-            if ("ws".equals(uri.getScheme())) {
-                port = 80;
-            } else if ("wss".equals(uri.getScheme())) {
-                port = 443;
-            }
-            uri = new URI(uri.getScheme(), "", uri.getHost(), port, uri.getPath(), uri.getQuery(), "");
-        }
-        return uri;
     }
 
     /**
@@ -108,23 +87,24 @@ class ConnectionTask implements Task {
             WebSocketClient client = _factory.newWebSocketClient();
 
             int id = args.getInt(0);
-            String url = args.getString(1);
+            URI uri = new URI(args.getString(1));
             String protocol = args.getString(2);
-            JSONObject options = args.getJSONObject(3);
-            String origin = options.optString("origin", "");
+            JSONObject options = args.getJSONObject(5);
+            String origin = options.optString("origin", args.getString(3));
+            String agent = options.optString("agent", args.getString(4));
             long maxConnectTime =  options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
-            URI uri = complementPort(url);
-
+            client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));
+            client.setMaxBinaryMessageSize(options.optInt("maxBinaryMessageSize", MAX_BINARY_MESSAGE_SIZE));
             if (protocol.length() > 0) {
                 client.setProtocol(protocol);
             }
             if (origin.length() > 0) {
                 client.setOrigin(origin);
             }
-            client.setMaxTextMessageSize(Integer.MAX_VALUE);
-            client.setMaxBinaryMessageSize(-1);
-
+            if (agent.length() > 0) {
+                client.setAgent(agent);
+            }
             setCookie(client.getCookies(), uri.getHost());
 
             WebSocketGenerator gen = new WebSocketGenerator(id, ctx);
