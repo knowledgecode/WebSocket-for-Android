@@ -98,14 +98,15 @@ document.addEventListener('deviceready', function () {
 ```
 #### Options
 This plugin has the following options. All these parameters are optional. Of course these don't affect native WebSocket.  
-| key                  | default value          | supported version               |
-|:---------------------|:-----------------------|:--------------------------------|
-| origin               | file\:\/\/ \(usually\) | v0\.3\.0 \~                     |
-| maxConnectTime       | 75000                  | v0\.4\.0 \~                     |
-| maxTextMessageSize   | \-1                    | v0\.4\.0 \~ \(except v0\.8\.x\) |
-| maxBinaryMessageSize | \-1                    | v0\.4\.0 \~ \(except v0\.8\.x\) |
-| override             | false                  | v0\.8\.0 \~                     |
-| agent                | \(depends on devices\) | v0\.9\.0 \~                     |
+
+| key                  | default value        | supported version        |
+|:---------------------|:---------------------|:-------------------------|
+| origin               | file:// (usually)    | v0.3.0 ~                 |
+| maxConnectTime       | 75000                | v0.4.0 ~                 |
+| maxTextMessageSize   | -1                   | v0.4.0 ~ (except v0.8.x) |
+| maxBinaryMessageSize | -1                   | v0.4.0 ~ (except v0.8.x) |
+| override             | false                | v0.8.0 ~                 |
+| agent                | (depends on devices) | v0.9.0 ~                 |
 
 `origin` is a value to set the request header field. Default value is usually `file://`. This is the same value as when using native WebSocket.  
 `maxConnectTime` is time to wait for connection. A unit is millisecond.  
