@@ -35,7 +35,7 @@ import android.util.SparseArray;
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  *
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.9.0
+ * @version 0.9.1
  */
 public class WebSocket extends CordovaPlugin {
 
