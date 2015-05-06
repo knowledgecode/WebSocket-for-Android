@@ -5,7 +5,7 @@ This is based on [Jetty 8](https://github.com/eclipse/jetty.project/tree/jetty-8
 ## Requirements
  - Android 2.3 or later (recommended 4.1 or later)  
  - `cordova-android@3.0.0` or later or compatible framework  
- - `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist` (since `cordova-android@4.0.0`)  
+ - `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist` if using `cordova-android@4.0.0` or later  
 
 The plugin for Cordova 2.x can be found [here](https://github.com/knowledgecode/WebSocket-for-Android/tree/2.x).  
 
@@ -27,20 +27,27 @@ The plugin for Cordova 2.x can be found [here](https://github.com/knowledgecode/
  - Android 3.x (Honeycomb) are not supported (maybe work, but not tested).  
  - A new WebView based on Chromium supports WebSockets. Specifically Android 4.4 (KitKat) or later support them, so this plugin is **NOT** used on them by default.  
  - This plugin can be used [Crosswalk](https://crosswalk-project.org/) together in `cordova-android@4.0.0`. In this case also this is not used by default because it supports WebSockets.  
- - If target Android 5.x (Lolipop), would be better to build with `cordova-android@3.7.1` or later.  
+ - If include Android 5.x (Lollipop) as target, would be better to build with `cordova-android@3.7.1` or later.  
 
 ## Installation
-Use Cordova Command-Line Interface (CLI):
+Use Cordova Command-Line Interface (CLI). At first, check Cordova version:
+```sh
+$ cordova --version
+```
+If using 5.0.0 or later:
 ```sh
 $ cordova plugin add cordova-plugin-websocket
 ```
-Can also install this from the GitHub repository:  
+If using other old versions:
 ```sh
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
 
 #### Caveats
-Previous plugin id `com.knowledgecode.cordova.websocket` is deprecated. It will be installed old version of this if use it.  
+Cordova core plugins have been moved to npm from Cordova plugins registry (CPR). This plugin has been moved as well. It will be **no longer updated** in CPR, but can still install it from there for now:
+```sh
+$ cordova plugin add com.knowledgecode.cordova.websocket
+```
 
 #### Setting a Content-Security-Policy (CSP)
 `cordova-android@4.0.0` supports SCP. In order to permit WebSocket access using `cordova-plugin-whitelist`, append `connect-src` directive in `index.html`:
@@ -54,17 +61,16 @@ For example:
 ```
 
 ## Upgrading from previous versions
-Just remove and re-install:  
+Check the plugin id:
 ```sh
-$ cordova plugin remove cordova-plugin-websocket
+$ cordova plugin
+```
+Remove and reinstall:
+```sh
+$ cordova plugin rm <PLUGIN ID>
 $ cordova plugin add cordova-plugin-websocket
 ```
-If using v0.8.x or earlier, the plugin id is different:
-```sh
-$ cordova plugin remove com.knowledgecode.cordova.websocket
-$ cordova plugin add cordova-plugin-websocket
-```
-Also will need to install `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist`.
+Also will need to install `cordova-plugin-whitelist` or `cordova-plugin-legacy-whitelist` if using `cordova-android@4.0.0`.
 
 #### Caveats
 When install this plugin, it adds `INTERNET` permission to `platforms/android/AndroidManifest.xml`. If remove this plugin, the permission is also removed at the same time even if it is required for other plugins.  
