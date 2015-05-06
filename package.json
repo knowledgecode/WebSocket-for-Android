@@ -1,9 +1,9 @@
 {
   "name": "cordova-plugin-websocket",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Cordova WebSocket Plugin for Android",
   "cordova": {
-    "id": "com.knowledgecode.cordova.websocket",
+    "id": "cordova-plugin-websocket",
     "platforms": [
       "android"
     ]
