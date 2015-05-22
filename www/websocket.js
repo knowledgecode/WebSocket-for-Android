@@ -198,51 +198,52 @@
             listeners[id] = {};
 
             exec(function (data) {
-                switch (data[0]) {
-                case 'O':
+                if (data instanceof ArrayBuffer) {
                     taskQueue.push(function () {
-                        var evt = createMessage('open');
-
-                        that.readyState = that.OPEN;
-                        that.protocol = data.substring(1);
-                        if (that.onopen) {
-                            that.onopen(evt);
-                        }
-                        that.dispatchEvent(evt);
-                    });
-                    break;
-                case 'T':
-                    taskQueue.push(function () {
-                        var evt = createMessage('message', data.substring(1), that.url);
+                        var evt = createMessage('message', data, that.url);
 
                         if (that.onmessage) {
                             that.onmessage(evt);
                         }
                         that.dispatchEvent(evt);
                     });
-                    break;
-                case 'B':
-                    taskQueue.push(function () {
-                        var evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+                } else {
+                    switch (data[0]) {
+                    case 'O':
+                        taskQueue.push(function () {
+                            var evt = createMessage('open');
 
-                        if (that.onmessage) {
-                            that.onmessage(evt);
-                        }
-                        that.dispatchEvent(evt);
-                    });
-                    break;
-                case 'C':
-                    taskQueue.push(function () {
-                        var evt = createMessage('close', data.substring(1));
+                            that.readyState = that.OPEN;
+                            that.protocol = data.substring(1);
+                            if (that.onopen) {
+                                that.onopen(evt);
+                            }
+                            that.dispatchEvent(evt);
+                        });
+                        break;
+                    case 'T':
+                        taskQueue.push(function () {
+                            var evt = createMessage('message', data.substring(1), that.url);
 
-                        that.readyState = that.CLOSED;
-                        if (that.onclose) {
-                            that.onclose(evt);
-                        }
-                        that.dispatchEvent(evt);
-                        delete listeners[that.__getId__()];
-                    });
-                    break;
+                            if (that.onmessage) {
+                                that.onmessage(evt);
+                            }
+                            that.dispatchEvent(evt);
+                        });
+                        break;
+                    case 'C':
+                        taskQueue.push(function () {
+                            var evt = createMessage('close', data.substring(1));
+
+                            that.readyState = that.CLOSED;
+                            if (that.onclose) {
+                                that.onclose(evt);
+                            }
+                            that.dispatchEvent(evt);
+                            delete listeners[that.__getId__()];
+                        });
+                        break;
+                    }
                 }
             }, function () {
                 taskQueue.push(function () {

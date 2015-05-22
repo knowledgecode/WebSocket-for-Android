@@ -18,7 +18,7 @@
  */
 package com.knowledgecode.cordova.websocket;
 
-import java.nio.charset.Charset;
+import java.util.Arrays;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
@@ -37,7 +37,6 @@ class WebSocketGenerator implements
 
     private final int _id;
     private final CallbackContext _ctx;
-    private final Charset _iso88591;
     private OnOpenListener _openListener;
     private OnCloseListener _closeListener;
 
@@ -50,7 +49,6 @@ class WebSocketGenerator implements
     public WebSocketGenerator(int id, CallbackContext ctx) {
         _id = id;
         _ctx = ctx;
-        _iso88591 = Charset.forName("ISO-8859-1");
         _openListener = new OnOpenListener() {
             @Override
             public void onOpen(int id, Connection conn) {
@@ -99,7 +97,8 @@ class WebSocketGenerator implements
 
     @Override
     public void onMessage(byte[] data, int offset, int length) {
-        sendCallback("B" + new String(data, _iso88591), true);
+        byte[] content = Arrays.copyOfRange(data, offset, offset+length);
+        sendCallback(content, true);
     }
 
     @Override
@@ -120,6 +119,20 @@ class WebSocketGenerator implements
     private void sendCallback(String callbackString, boolean keepCallback) {
         if (!_ctx.isFinished()) {
             PluginResult result = new PluginResult(Status.OK, callbackString);
+            result.setKeepCallback(keepCallback);
+            _ctx.sendPluginResult(result);
+        }
+    }
+
+    /**
+     * Send plugin result (ArrayBuffer)
+     *
+     * @param callbackBytes
+     * @param keepCallback
+     */
+    private void sendCallback(byte[] callbackBytes, boolean keepCallback) {
+        if (!_ctx.isFinished()) {
+            PluginResult result = new PluginResult(Status.OK, callbackBytes);
             result.setKeepCallback(keepCallback);
             _ctx.sendPluginResult(result);
         }
