@@ -25,7 +25,7 @@ The plugin for Cordova 2.x can be found [here](https://github.com/knowledgecode/
 #### Notes
  - WSS protocol is only supported TLS. SSLv3 is not.  
  - Android 3.x (Honeycomb) are not supported (maybe work, but not tested).  
- - A new WebView based on Chromium supports WebSockets. Specifically Android 4.4 (KitKat) or later support them, so this plugin is **NOT** used on them by default.  
+ - A new WebView based on Chromium supports WebSockets. Specifically Android 4.4 (KitKat) and later support them, so this plugin is **NOT** used on them by default.  
  - This plugin can be used [Crosswalk](https://crosswalk-project.org/) together in `cordova-android@4.0.0`. In this case also this is not used by default because it supports WebSockets.  
  - If include Android 5.x (Lollipop) as target, would be better to build with `cordova-android@3.7.1` or later.  
 
