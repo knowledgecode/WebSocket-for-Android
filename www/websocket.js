@@ -21,7 +21,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.9.1
+ * @version 0.9.2
  */
 (function (window) {
     'use strict';
@@ -89,8 +89,11 @@
             r.readAsDataURL(blob);
         },
         stringToBinary = function (data, binaryType) {
-            var i, len = data.length, array = new window.Uint8Array(len);
+            var i, len, array;
 
+            data = window.atob(data);
+            len = data.length;
+            array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }

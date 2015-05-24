@@ -1,4 +1,7 @@
 ## Change Log
+#### 0.9.2
+* fixed lack of trailing zeros (0x00) when receiving binary (thanks to @lemoncola)  
+
 #### 0.9.1
 * updated only documents  
 
