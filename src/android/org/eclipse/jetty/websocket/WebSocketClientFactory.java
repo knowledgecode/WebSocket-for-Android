@@ -69,6 +69,11 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 {
     private final static Logger __log = org.eclipse.jetty.util.log.Log.getLogger(WebSocketClientFactory.class.getName());
     private final static ByteArrayBuffer __ACCEPT = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Accept");
+    /**
+     * append protocol
+     * @author KNOWLEDGECODE
+     */
+    private final static ByteArrayBuffer __PROTOCOL = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Protocol");
     private final Queue<WebSocketConnection> connections = new ConcurrentLinkedQueue<WebSocketConnection>();
     private final SslContextFactory _sslContextFactory = new SslContextFactory();
     private final ThreadPool _threadPool;
@@ -358,6 +363,11 @@ public class WebSocketClientFactory extends AggregateLifeCycle
         private final String _key;
         private final HttpParser _parser;
         private String _accept;
+        /**
+         * append protocol
+         * @author KNOWLEDGECODE
+         */
+        private String _protocol;
         private String _error;
         private ByteArrayBuffer _handshake;
 
@@ -389,6 +399,12 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 {
                     if (__ACCEPT.equals(name))
                         _accept = value.toString();
+                    /**
+                     * append protocol
+                     * @author KNOWLEDGECODE
+                     */
+                    else if (__PROTOCOL.equals(name))
+                        _protocol = value.toString();
                 }
 
                 @Override // TODO simone says shouldn't be needed
@@ -565,7 +581,11 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                     _buffers,
                     System.currentTimeMillis(),
                     _future.getMaxIdleTime(),
-                    _future.getProtocol(),
+                    /**
+                     * append protocol
+                     * @author KNOWLEDGECODE
+                     */
+                    _protocol,
                     null,
                     WebSocketConnectionRFC6455.VERSION,
                     _future.getMaskGen());

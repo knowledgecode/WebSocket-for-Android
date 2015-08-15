@@ -172,14 +172,14 @@
                 break;
             case 2:
                 if (!Array.isArray(protocols)) {
-                    protocols = [String(protocols)];
+                    protocols = [protocols];
                 }
                 for (i = 0, len = protocols.length; i < len; i++) {
-                    if (!protocols[i].length) {
-                        throw new SyntaxError('Failed to construct \'WebSocket\': The subprotocol \'\' is invalid.');
+                    if (!/^[0-9A-Za-z!#\$%&'\*\+\-\.\^_`|~]+$/.test(protocols[i])) {
+                        throw new SyntaxError('Failed to construct \'WebSocket\': The subprotocol \'' + protocols[i] + '\' is invalid.');
                     }
                 }
-                protocols = len > 0 ? protocols.join() : '';
+                protocols = len ? protocols.join(', ') : '';
                 break;
             default:
                 throw new TypeError('Failed to construct \'WebSocket\': No matching constructor signature.');
