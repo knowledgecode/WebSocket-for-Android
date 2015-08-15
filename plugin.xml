@@ -93,11 +93,8 @@
     <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
-    <source-file src="src/android/org/eclipse/jetty/util/log/AbstractLogger.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Log.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Logger.java" target-dir="src/org/eclipse/jetty/util/log" />
-    <source-file src="src/android/org/eclipse/jetty/util/log/LoggerLog.java" target-dir="src/org/eclipse/jetty/util/log" />
-    <source-file src="src/android/org/eclipse/jetty/util/log/StdErrLog.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/BadResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/FileResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/JarFileResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
