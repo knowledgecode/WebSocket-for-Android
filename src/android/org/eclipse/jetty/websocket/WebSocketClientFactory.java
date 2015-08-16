@@ -585,7 +585,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                      * append protocol
                      * @author KNOWLEDGECODE
                      */
-                    _protocol == null ? _future.getProtocol() : _protocol,
+                    _protocol,
                     null,
                     WebSocketConnectionRFC6455.VERSION,
                     _future.getMaskGen());
