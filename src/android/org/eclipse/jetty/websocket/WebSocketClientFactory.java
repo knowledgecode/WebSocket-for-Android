@@ -23,10 +23,14 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.net.ssl.SSLEngine;
@@ -53,6 +57,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
 
+import android.text.TextUtils;
 import android.util.Base64;
 
 /* ------------------------------------------------------------ */
@@ -64,16 +69,15 @@ import android.util.Base64;
  * so it's lifecycle must be controlled externally.
  *
  * @see WebSocketClient
+ *
+ * modified by KNOWLEDGECODE
  */
 public class WebSocketClientFactory extends AggregateLifeCycle
 {
-    private final static Logger __log = org.eclipse.jetty.util.log.Log.getLogger(WebSocketClientFactory.class.getName());
-    private final static ByteArrayBuffer __ACCEPT = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Accept");
-    /**
-     * append protocol
-     * @author KNOWLEDGECODE
-     */
-    private final static ByteArrayBuffer __PROTOCOL = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Protocol");
+    private static final Logger __log = org.eclipse.jetty.util.log.Log.getLogger(WebSocketClientFactory.class.getName());
+    private static final ByteArrayBuffer __ACCEPT = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Accept");
+    private static final ByteArrayBuffer __PROTOCOL = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Protocol");
+    private static final ByteArrayBuffer __EXTENSIONS = new ByteArrayBuffer.CaseInsensitive("Sec-WebSocket-Extensions");
     private final Queue<WebSocketConnection> connections = new ConcurrentLinkedQueue<WebSocketConnection>();
     private final SslContextFactory _sslContextFactory = new SslContextFactory();
     private final ThreadPool _threadPool;
@@ -363,11 +367,8 @@ public class WebSocketClientFactory extends AggregateLifeCycle
         private final String _key;
         private final HttpParser _parser;
         private String _accept;
-        /**
-         * append protocol
-         * @author KNOWLEDGECODE
-         */
         private String _protocol;
+        private List<String> _extensions;
         private String _error;
         private ByteArrayBuffer _handshake;
 
@@ -380,6 +381,7 @@ public class WebSocketClientFactory extends AggregateLifeCycle
             byte[] bytes = new byte[16];
             new Random().nextBytes(bytes);
             _key = new String(Base64.encodeToString(bytes, Base64.NO_WRAP));
+            _extensions = new ArrayList<String>();
 
             Buffers buffers = new SimpleBuffers(_buffers.getBuffer(), null);
             _parser = new HttpParser(buffers, _endp, new HttpParser.EventHandler()
@@ -399,12 +401,11 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 {
                     if (__ACCEPT.equals(name))
                         _accept = value.toString();
-                    /**
-                     * append protocol
-                     * @author KNOWLEDGECODE
-                     */
                     else if (__PROTOCOL.equals(name))
                         _protocol = value.toString();
+                    else if (__EXTENSIONS.equals(name))
+                        for (String s : TextUtils.split(value.toString(), ","))
+                            _extensions.add(s.trim());
                 }
 
                 @Override // TODO simone says shouldn't be needed
@@ -423,6 +424,46 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                     _endp.close();
                 }
             });
+        }
+
+        private boolean initExtensions(List<Extension> extensions)
+        {
+            Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+            Set<String> s = new HashSet<String>();
+
+            for (String ext : (String[]) _extensions.toArray(new String[]{}))
+            {
+                Map<String, String> m = new HashMap<String, String>();
+                String key = null;
+
+                for (String p : TextUtils.split(ext, ";"))
+                {
+                    String[] pp = TextUtils.split(p.trim(), "=");
+                    m.put(pp[0].trim(), pp.length > 1 ? pp[1].trim() : "");
+                    if (key == null)
+                        key = pp[0].trim();
+                    if (!s.add(pp[0].trim()))
+                        return false;
+                }
+                map.put(key, m);
+            }
+            for (Extension extension : extensions)
+            {
+                Map<String, String> m = map.remove(extension.getName());
+                if (m != null)
+                {
+                    if (!extension.init(m))
+                        return false;
+                }
+                else
+                {
+                    extensions.remove(extension);
+                }
+            }
+            if (map.size() > 0)
+                return false;
+
+            return true;
         }
 
         private boolean handshake()
@@ -473,28 +514,24 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 if (_future.getProtocol() != null)
                     request.append("Sec-WebSocket-Protocol: ").append(_future.getProtocol()).append("\r\n");
 
-                /**
-                 * append pragma
-                 * @author KNOWLEDGECODE
-                 */
                 request.append("pragma: no-cache\r\n");
 
-                /**
-                 * append cache-control
-                 * @author KNOWLEDGECODE
-                 */
                 request.append("cache-control: no-cache\r\n");
 
                 request.append("Sec-WebSocket-Key: ").append(_key).append("\r\n");
 
                 request.append("Sec-WebSocket-Version: ").append(WebSocketConnectionRFC6455.VERSION).append("\r\n");
 
-                /**
-                 * append user-agent
-                 * @author KNOWLEDGECODE
-                 */
                 if (_future.getAgent() != null)
                     request.append("user-agent: ").append(_future.getAgent()).append("\r\n");
+
+                if (_future.getExtensions().size() > 0)
+                {
+                    List<String> extensions = new ArrayList<String>();
+                    for (Extension ext :_future.getExtensions())
+                        extensions.add(ext.getParameterizedName());
+                    request.append("Sec-WebSocket-Extensions: ").append(TextUtils.join(", ", extensions)).append("\r\n");
+                }
 
                 Map<String, String> cookies = _future.getCookies();
                 if (cookies != null && cookies.size() > 0)
@@ -511,8 +548,6 @@ public class WebSocketClientFactory extends AggregateLifeCycle
 
                 _handshake=new ByteArrayBuffer(request.toString(), false);
             }
-
-            // TODO extensions
 
             try
             {
@@ -552,6 +587,10 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 {
                     _error = "Bad Sec-WebSocket-Accept";
                 }
+                else if (!initExtensions(_future.getExtensions()))
+                {
+                    _error = "Bad Sec-WebSocket-Extension";
+                }
                 else
                 {
                     WebSocketConnection connection = newWebSocketConnection();
@@ -581,12 +620,8 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                     _buffers,
                     System.currentTimeMillis(),
                     _future.getMaxIdleTime(),
-                    /**
-                     * append protocol
-                     * @author KNOWLEDGECODE
-                     */
                     _protocol,
-                    null,
+                    _future.getExtensions(),
                     WebSocketConnectionRFC6455.VERSION,
                     _future.getMaskGen());
         }

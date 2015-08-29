@@ -27,7 +27,7 @@ import java.io.IOException;
  * The Interface has several nested interfaces, for each type of message that may be received.
  */
 public interface WebSocket
-{   
+{
     /**
      * Called when a new websocket connection is accepted.
      * @param connection The Connection object to use to send messages.
@@ -68,7 +68,7 @@ public interface WebSocket
          */
         void onMessage(byte[] data, int offset, int length);
     }
-    
+
     /**
      * A nested WebSocket interface for receiving control messages
      */
@@ -84,7 +84,7 @@ public interface WebSocket
          */
         boolean onControl(byte controlCode,byte[] data, int offset, int length);
     }
-    
+
     /**
      * A nested WebSocket interface for receiving any websocket frame
      */
@@ -100,18 +100,21 @@ public interface WebSocket
          * @return true if this call has completely handled the frame and no further processing is needed (including aggregation and/or message delivery)
          */
         boolean onFrame(byte flags,byte opcode,byte[] data, int offset, int length);
-        
+
         void onHandshake(FrameConnection connection);
     }
-    
+
     /**
      * A  Connection interface is passed to a WebSocket instance via the {@link WebSocket#onOpen(Connection)} to 
      * give the application access to the specifics of the current connection.   This includes methods 
      * for sending frames and messages as well as methods for interpreting the flags and opcodes of the connection.
+     *
+     * modified by KNOWLEDGECODE
      */
     public interface Connection
     {
         String getProtocol();
+        String getExtensions();
         void sendMessage(String data) throws IOException;
         void sendMessage(byte[] data, int offset, int length) throws IOException;
 
@@ -119,41 +122,41 @@ public interface WebSocket
          * Close the connection with normal close code.
          */
         void close();
-        
+
         /** Close the connection with specific closeCode and message.
          * @param closeCode The close code to send, or -1 for no close code
          * @param message The message to send or null for no message
          */
         void close(int closeCode,String message);
-        
+
         boolean isOpen();
 
         /**
          * @param ms The time in ms that the connection can be idle before closing
          */
         void setMaxIdleTime(int ms);
-        
+
         /**
          * @param size size<0 No aggregation of frames to messages, >=0 max size of text frame aggregation buffer in characters
          */
         void setMaxTextMessageSize(int size);
-        
+
         /**
          * @param size size<0 no aggregation of binary frames, >=0 size of binary frame aggregation buffer
          */
         void setMaxBinaryMessageSize(int size);
-        
+
         /**
          * @return The time in ms that the connection can be idle before closing
          */
         int getMaxIdleTime();
-        
+
         /**
          * Size in characters of the maximum text message to be received
          * @return size <0 No aggregation of frames to messages, >=0 max size of text frame aggregation buffer in characters
          */
         int getMaxTextMessageSize();
-        
+
         /**
          * Size in bytes of the maximum binary message to be received
          * @return size <0 no aggregation of binary frames, >=0 size of binary frame aggregation buffer
@@ -174,22 +177,22 @@ public interface WebSocket
          * @return The opcode of a binary message
          */
         byte binaryOpcode();
-        
+
         /**
          * @return The opcode of a text message
          */
         byte textOpcode();
-        
+
         /**
          * @return The opcode of a continuation frame
          */
         byte continuationOpcode();
-        
+
         /**
          * @return Mask for the FIN bit.
          */
         byte finMask();
-        
+
         /** Set if frames larger than the frame buffer are handled with local fragmentations
          * @param allowFragmentation
          */
@@ -242,12 +245,12 @@ public interface WebSocket
          * @return True if the opcode is a pong control
          */
         boolean isPong(byte opcode);
-        
+
         /**
          * @return True if frames larger than the frame buffer are fragmented.
          */
         boolean isAllowFrameFragmentation();
-        
+
         /** Send a control frame
          * @param control
          * @param data

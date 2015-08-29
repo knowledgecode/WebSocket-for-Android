@@ -116,8 +116,10 @@
     <source-file src="src/android/org/eclipse/jetty/util/ssl/SslContextFactory.java" target-dir="src/org/eclipse/jetty/util/ssl" />
     <source-file src="src/android/org/eclipse/jetty/websocket/Extension.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/MaskGen.java" target-dir="src/org/eclipse/jetty/websocket" />
+    <source-file src="src/android/org/eclipse/jetty/websocket/PerMessageDeflateExtension.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/RandomMaskGen.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/WebSocket.java" target-dir="src/org/eclipse/jetty/websocket" />
+    <source-file src="src/android/org/eclipse/jetty/websocket/WebSocketBuffer.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/WebSocketBuffers.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/WebSocketClient.java" target-dir="src/org/eclipse/jetty/websocket" />
     <source-file src="src/android/org/eclipse/jetty/websocket/WebSocketClientFactory.java" target-dir="src/org/eclipse/jetty/websocket" />

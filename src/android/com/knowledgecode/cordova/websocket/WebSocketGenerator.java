@@ -87,8 +87,10 @@ class WebSocketGenerator implements
         _openListener.onOpen(_id, conn);
 
         String protocol = conn.getProtocol();
+        String extensions = conn.getExtensions();
         protocol = protocol == null ? "" : protocol;
-        sendCallback("O" + protocol, true);
+        extensions = extensions == null ? "" : extensions;
+        sendCallback(String.format("O[\"%s\",\"%s\"]", protocol, extensions), true);
     }
 
     @Override

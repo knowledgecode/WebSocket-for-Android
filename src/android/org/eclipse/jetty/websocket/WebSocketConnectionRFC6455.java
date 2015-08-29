@@ -21,7 +21,7 @@ package org.eclipse.jetty.websocket;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +38,7 @@ import org.eclipse.jetty.websocket.WebSocket.OnControl;
 import org.eclipse.jetty.websocket.WebSocket.OnFrame;
 import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
 
+import android.text.TextUtils;
 import android.util.Base64;
 
 /* ------------------------------------------------------------ */
@@ -62,6 +63,8 @@ import android.util.Base64;
  *   |                     Payload Data continued ...                |
  *   +---------------------------------------------------------------+
  * </pre>
+ *
+ * modified by KNOWLEDGECODE
  */
 public class WebSocketConnectionRFC6455 extends AbstractConnection implements WebSocketConnection
 {
@@ -531,6 +534,17 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         }
 
         /* ------------------------------------------------------------ */
+        public String getExtensions()
+        {
+            List<String> extensions = new ArrayList<String>();
+
+            for (Extension extension : _extensions) {
+                extensions.add(extension.getParameterizedName());
+            }
+            return TextUtils.join(", ", extensions);
+        }
+
+        /* ------------------------------------------------------------ */
         public byte binaryOpcode()
         {
             return OP_BINARY;
@@ -630,44 +644,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
     private class WSFrameHandler implements WebSocketParser.FrameHandler
     {
-        public class ByteArrayBuffer
-        {
-            private byte[] _buffer;
-            private int _index;
-
-            public ByteArrayBuffer(int capacity)
-            {
-                _buffer = new byte[capacity];
-                _index = 0;
-            }
-
-            public ByteArrayBuffer append(final byte[] array, int offset, int length)
-            {
-                if (length > _buffer.length - _index)
-                {
-                    _buffer = Arrays.copyOf(_buffer, Math.max(_buffer.length << 1, _index + length));
-                }
-                System.arraycopy(array, offset, _buffer, _index, length);
-                _index += length;
-                return this;
-            }
-
-            public byte[] toArray()
-            {
-                return Arrays.copyOf(_buffer, _index);
-            }
-
-            public void clear()
-            {
-                _index = 0;
-            }
-
-            public int length()
-            {
-                return _index;
-            }
-        }
-
         private boolean excess(int opcode, int length)
         {
             switch (opcode)
@@ -682,8 +658,8 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         }
 
         private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private static final int INITIAL_CAPACITY = 16384;
-        private ByteArrayBuffer _buffer = new ByteArrayBuffer(INITIAL_CAPACITY);
+        private static final int INITIAL_CAPACITY = 8192;
+        private WebSocketBuffer _buffer = new WebSocketBuffer(INITIAL_CAPACITY);
         private byte _opcode = -1;
 
         public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
@@ -707,7 +683,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                 return;
             }
 
-            // TODO: check extensions for RSV bit(s) meanings
             if ((flags & 0x7) != 0)
             {
                 errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "RSV bits set 0x" + Integer.toHexString(flags));
@@ -784,7 +759,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                                 }
                                 else
                                 {
-                                    _onTextMessage.onMessage(new String(_buffer.append(array, offset, length).toArray(), _utf8));
+                                    _onTextMessage.onMessage(_buffer.append(array, offset, length).toString(_utf8));
                                 }
                                 break;
                             case WebSocketConnectionRFC6455.OP_BINARY:
@@ -794,7 +769,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                                 }
                                 else
                                 {
-                                    byte[] msg = _buffer.append(array, offset, length).toArray();
+                                    byte[] msg = _buffer.append(array, offset, length).array();
                                     _onBinaryMessage.onMessage(msg, 0, msg.length);
                                 }
                                 break;
