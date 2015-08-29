@@ -19,6 +19,7 @@
 package org.eclipse.jetty.http;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.BufferCache.CachedBuffer;
@@ -28,7 +29,6 @@ import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.io.View;
-import org.eclipse.jetty.io.bio.StreamEndPoint;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
@@ -1139,7 +1139,7 @@ public class HttpParser implements Parser
     @Override
     public String toString()
     {
-        return String.format("%s{s=%d,l=%d,c=%d}",
+        return String.format(Locale.getDefault(), "%s{s=%d,l=%d,c=%d}",
                 getClass().getSimpleName(),
                 _state,
                 _length,
@@ -1212,27 +1212,6 @@ public class HttpParser implements Parser
         }
 
         return _contentView.length()>0?_contentView:null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see java.io.InputStream#available()
-     */
-    public int available() throws IOException
-    {
-        if (_contentView!=null && _contentView.length()>0)
-            return _contentView.length();
-
-        if (_endp.isBlocking())
-        {
-            if (_state>0 && _endp instanceof StreamEndPoint)
-                return ((StreamEndPoint)_endp).getInputStream().available()>0?1:0;
-
-            return 0;
-        }
-
-        parseNext();
-        return _contentView==null?0:_contentView.length();
     }
 
     /* ------------------------------------------------------------ */

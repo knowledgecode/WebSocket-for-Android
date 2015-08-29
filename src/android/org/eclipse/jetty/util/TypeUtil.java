@@ -23,7 +23,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -484,24 +483,6 @@ public class TypeUtil
         }
     }
 
-    public static URL jarFor(String className)
-    {
-        try
-        {
-            className=className.replace('.','/')+".class";
-            // hack to discover jstl libraries
-            URL url = Loader.getResource(null,className,false);
-            String s=url.toString();
-            if (s.startsWith("jar:file:"))
-                return new URL(s.substring(4,s.indexOf("!/")));
-        }
-        catch(Exception e)
-        {
-            LOG.ignore(e);
-        }
-        return null;
-    }
-    
     public static Object call(Class<?> oClass, String method, Object obj, Object[] arg) 
        throws InvocationTargetException, NoSuchMethodException
     {

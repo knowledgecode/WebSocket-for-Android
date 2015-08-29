@@ -61,58 +61,6 @@ public abstract class Credential implements Serializable
 
     /* ------------------------------------------------------------ */
     /**
-     * Get a credential from a String. If the credential String starts with a
-     * known Credential type (eg "CRYPT:" or "MD5:" ) then a Credential of that
-     * type is returned. Else the credential is assumed to be a Password.
-     * 
-     * @param credential String representation of the credential
-     * @return A Credential or Password instance.
-     */
-    public static Credential getCredential(String credential)
-    {
-        if (credential.startsWith(Crypt.__TYPE)) return new Crypt(credential);
-        if (credential.startsWith(MD5.__TYPE)) return new MD5(credential);
-
-        return new Password(credential);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Unix Crypt Credentials
-     */
-    public static class Crypt extends Credential
-    {
-        private static final long serialVersionUID = -2027792997664744210L;
-
-        public static final String __TYPE = "CRYPT:";
-
-        private final String _cooked;
-
-        Crypt(String cooked)
-        {
-            _cooked = cooked.startsWith(Crypt.__TYPE) ? cooked.substring(__TYPE.length()) : cooked;
-        }
-
-        @Override
-        public boolean check(Object credentials)
-        {
-            if (credentials instanceof char[])
-                credentials=new String((char[])credentials);
-            if (!(credentials instanceof String) && !(credentials instanceof Password)) 
-                LOG.warn("Can't check " + credentials.getClass() + " against CRYPT");
-
-            String passwd = credentials.toString();
-            return _cooked.equals(UnixCrypt.crypt(passwd, _cooked));
-        }
-
-        public static String crypt(String user, String pw)
-        {
-            return "CRYPT:" + UnixCrypt.crypt(pw, user);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * MD5 Credentials
      */
     public static class MD5 extends Credential

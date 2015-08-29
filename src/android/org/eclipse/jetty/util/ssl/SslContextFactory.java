@@ -695,41 +695,41 @@ public class SslContextFactory extends AbstractLifeCycle
         _allowRenegotiate = allowRenegotiate;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param password
-     *            The password for the key store
-     */
-    public void setKeyStorePassword(String password)
-    {
-        checkNotStarted();
-
-        _keyStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param password
-     *            The password (if any) for the specific key within the key store
-     */
-    public void setKeyManagerPassword(String password)
-    {
-        checkNotStarted();
-
-        _keyManagerPassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param password
-     *            The password for the trust store
-     */
-    public void setTrustStorePassword(String password)
-    {
-        checkNotStarted();
-
-        _trustStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
-    }
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param password
+//     *            The password for the key store
+//     */
+//    public void setKeyStorePassword(String password)
+//    {
+//        checkNotStarted();
+//
+//        _keyStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
+//    }
+//
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param password
+//     *            The password (if any) for the specific key within the key store
+//     */
+//    public void setKeyManagerPassword(String password)
+//    {
+//        checkNotStarted();
+//
+//        _keyManagerPassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
+//    }
+//
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param password
+//     *            The password for the trust store
+//     */
+//    public void setTrustStorePassword(String password)
+//    {
+//        checkNotStarted();
+//
+//        _trustStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
+//    }
 
     /* ------------------------------------------------------------ */
     /**

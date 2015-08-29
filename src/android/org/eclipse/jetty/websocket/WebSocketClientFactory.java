@@ -187,34 +187,34 @@ public class WebSocketClientFactory extends AggregateLifeCycle
         return _maskGen;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param maskGen the shared mask generator, or null if no shared mask generator is used
-     * @see WebSocketClient#setMaskGen(MaskGen)
-     */
-    public void setMaskGen(MaskGen maskGen)
-    {
-        if (isRunning())
-            throw new IllegalStateException(getState());
-        removeBean(_maskGen);
-        _maskGen = maskGen;
-        addBean(maskGen);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param bufferSize the read buffer size
-     * @see #getBufferSize()
-     */
-    public void setBufferSize(int bufferSize)
-    {
-        if (isRunning())
-            throw new IllegalStateException(getState());
-        removeBean(_buffers);
-        _buffers = new WebSocketBuffers(bufferSize);
-        addBean(_buffers);
-    }
-
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param maskGen the shared mask generator, or null if no shared mask generator is used
+//     * @see WebSocketClient#setMaskGen(MaskGen)
+//     */
+//    public void setMaskGen(MaskGen maskGen)
+//    {
+//        if (isRunning())
+//            throw new IllegalStateException(getState());
+//        removeBean(_maskGen);
+//        _maskGen = maskGen;
+//        addBean(maskGen);
+//    }
+//
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param bufferSize the read buffer size
+//     * @see #getBufferSize()
+//     */
+//    public void setBufferSize(int bufferSize)
+//    {
+//        if (isRunning())
+//            throw new IllegalStateException(getState());
+//        removeBean(_buffers);
+//        _buffers = new WebSocketBuffers(bufferSize);
+//        addBean(_buffers);
+//    }
+//
     /* ------------------------------------------------------------ */
     /**
      * @return the read buffer size

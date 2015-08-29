@@ -18,9 +18,13 @@
 
 package org.eclipse.jetty.io.nio;
 
+import android.annotation.SuppressLint;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
@@ -440,6 +444,7 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
         }
     }
 
+    @SuppressLint("TrulyRandom")
     private synchronized boolean wrap(final Buffer buffer) throws IOException
     {
         ByteBuffer bbuf=extractByteBuffer(buffer);
@@ -482,10 +487,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
                     _logger.debug(String.valueOf(_endp), e);
                     _endp.close();
                     throw e;
-                }
-                catch (IOException x)
-                {
-                    throw x;
                 }
                 catch (Exception x)
                 {
@@ -573,10 +574,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
                     _logger.debug(String.valueOf(_endp), e);
                     _endp.close();
                     throw e;
-                }
-                catch (IOException x)
-                {
-                    throw x;
                 }
                 catch (Exception x)
                 {
@@ -891,7 +888,7 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
             int i = inbound == null? -1 : inbound.length();
             int o = outbound == null ? -1 : outbound.length();
             int u = unwrap == null ? -1 : unwrap.length();
-            return String.format("SSL %s i/o/u=%d/%d/%d ishut=%b oshut=%b {%s}",
+            return String.format(Locale.getDefault(), "SSL %s i/o/u=%d/%d/%d ishut=%b oshut=%b {%s}",
                     _engine.getHandshakeStatus(),
                     i, o, u,
                     _ishut, _oshut,
