@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
+import org.eclipse.jetty.websocket.PerMessageDeflateExtension;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
@@ -99,6 +100,7 @@ class ConnectionTask implements Task {
             JSONObject options = args.getJSONObject(5);
             String origin = options.optString("origin", args.getString(3));
             String agent = options.optString("agent", args.getString(4));
+            boolean deflate = options.optBoolean("perMessageDeflate", false);
             long maxConnectTime = options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
             client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));
@@ -112,6 +114,10 @@ class ConnectionTask implements Task {
             if (agent.length() > 0) {
                 client.setAgent(agent);
             }
+            if (deflate) {
+                client.getExtensions().add(new PerMessageDeflateExtension());
+            }
+
             setCookie(client.getCookies(), uri.getHost());
 
             WebSocketGenerator gen = new WebSocketGenerator(id, ctx);

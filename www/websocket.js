@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*eslint complexity: 0 no-mixed-requires: 0 */
-/*global require, module */
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.9.2
+ * @version 0.10.0
  */
 (function (window) {
     'use strict';
@@ -91,7 +89,7 @@
         stringToBinary = function (data, binaryType) {
             var i, len, array;
 
-            data = window.atob(data);
+            data = atob(data);
             len = data.length;
             array = new window.Uint8Array(len);
             for (i = 0; i < len; i++) {
@@ -204,10 +202,12 @@
                 switch (data[0]) {
                 case 'O':
                     taskQueue.push(function () {
-                        var evt = createMessage('open');
+                        var evt = createMessage('open'),
+                            param = JSON.parse(data.substring(1));
 
+                        that.protocol = param[0];
+                        that.extensions = param[1];
                         that.readyState = that.OPEN;
-                        that.protocol = data.substring(1);
                         if (that.onopen) {
                             that.onopen(evt);
                         }

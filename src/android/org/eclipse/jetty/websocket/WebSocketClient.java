@@ -74,6 +74,8 @@ import org.eclipse.jetty.util.log.Logger;
  *
  *   connection.sendMessage("Hello World");
  * </pre>
+ *
+ * modified by KNOWLEDGECODE
  */
 public class WebSocketClient
 {
@@ -81,7 +83,7 @@ public class WebSocketClient
 
     private final WebSocketClientFactory _factory;
     private final Map<String,String> _cookies=new ConcurrentHashMap<String, String>();
-    private final List<String> _extensions=new CopyOnWriteArrayList<String>();
+    private final List<Extension> _extensions=new CopyOnWriteArrayList<Extension>();
     private String _origin;
     private String _protocol;
     private String _agent;
@@ -208,7 +210,7 @@ public class WebSocketClient
     /**
      * @return The list of websocket protocol extensions
      */
-    public List<String> getExtensions()
+    public List<Extension> getExtensions()
     {
         return _extensions;
     }
@@ -275,8 +277,7 @@ public class WebSocketClient
 
     /* ------------------------------------------------------------ */
     /**
-     * get user-agent
-     * @author KNOWLEDGECODE
+     * @return user-agent
      */
     public String getAgent()
     {
@@ -285,8 +286,7 @@ public class WebSocketClient
 
     /* ------------------------------------------------------------ */
     /**
-     * set user-agent
-     * @author KNOWLEDGECODE
+     * @param user-agent
      */
     public void setAgent(String _agent)
     {
@@ -508,13 +508,13 @@ public class WebSocketClient
             return _client.getMaskGen();
         }
 
-        /**
-         * get user-agent
-         * @author KNOWLEDGECODE
-         */
         public String getAgent()
         {
             return _client.getAgent();
+        }
+
+        public List<Extension> getExtensions() {
+            return _client.getExtensions();
         }
 
         @Override
