@@ -59,6 +59,13 @@ class ConnectionTask implements Task {
     public ConnectionTask(WebSocketClientFactory factory, SparseArray<Connection> map) {
         _factory = factory;
         _map = map;
+
+        if (!_factory.isRunning()) {
+            try {
+                _factory.start();
+            } catch (Exception e) {
+            }
+        }
     }
 
     /**
@@ -92,7 +99,7 @@ class ConnectionTask implements Task {
             JSONObject options = args.getJSONObject(5);
             String origin = options.optString("origin", args.getString(3));
             String agent = options.optString("agent", args.getString(4));
-            long maxConnectTime =  options.optLong("maxConnectTime", MAX_CONNECT_TIME);
+            long maxConnectTime = options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
             client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));
             client.setMaxBinaryMessageSize(options.optInt("maxBinaryMessageSize", MAX_BINARY_MESSAGE_SIZE));
@@ -133,3 +140,4 @@ class ConnectionTask implements Task {
         }
     }
 }
+

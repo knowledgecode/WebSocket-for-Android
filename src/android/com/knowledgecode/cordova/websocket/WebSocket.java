@@ -20,6 +20,7 @@ package com.knowledgecode.cordova.websocket;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
@@ -35,9 +36,15 @@ import android.util.SparseArray;
  * This plugin is using Jetty under the terms of the Apache License v2.0.
  *
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.9.2
+ * @version 0.10.0
  */
 public class WebSocket extends CordovaPlugin {
+
+    static final String CREATE_TASK = "create";
+    static final String SEND_TASK = "send";
+    static final String CLOSE_TASK = "close";
+    static final String RESET_TASK = "reset";
+    static final String DESTROY_TASK = "destroy";
 
     private WebSocketClientFactory _factory;
     private SparseArray<Connection> _conn;
@@ -51,12 +58,12 @@ public class WebSocket extends CordovaPlugin {
         _conn = new SparseArray<Connection>();
         _executor = Executors.newSingleThreadExecutor();
         _runner = new TaskRunner();
-        _runner.setTask("create", new ConnectionTask(_factory, _conn));
-        _runner.setTask("send", new SendingTask(_conn));
-        _runner.setTask("close", new DisconnectionTask(_conn));
+        _runner.setTask(CREATE_TASK, new ConnectionTask(_factory, _conn));
+        _runner.setTask(SEND_TASK, new SendingTask(_conn));
+        _runner.setTask(CLOSE_TASK, new DisconnectionTask(_conn));
+        _runner.setTask(RESET_TASK, new ResetTask(_conn));
+        _runner.setTask(DESTROY_TASK, new DestroyTask(_factory, _conn));
         _executor.execute(_runner);
-        _executor.shutdown();
-        start();
     }
 
     @Override
@@ -64,57 +71,20 @@ public class WebSocket extends CordovaPlugin {
         return _runner.addTaskQueue(new TaskBean(action, rawArgs, ctx));
     };
 
-    /**
-     * Start WebSocketClientFactory.
-     *
-     * @return WebSocket
-     */
-    private WebSocket start() {
-        try {
-            _factory.start();
-        } catch (Exception e) {
-        }
-        return this;
-    }
-
-    /**
-     * Stop WebSocketClientFactory.
-     *
-     * @return WebSocket
-     */
-    private WebSocket stop() {
-        if (_conn != null) {
-            for (int i = 0; i < _conn.size(); i++) {
-                int key = _conn.keyAt(i);
-
-                if (_conn.get(key).isOpen()) {
-                    _conn.get(key).close();
-                }
-            }
-            _conn.clear();
-        }
-        try {
-            _factory.stop();
-        } catch (Exception e) {
-        }
-        return this;
-    }
-
     @Override
     public void onReset() {
-        if (_factory != null) {
-            stop().start();
-        }
+        _runner.addTaskQueue(new TaskBean(RESET_TASK));
+        super.onReset();
     }
 
     @Override
     public void onDestroy() {
-        stop();
-        _conn = null;
-        _executor.shutdownNow();
-        _executor = null;
-        _runner = null;
-        _factory.destroy();
-        _factory = null;
+        _runner.addTaskQueue(new TaskBean(DESTROY_TASK));
+        _executor.shutdown();
+        try {
+            _executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+        }
+        super.onDestroy();
     }
 }

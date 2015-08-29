@@ -62,10 +62,6 @@ class TaskRunner implements Runnable {
             try {
                 task = _queue.take();
             } catch (InterruptedException e) {
-                _queue.clear();
-                _queue = null;
-                _map.clear();
-                _map = null;
                 break;
             }
 
@@ -79,6 +75,12 @@ class TaskRunner implements Runnable {
                 ctx.error("JSON");
             }
             _map.get(action).execute(args, ctx);
+
+            if (WebSocket.DESTROY_TASK.equals(action)) {
+                break;
+            }
         }
+        _queue.clear();
+        _map.clear();
     }
 }
