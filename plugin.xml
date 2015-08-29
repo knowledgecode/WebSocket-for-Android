@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cordova-plugin-websocket"
-  version="0.9.2">
+  version="0.10.0">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
@@ -29,7 +29,9 @@
     </config-file>
 
     <source-file src="src/android/com/knowledgecode/cordova/websocket/ConnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
+    <source-file src="src/android/com/knowledgecode/cordova/websocket/DestroyTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/DisconnectionTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
+    <source-file src="src/android/com/knowledgecode/cordova/websocket/ResetTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/SendingTask.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskBean.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/TaskRunner.java" target-dir="src/com/knowledgecode/cordova/websocket" />
@@ -93,6 +95,9 @@
     <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
+    <!--
+    <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" />
+    -->
     <source-file src="src/android/org/eclipse/jetty/util/log/Log.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Logger.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/BadResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
