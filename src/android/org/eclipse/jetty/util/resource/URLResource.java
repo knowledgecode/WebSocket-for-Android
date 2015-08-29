@@ -27,7 +27,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
-import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -266,23 +265,6 @@ public class URLResource extends Resource
     public String[] list()
     {
         return null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns the resource contained inside the current resource with the
-     * given name
-     */
-    @Override
-    public Resource addPath(String path)
-        throws IOException,MalformedURLException
-    {
-        if (path==null)
-            return null;
-
-        path = URIUtil.canonicalPath(path);
-
-        return newResource(URIUtil.addPaths(_url.toExternalForm(),path));
     }
 
     /* ------------------------------------------------------------ */

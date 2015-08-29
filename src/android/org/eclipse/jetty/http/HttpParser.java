@@ -19,6 +19,8 @@
 package org.eclipse.jetty.http;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Locale;
 
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.BufferCache.CachedBuffer;
@@ -28,8 +30,6 @@ import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.io.View;
-import org.eclipse.jetty.io.bio.StreamEndPoint;
-import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -60,6 +60,8 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
     public static final int STATE_SEEKING_EOF=7;
+
+    public static final Charset __ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     private final EventHandler _handler;
     private final Buffers _buffers; // source of buffers
@@ -552,7 +554,7 @@ public class HttpParser implements Parser
                                                     _contentLength=HttpTokens.CHUNKED_CONTENT;
                                                 else
                                                 {
-                                                    String c=value.toString(StringUtil.__ISO_8859_1);
+                                                    String c=value.toString(__ISO_8859_1);
                                                     if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                         _contentLength=HttpTokens.CHUNKED_CONTENT;
 
@@ -749,9 +751,9 @@ public class HttpParser implements Parser
                                     else
                                     {
                                         // Continuation line!
-                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
+                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(__ISO_8859_1);
                                         _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                        _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
+                                        _multiLineValue += " " + _tok1.toString(__ISO_8859_1);
                                     }
                                 }
                                 _eol=ch;
@@ -782,9 +784,9 @@ public class HttpParser implements Parser
                                     else
                                     {
                                         // Continuation line!
-                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
+                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(__ISO_8859_1);
                                         _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                        _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
+                                        _multiLineValue += " " + _tok1.toString(__ISO_8859_1);
                                     }
                                 }
                                 _eol=ch;
@@ -1139,7 +1141,7 @@ public class HttpParser implements Parser
     @Override
     public String toString()
     {
-        return String.format("%s{s=%d,l=%d,c=%d}",
+        return String.format(Locale.getDefault(), "%s{s=%d,l=%d,c=%d}",
                 getClass().getSimpleName(),
                 _state,
                 _length,
@@ -1215,27 +1217,6 @@ public class HttpParser implements Parser
     }
 
     /* ------------------------------------------------------------ */
-    /* (non-Javadoc)
-     * @see java.io.InputStream#available()
-     */
-    public int available() throws IOException
-    {
-        if (_contentView!=null && _contentView.length()>0)
-            return _contentView.length();
-
-        if (_endp.isBlocking())
-        {
-            if (_state>0 && _endp instanceof StreamEndPoint)
-                return ((StreamEndPoint)_endp).getInputStream().available()>0?1:0;
-
-            return 0;
-        }
-
-        parseNext();
-        return _contentView==null?0:_contentView.length();
-    }
-
-    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public static abstract class EventHandler
@@ -1272,8 +1253,4 @@ public class HttpParser implements Parser
         public void earlyEOF()
         {}
     }
-
-
-
-
 }

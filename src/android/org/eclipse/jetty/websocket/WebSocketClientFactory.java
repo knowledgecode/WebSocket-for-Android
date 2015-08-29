@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.net.ssl.SSLEngine;
 
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpParser;
 import org.eclipse.jetty.io.AbstractConnection;
 import org.eclipse.jetty.io.AsyncEndPoint;
@@ -187,34 +186,34 @@ public class WebSocketClientFactory extends AggregateLifeCycle
         return _maskGen;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param maskGen the shared mask generator, or null if no shared mask generator is used
-     * @see WebSocketClient#setMaskGen(MaskGen)
-     */
-    public void setMaskGen(MaskGen maskGen)
-    {
-        if (isRunning())
-            throw new IllegalStateException(getState());
-        removeBean(_maskGen);
-        _maskGen = maskGen;
-        addBean(maskGen);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param bufferSize the read buffer size
-     * @see #getBufferSize()
-     */
-    public void setBufferSize(int bufferSize)
-    {
-        if (isRunning())
-            throw new IllegalStateException(getState());
-        removeBean(_buffers);
-        _buffers = new WebSocketBuffers(bufferSize);
-        addBean(_buffers);
-    }
-
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param maskGen the shared mask generator, or null if no shared mask generator is used
+//     * @see WebSocketClient#setMaskGen(MaskGen)
+//     */
+//    public void setMaskGen(MaskGen maskGen)
+//    {
+//        if (isRunning())
+//            throw new IllegalStateException(getState());
+//        removeBean(_maskGen);
+//        _maskGen = maskGen;
+//        addBean(maskGen);
+//    }
+//
+//    /* ------------------------------------------------------------ */
+//    /**
+//     * @param bufferSize the read buffer size
+//     * @see #getBufferSize()
+//     */
+//    public void setBufferSize(int bufferSize)
+//    {
+//        if (isRunning())
+//            throw new IllegalStateException(getState());
+//        removeBean(_buffers);
+//        _buffers = new WebSocketBuffers(bufferSize);
+//        addBean(_buffers);
+//    }
+//
     /* ------------------------------------------------------------ */
     /**
      * @return the read buffer size
@@ -362,6 +361,8 @@ public class WebSocketClientFactory extends AggregateLifeCycle
      */
     class HandshakeConnection extends AbstractConnection implements AsyncConnection
     {
+        private static final String __COOKIE_DELIM="\"\\\n\r\t\f\b%+ ;=";
+
         private final AsyncEndPoint _endp;
         private final WebSocketClient.WebSocketFuture _future;
         private final String _key;
@@ -538,9 +539,9 @@ public class WebSocketClientFactory extends AggregateLifeCycle
                 {
                     for (String cookie : cookies.keySet())
                         request.append("Cookie: ")
-                        .append(QuotedStringTokenizer.quoteIfNeeded(cookie, HttpFields.__COOKIE_DELIM))
+                        .append(QuotedStringTokenizer.quoteIfNeeded(cookie, __COOKIE_DELIM))
                         .append("=")
-                        .append(QuotedStringTokenizer.quoteIfNeeded(cookies.get(cookie), HttpFields.__COOKIE_DELIM))
+                        .append(QuotedStringTokenizer.quoteIfNeeded(cookies.get(cookie), __COOKIE_DELIM))
                         .append("\r\n");
                 }
 

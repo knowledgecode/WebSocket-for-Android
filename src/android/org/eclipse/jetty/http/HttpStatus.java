@@ -18,6 +18,8 @@
 
 package org.eclipse.jetty.http;
 
+import java.util.Locale;
+
 /**
  * <p>
  * HttpStatusCode enum class, for status codes based on various HTTP RFCs. (see
@@ -837,7 +839,7 @@ public class HttpStatus
         @Override
         public String toString()
         {
-            return String.format("[%03d %s]",this._code,this.getMessage());
+            return String.format(Locale.getDefault(), "[%03d %s]",this._code,this.getMessage());
         }
 
         /**
@@ -913,44 +915,6 @@ public class HttpStatus
         public boolean isServerError()
         {
             return HttpStatus.isServerError(this._code);
-        }
-    }
-
-
-    /**
-     * Get the HttpStatusCode for a specific code
-     *
-     * @param code
-     *            the code to lookup.
-     * @return the {@link HttpStatus} if found, or null if not found.
-     */
-    public static Code getCode(int code)
-    {
-        if (code <= MAX_CODE)
-        {
-            return codeMap[code];
-        }
-        return null;
-    }
-
-    /**
-     * Get the status message for a specific code.
-     *
-     * @param code
-     *            the code to look up
-     * @return the specific message, or the code number itself if code
-     *         does not match known list.
-     */
-    public static String getMessage(int code)
-    {
-        Code codeEnum = getCode(code);
-        if (codeEnum != null)
-        {
-            return codeEnum.getMessage();
-        }
-        else
-        {
-            return Integer.toString(code);
         }
     }
 

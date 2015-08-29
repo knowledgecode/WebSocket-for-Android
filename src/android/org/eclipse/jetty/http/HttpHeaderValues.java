@@ -57,7 +57,7 @@ public class HttpHeaderValues extends BufferCache
         BYTES_ORDINAL=9,
         NO_CACHE_ORDINAL=10,
         UPGRADE_ORDINAL=11;
-    
+
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
     public final static Buffer 
@@ -72,17 +72,4 @@ public class HttpHeaderValues extends BufferCache
         BYTES_BUFFER=CACHE.add(BYTES,BYTES_ORDINAL),
         NO_CACHE_BUFFER=CACHE.add(NO_CACHE,NO_CACHE_ORDINAL),
         UPGRADE_BUFFER=CACHE.add(UPGRADE,UPGRADE_ORDINAL);
-        
-
-    public static boolean hasKnownValues(int httpHeaderOrdinal)
-    {
-        switch(httpHeaderOrdinal)
-        {
-            case HttpHeaders.CONNECTION_ORDINAL:
-            case HttpHeaders.TRANSFER_ENCODING_ORDINAL:
-            case HttpHeaders.CONTENT_ENCODING_ORDINAL:
-                return true;
-        }
-        return false;
-    }
 }

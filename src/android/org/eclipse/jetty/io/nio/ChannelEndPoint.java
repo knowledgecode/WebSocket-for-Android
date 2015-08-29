@@ -30,7 +30,6 @@ import java.nio.channels.SocketChannel;
 
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.EndPoint;
-import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -42,6 +41,8 @@ import org.eclipse.jetty.util.log.Logger;
 public class ChannelEndPoint implements EndPoint
 {
     private static final Logger LOG = Log.getLogger(ChannelEndPoint.class);
+
+    private static final String ALL_INTERFACES = "0.0.0.0";
 
     protected final ByteChannel _channel;
     protected final ByteBuffer[] _gather2=new ByteBuffer[2];
@@ -408,7 +409,7 @@ public class ChannelEndPoint implements EndPoint
         if (_socket==null)
             return null;
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return StringUtil.ALL_INTERFACES;
+           return ALL_INTERFACES;
         return _local.getAddress().getHostAddress();
     }
 
@@ -421,7 +422,7 @@ public class ChannelEndPoint implements EndPoint
         if (_socket==null)
             return null;
        if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
-           return StringUtil.ALL_INTERFACES;
+           return ALL_INTERFACES;
         return _local.getAddress().getCanonicalHostName();
     }
 
