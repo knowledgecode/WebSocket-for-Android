@@ -19,12 +19,6 @@
 package org.eclipse.jetty.util.security;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
-
-import org.eclipse.jetty.util.StringUtil;
-import org.eclipse.jetty.util.TypeUtil;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
 
 /* ------------------------------------------------------------ */
 /**
@@ -43,8 +37,6 @@ import org.eclipse.jetty.util.log.Logger;
  */
 public abstract class Credential implements Serializable
 {
-    private static final Logger LOG = Log.getLogger(Credential.class);
-
     private static final long serialVersionUID = -7760551052768181572L;
 
     /* ------------------------------------------------------------ */
@@ -58,120 +50,4 @@ public abstract class Credential implements Serializable
      *         to both this Credential and the passed credential.
      */
     public abstract boolean check(Object credentials);
-
-    /* ------------------------------------------------------------ */
-    /**
-     * MD5 Credentials
-     */
-    public static class MD5 extends Credential
-    {
-        private static final long serialVersionUID = 5533846540822684240L;
-
-        public static final String __TYPE = "MD5:";
-
-        public static final Object __md5Lock = new Object();
-
-        private static MessageDigest __md;
-
-        private final byte[] _digest;
-
-        /* ------------------------------------------------------------ */
-        MD5(String digest)
-        {
-            digest = digest.startsWith(__TYPE) ? digest.substring(__TYPE.length()) : digest;
-            _digest = TypeUtil.parseBytes(digest, 16);
-        }
-
-        /* ------------------------------------------------------------ */
-        public byte[] getDigest()
-        {
-            return _digest;
-        }
-
-        /* ------------------------------------------------------------ */
-        @Override
-        public boolean check(Object credentials)
-        {
-            try
-            {
-                byte[] digest = null;
-
-                if (credentials instanceof char[])
-                    credentials=new String((char[])credentials);
-                if (credentials instanceof Password || credentials instanceof String)
-                {
-                    synchronized (__md5Lock)
-                    {
-                        if (__md == null) __md = MessageDigest.getInstance("MD5");
-                        __md.reset();
-                        __md.update(credentials.toString().getBytes(StringUtil.__ISO_8859_1));
-                        digest = __md.digest();
-                    }
-                    if (digest == null || digest.length != _digest.length) return false;
-                    for (int i = 0; i < digest.length; i++)
-                        if (digest[i] != _digest[i]) return false;
-                    return true;
-                }
-                else if (credentials instanceof MD5)
-                {
-                    MD5 md5 = (MD5) credentials;
-                    if (_digest.length != md5._digest.length) return false;
-                    for (int i = 0; i < _digest.length; i++)
-                        if (_digest[i] != md5._digest[i]) return false;
-                    return true;
-                }
-                else if (credentials instanceof Credential)
-                {
-                    // Allow credential to attempt check - i.e. this'll work
-                    // for DigestAuthModule$Digest credentials
-                    return ((Credential) credentials).check(this);
-                }
-                else
-                {
-                    LOG.warn("Can't check " + credentials.getClass() + " against MD5");
-                    return false;
-                }
-            }
-            catch (Exception e)
-            {
-                LOG.warn(e);
-                return false;
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public static String digest(String password)
-        {
-            try
-            {
-                byte[] digest;
-                synchronized (__md5Lock)
-                {
-                    if (__md == null)
-                    {
-                        try
-                        {
-                            __md = MessageDigest.getInstance("MD5");
-                        }
-                        catch (Exception e)
-                        {
-                            LOG.warn(e);
-                            return null;
-                        }
-                    }
-
-                    __md.reset();
-                    __md.update(password.getBytes(StringUtil.__ISO_8859_1));
-                    digest = __md.digest();
-                }
-
-                return __TYPE + TypeUtil.toString(digest, 16);
-            }
-            catch (Exception e)
-            {
-                LOG.warn(e);
-                return null;
-            }
-        }
-    }
 }

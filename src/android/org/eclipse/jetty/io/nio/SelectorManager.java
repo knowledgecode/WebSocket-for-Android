@@ -28,7 +28,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,7 +42,6 @@ import org.eclipse.jetty.io.AsyncEndPoint;
 import org.eclipse.jetty.io.ConnectedEndPoint;
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.EndPoint;
-import org.eclipse.jetty.util.TypeUtil;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.AggregateLifeCycle;
 import org.eclipse.jetty.util.component.Dumpable;
@@ -379,7 +380,7 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
     public void dump(Appendable out, String indent) throws IOException
     {
         AggregateLifeCycle.dumpObject(out,this);
-        AggregateLifeCycle.dump(out,indent,TypeUtil.asList(_selectSet));
+        AggregateLifeCycle.dump(out,indent,Arrays.asList(_selectSet));
     }
 
 
@@ -991,7 +992,7 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
         public String toString()
         {
             Selector selector=_selector;
-            return String.format("%s keys=%d selected=%d",
+            return String.format(Locale.getDefault(), "%s keys=%d selected=%d",
                     super.toString(),
                     selector != null && selector.isOpen() ? selector.keys().size() : -1,
                     selector != null && selector.isOpen() ? selector.selectedKeys().size() : -1);

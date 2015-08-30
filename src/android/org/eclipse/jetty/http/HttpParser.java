@@ -19,6 +19,7 @@
 package org.eclipse.jetty.http;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 import org.eclipse.jetty.io.Buffer;
@@ -29,7 +30,6 @@ import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.io.View;
-import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -60,6 +60,8 @@ public class HttpParser implements Parser
     public static final int STATE_CHUNK_PARAMS=5;
     public static final int STATE_CHUNK=6;
     public static final int STATE_SEEKING_EOF=7;
+
+    public static final Charset __ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     private final EventHandler _handler;
     private final Buffers _buffers; // source of buffers
@@ -552,7 +554,7 @@ public class HttpParser implements Parser
                                                     _contentLength=HttpTokens.CHUNKED_CONTENT;
                                                 else
                                                 {
-                                                    String c=value.toString(StringUtil.__ISO_8859_1);
+                                                    String c=value.toString(__ISO_8859_1);
                                                     if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                         _contentLength=HttpTokens.CHUNKED_CONTENT;
 
@@ -749,9 +751,9 @@ public class HttpParser implements Parser
                                     else
                                     {
                                         // Continuation line!
-                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
+                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(__ISO_8859_1);
                                         _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                        _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
+                                        _multiLineValue += " " + _tok1.toString(__ISO_8859_1);
                                     }
                                 }
                                 _eol=ch;
@@ -782,9 +784,9 @@ public class HttpParser implements Parser
                                     else
                                     {
                                         // Continuation line!
-                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(StringUtil.__ISO_8859_1);
+                                        if (_multiLineValue == null) _multiLineValue=_tok1.toString(__ISO_8859_1);
                                         _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                        _multiLineValue += " " + _tok1.toString(StringUtil.__ISO_8859_1);
+                                        _multiLineValue += " " + _tok1.toString(__ISO_8859_1);
                                     }
                                 }
                                 _eol=ch;
@@ -1251,8 +1253,4 @@ public class HttpParser implements Parser
         public void earlyEOF()
         {}
     }
-
-
-
-
 }

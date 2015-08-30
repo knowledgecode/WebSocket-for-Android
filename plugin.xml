@@ -38,7 +38,6 @@
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocket.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/com/knowledgecode/cordova/websocket/WebSocketGenerator.java" target-dir="src/com/knowledgecode/cordova/websocket" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpException.java" target-dir="src/org/eclipse/jetty/http" />
-    <source-file src="src/android/org/eclipse/jetty/http/HttpFields.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpHeaders.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpHeaderValues.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpMethods.java" target-dir="src/org/eclipse/jetty/http" />
@@ -75,11 +74,9 @@
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectorManager.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SslConnection.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/util/BlockingArrayQueue.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/DateCache.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/IO.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/QuotedStringTokenizer.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/StringMap.java" target-dir="src/org/eclipse/jetty/util" />
-    <source-file src="src/android/org/eclipse/jetty/util/StringUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/thread/QueuedThreadPool.java" target-dir="src/org/eclipse/jetty/util/thread" />
     <source-file src="src/android/org/eclipse/jetty/util/thread/ThreadPool.java" target-dir="src/org/eclipse/jetty/util/thread" />
     <source-file src="src/android/org/eclipse/jetty/util/thread/Timeout.java" target-dir="src/org/eclipse/jetty/util/thread" />
@@ -89,9 +86,7 @@
     <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
-    <!--
-    <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" />
-    -->
+    <!-- <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" /> -->
     <source-file src="src/android/org/eclipse/jetty/util/log/Log.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Logger.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/Resource.java" target-dir="src/org/eclipse/jetty/util/resource" />

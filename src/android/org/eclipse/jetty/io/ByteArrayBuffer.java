@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
-import org.eclipse.jetty.util.StringUtil;
+import java.nio.charset.Charset;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -33,7 +32,8 @@ public class ByteArrayBuffer extends AbstractBuffer
 {
     // Set a maximum size to a write for the writeTo method, to ensure that very large content is not
     // written as a single write (which may fall foul to write timeouts if consumed slowly).
-    final static int MAX_WRITE=Integer.getInteger("org.eclipse.jetty.io.ByteArrayBuffer.MAX_WRITE",128*1024);
+    static final int MAX_WRITE=Integer.getInteger("org.eclipse.jetty.io.ByteArrayBuffer.MAX_WRITE",128*1024);
+    static final Charset __ISO_8859_1 = Charset.forName("ISO-8859-1");
     final protected byte[] _bytes;
 
     protected ByteArrayBuffer(int size, int access, boolean isVolatile)
@@ -78,7 +78,7 @@ public class ByteArrayBuffer extends AbstractBuffer
     public ByteArrayBuffer(String value)
     {
         super(READWRITE,NON_VOLATILE);
-        _bytes = StringUtil.getBytes(value);
+        _bytes = value.getBytes(__ISO_8859_1);
         setGetIndex(0);
         setPutIndex(_bytes.length);
         _access=IMMUTABLE;
@@ -88,7 +88,7 @@ public class ByteArrayBuffer extends AbstractBuffer
     public ByteArrayBuffer(String value,boolean immutable)
     {
         super(READWRITE,NON_VOLATILE);
-        _bytes = StringUtil.getBytes(value);
+        _bytes = value.getBytes(__ISO_8859_1);
         setGetIndex(0);
         setPutIndex(_bytes.length);
         if (immutable)
