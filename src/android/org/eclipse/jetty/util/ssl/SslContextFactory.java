@@ -71,6 +71,8 @@ import android.os.Build;
  * as well as HttpClient. It holds all SSL parameters and
  * creates SSL context based on these parameters to be
  * used by the SSL connectors.
+ *
+ * modified by KNOWLEDGECODE
  */
 public class SslContextFactory extends AbstractLifeCycle
 {
@@ -88,8 +90,7 @@ public class SslContextFactory extends AbstractLifeCycle
         public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
         {
             /**
-             * This is a workaround for SSL bugs in 4.0.3 or lower.
-             * @author KNOWLEDGECODE
+             * workaround for SSL bugs in 4.0.3 and lower
              * @see https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/AsyncSSLSocketWrapper.java
              */
             if (Build.VERSION.SDK_INT <= 15) {
@@ -126,12 +127,12 @@ public class SslContextFactory extends AbstractLifeCycle
     /** Excluded protocols. */
     private final Set<String> _excludeProtocols = new LinkedHashSet<String>();
     /** Included protocols. */
-    private Set<String> _includeProtocols = null;
+    private Set<String> _includeProtocols = new LinkedHashSet<String>();
 
     /** Excluded cipher suites. */
     private final Set<String> _excludeCipherSuites = new LinkedHashSet<String>();
     /** Included cipher suites. */
-    private Set<String> _includeCipherSuites = null;
+    private Set<String> _includeCipherSuites = new LinkedHashSet<String>();
 
     /** Keystore path. */
     private String _keyStorePath;
@@ -339,7 +340,6 @@ public class SslContextFactory extends AbstractLifeCycle
     public void setExcludeProtocols(String... protocols)
     {
         checkNotStarted();
-
         _excludeProtocols.clear();
         _excludeProtocols.addAll(Arrays.asList(protocols));
     }
@@ -373,8 +373,8 @@ public class SslContextFactory extends AbstractLifeCycle
     public void setIncludeProtocols(String... protocols)
     {
         checkNotStarted();
-
-        _includeProtocols = new LinkedHashSet<String>(Arrays.asList(protocols));
+        _includeProtocols.clear();
+        _includeProtocols.addAll(Arrays.asList(protocols));
     }
 
     /* ------------------------------------------------------------ */
@@ -429,8 +429,8 @@ public class SslContextFactory extends AbstractLifeCycle
     public void setIncludeCipherSuites(String... cipherSuites)
     {
         checkNotStarted();
-
-        _includeCipherSuites = new LinkedHashSet<String>(Arrays.asList(cipherSuites));
+        _includeCipherSuites.clear();
+        _includeCipherSuites.addAll(Arrays.asList(cipherSuites));
     }
 
     /* ------------------------------------------------------------ */
@@ -1140,7 +1140,7 @@ public class SslContextFactory extends AbstractLifeCycle
         Set<String> selected_protocols = new LinkedHashSet<String>();
 
         // Set the starting protocols - either from the included or enabled list
-        if (_includeProtocols!=null)
+        if (!_includeProtocols.isEmpty())
         {
             // Use only the supported included protocols
             for (String protocol : _includeProtocols)
@@ -1172,7 +1172,7 @@ public class SslContextFactory extends AbstractLifeCycle
         Set<String> selected_ciphers = new LinkedHashSet<String>();
 
         // Set the starting ciphers - either from the included or enabled list
-        if (_includeCipherSuites!=null)
+        if (!_includeCipherSuites.isEmpty())
         {
             // Use only the supported included ciphers
             for (String cipherSuite : _includeCipherSuites)
