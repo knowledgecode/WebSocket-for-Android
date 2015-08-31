@@ -1,4 +1,10 @@
 ## Change Log
+#### 0.10.0
+* permessage-deflate support (experimental)  
+* fixed multiple subprotocol bug  
+* improved finalization  
+* deleted unused codes (shrank about 25%)  
+
 #### 0.9.2
 * fixed lack of trailing zeros (0x00) when receiving binary (thanks to @lemoncola)  
 
@@ -19,15 +25,15 @@
 * fixed that difference between packages and directories structure (thanks to @digigm)  
 
 #### 0.8.2
-* fixed the constructor error on 4.4 or later (thanks to @digigm)  
+* fixed the constructor error on 4.4 and later (thanks to @digigm)  
 
 #### 0.8.1
 * fixed the frame aggregation error (thanks to @Atsyn)  
-* fixed the binary transmission for the case of using the plugin on 4.4 or later  
+* fixed the binary transmission for the case of using the plugin on 4.4 and later  
 
 #### 0.8.0
 * performance improvement (about 5% to 15% faster than previous versions)  
-* deployed the sources of Jetty directly (instead the jar file)  
+* deployed source of Jetty directly (instead the jar file)  
 * abolished `maxTextMessageSize`/`maxBinaryMessageSize` options  
 * added `override` option  
 * refactor  
