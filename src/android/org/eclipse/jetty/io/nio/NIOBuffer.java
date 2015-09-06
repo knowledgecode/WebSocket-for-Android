@@ -31,7 +31,4 @@ public interface NIOBuffer extends Buffer
 {
     /* ------------------------------------------------------------ */
     public ByteBuffer getByteBuffer();
-
-    /* ------------------------------------------------------------ */
-    public boolean isDirect();
 }

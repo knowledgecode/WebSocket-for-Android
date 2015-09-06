@@ -29,10 +29,9 @@ package org.eclipse.jetty.io;
 public interface Buffers
 {
     enum Type { BYTE_ARRAY, DIRECT, INDIRECT } ;
-    
+
     Buffer getHeader();
     Buffer getBuffer();
-    Buffer getBuffer(int size);
-    
+
     void returnBuffer(Buffer buffer);
 }

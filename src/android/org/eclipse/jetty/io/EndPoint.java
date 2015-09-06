@@ -20,7 +20,6 @@ package org.eclipse.jetty.io;
 
 import java.io.IOException;
 
-
 /**
  *
  * A transport EndPoint
@@ -56,7 +55,6 @@ public interface EndPoint
      */
     int fill(Buffer buffer) throws IOException;
 
-
     /**
      * Flush the buffer from the current getIndex to it's putIndex using whatever byte
      * sink is backing the buffer. The getIndex is updated with the number of bytes flushed.
@@ -69,35 +67,12 @@ public interface EndPoint
      */
     int flush(Buffer buffer) throws IOException;
 
-    /**
-     * Flush the buffer from the current getIndex to it's putIndex using whatever byte
-     * sink is backing the buffer. The getIndex is updated with the number of bytes flushed.
-     * Any mark set is cleared.
-     * If the entire contents of the buffer are flushed, then an implicit empty() is done.
-     * The passed header/trailer buffers are written before/after the contents of this buffer. This may be done
-     * either as gather writes, as a poke into this buffer or as several writes. The implementation is free to
-     * select the optimal mechanism.
-     * @param header A buffer to write before flushing this buffer. This buffers getIndex is updated.
-     * @param buffer The buffer to flush. This buffers getIndex is updated.
-     * @param trailer A buffer to write after flushing this buffer. This buffers getIndex is updated.
-     * @return the total number of bytes written.
-     */
-    int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException;
-
-
     /* ------------------------------------------------------------ */
     /**
      * @return The local IP address to which this <code>EndPoint</code> is bound, or <code>null</code>
      * if this <code>EndPoint</code> does not represent a network connection.
      */
     public String getLocalAddr();
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The local host name to which this <code>EndPoint</code> is bound, or <code>null</code>
-     * if this <code>EndPoint</code> does not represent a network connection.
-     */
-    public String getLocalHost();
 
     /* ------------------------------------------------------------ */
     /**
@@ -115,13 +90,6 @@ public interface EndPoint
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The host name of the remote machine to which this <code>EndPoint</code> is connected, or <code>null</code>
-     * if this <code>EndPoint</code> does not represent a network connection.
-     */
-    public String getRemoteHost();
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return The remote port number to which this <code>EndPoint</code> is connected, or <code>0</code>
      * if this <code>EndPoint</code> does not represent a network connection.
      */
@@ -131,19 +99,10 @@ public interface EndPoint
     public boolean isBlocking();
 
     /* ------------------------------------------------------------ */
-    public boolean blockReadable(long millisecs) throws IOException;
-
-    /* ------------------------------------------------------------ */
     public boolean blockWritable(long millisecs) throws IOException;
 
     /* ------------------------------------------------------------ */
     public boolean isOpen();
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The underlying transport object (socket, channel, etc.)
-     */
-    public Object getTransport();
 
     /* ------------------------------------------------------------ */
     /** Flush any buffered output.
@@ -169,7 +128,4 @@ public interface EndPoint
      * @throws IOException if the timeout cannot be set.
      */
     public void setMaxIdleTime(int timeMs) throws IOException;
-
-
-
 }

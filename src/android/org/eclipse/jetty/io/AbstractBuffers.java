@@ -98,26 +98,6 @@ public abstract class AbstractBuffers implements Buffers
 
     /* ------------------------------------------------------------ */
     /**
-     * Create a new content Buffer
-     * @param size
-     * @return new Buffer
-     */
-    final protected Buffer newBuffer(int size)
-    {
-       switch(_otherType)
-       {
-           case BYTE_ARRAY:
-               return new ByteArrayBuffer(size);
-           case DIRECT:
-               return new DirectNIOBuffer(size);
-           case INDIRECT:
-               return new IndirectNIOBuffer(size);
-       }
-       throw new IllegalStateException();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @param buffer
      * @return True if the buffer is the correct type to be a Header buffer
      */

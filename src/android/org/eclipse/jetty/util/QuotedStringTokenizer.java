@@ -46,7 +46,6 @@ public class QuotedStringTokenizer
     private StringBuffer _token;
     private boolean _hasToken=false;
     private int _i=0;
-    private int _lastStart=0;
     private boolean _double=true;
     private boolean _single=true;
 
@@ -71,35 +70,12 @@ public class QuotedStringTokenizer
     }
 
     /* ------------------------------------------------------------ */
-    public QuotedStringTokenizer(String str,
-                                 String delim,
-                                 boolean returnDelimiters)
-    {
-        this(str,delim,returnDelimiters,false);
-    }
-
-    /* ------------------------------------------------------------ */
-    public QuotedStringTokenizer(String str,
-                                 String delim)
-    {
-        this(str,delim,false,false);
-    }
-
-    /* ------------------------------------------------------------ */
-    public QuotedStringTokenizer(String str)
-    {
-        this(str,null,false,false);
-    }
-
-    /* ------------------------------------------------------------ */
     @Override
     public boolean hasMoreTokens()
     {
         // Already found a token
         if (_hasToken)
             return true;
-
-        _lastStart=_i;
 
         int state=0;
         boolean escape=false;
@@ -234,18 +210,6 @@ public class QuotedStringTokenizer
 
     /* ------------------------------------------------------------ */
     @Override
-    public String nextToken(String delim)
-        throws NoSuchElementException
-    {
-        _delim=delim;
-        _i=_lastStart;
-        _token.setLength(0);
-        _hasToken=false;
-        return nextToken();
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
     public boolean hasMoreElements()
     {
         return hasMoreTokens();
@@ -258,16 +222,6 @@ public class QuotedStringTokenizer
     {
         return nextToken();
     }
-
-    /* ------------------------------------------------------------ */
-    /** Not implemented.
-     */
-    @Override
-    public int countTokens()
-    {
-        return -1;
-    }
-
 
     /* ------------------------------------------------------------ */
     /** Quote a string.
@@ -298,27 +252,6 @@ public class QuotedStringTokenizer
         }
 
         return s;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Quote a string.
-     * The string is quoted only if quoting is required due to
-     * embeded delimiters, quote characters or the
-     * empty string.
-     * @param s The string to quote.
-     * @return quoted string
-     */
-    public static String quote(String s)
-    {
-        if (s==null)
-            return null;
-        if (s.length()==0)
-            return "\"\"";
-
-        StringBuffer b=new StringBuffer(s.length()+8);
-        quote(b,s);
-        return b.toString();
-
     }
 
     private static final char[] escapes = new char[32];
@@ -375,229 +308,5 @@ public class QuotedStringTokenizer
         {
             throw new RuntimeException(x);
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Quote a string into a StringBuffer only if needed.
-     * Quotes are forced if any delim characters are present.
-     *
-     * @param buf The StringBuffer
-     * @param s The String to quote.
-     * @param delim String of characters that must be quoted.
-     * @return true if quoted;
-     */
-    public static boolean quoteIfNeeded(Appendable buf, String s,String delim)
-    {
-        for (int i=0;i<s.length();i++)
-        {
-            char c = s.charAt(i);
-            if (delim.indexOf(c)>=0)
-            {
-            	quote(buf,s);
-            	return true;
-            }
-        }
-
-        try
-        {
-            buf.append(s);
-            return false;
-        }
-        catch(IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    public static String unquoteOnly(String s)
-    {
-        return unquoteOnly(s, false);
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Unquote a string, NOT converting unicode sequences
-     * @param s The string to unquote.
-     * @param lenient if true, will leave in backslashes that aren't valid escapes
-     * @return quoted string
-     */
-    public static String unquoteOnly(String s, boolean lenient)
-    {
-        if (s==null)
-            return null;
-        if (s.length()<2)
-            return s;
-
-        char first=s.charAt(0);
-        char last=s.charAt(s.length()-1);
-        if (first!=last || (first!='"' && first!='\''))
-            return s;
-
-        StringBuilder b = new StringBuilder(s.length() - 2);
-        boolean escape=false;
-        for (int i=1;i<s.length()-1;i++)
-        {
-            char c = s.charAt(i);
-
-            if (escape)
-            {
-                escape=false;
-                if (lenient && !isValidEscaping(c))
-                {
-                    b.append('\\');
-                }
-                b.append(c);
-            }
-            else if (c=='\\')
-            {
-                escape=true;
-            }
-            else
-            {
-                b.append(c);
-            }
-        }
-
-        return b.toString(); 
-    }
-    
-    /* ------------------------------------------------------------ */
-    public static String unquote(String s)
-    {
-        return unquote(s,false);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Unquote a string.
-     * @param s The string to unquote.
-     * @return quoted string
-     */
-    public static String unquote(String s, boolean lenient)
-    {
-        if (s==null)
-            return null;
-        if (s.length()<2)
-            return s;
-
-        char first=s.charAt(0);
-        char last=s.charAt(s.length()-1);
-        if (first!=last || (first!='"' && first!='\''))
-            return s;
-
-        StringBuilder b = new StringBuilder(s.length() - 2);
-        boolean escape=false;
-        for (int i=1;i<s.length()-1;i++)
-        {
-            char c = s.charAt(i);
-
-            if (escape)
-            {
-                escape=false;
-                switch (c)
-                {
-                    case 'n':
-                        b.append('\n');
-                        break;
-                    case 'r':
-                        b.append('\r');
-                        break;
-                    case 't':
-                        b.append('\t');
-                        break;
-                    case 'f':
-                        b.append('\f');
-                        break;
-                    case 'b':
-                        b.append('\b');
-                        break;
-                    case '\\':
-                        b.append('\\');
-                        break;
-                    case '/':
-                        b.append('/');
-                        break;
-                    case '"':
-                        b.append('"');
-                        break;
-                    case 'u':
-                        b.append((char)(
-                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<24)+
-                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<16)+
-                                (TypeUtil.convertHexDigit((byte)s.charAt(i++))<<8)+
-                                (TypeUtil.convertHexDigit((byte)s.charAt(i++)))
-                                )
-                        );
-                        break;
-                    default:
-                        if (lenient && !isValidEscaping(c))
-                        {
-                            b.append('\\');
-                        }
-                        b.append(c);
-                }
-            }
-            else if (c=='\\')
-            {
-                escape=true;
-            }
-            else
-            {
-                b.append(c);
-            }
-        }
-
-        return b.toString();
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Check that char c (which is preceded by a backslash) is a valid
-     * escape sequence.
-     * @param c
-     * @return
-     */
-    private static boolean isValidEscaping(char c)
-    {
-        return ((c == 'n') || (c == 'r') || (c == 't') || 
-                 (c == 'f') || (c == 'b') || (c == '\\') || 
-                 (c == '/') || (c == '"') || (c == 'u'));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return handle double quotes if true
-     */
-    public boolean getDouble()
-    {
-        return _double;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param d handle double quotes if true
-     */
-    public void setDouble(boolean d)
-    {
-        _double=d;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return handle single quotes if true
-     */
-    public boolean getSingle()
-    {
-        return _single;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param single handle single quotes if true
-     */
-    public void setSingle(boolean single)
-    {
-        _single=single;
     }
 }

@@ -25,9 +25,6 @@ import java.io.IOException;
  */
 public interface Parser
 {
-    void returnBuffers();
-    void reset();
-
     boolean isComplete();
 
     /**
@@ -36,12 +33,5 @@ public interface Parser
      */
     boolean parseAvailable() throws IOException;
 
-    boolean isMoreInBuffer() throws IOException;
-
     boolean isIdle();
-    
-    boolean isPersistent();
-    
-    void setPersistent(boolean persistent);
-
 }

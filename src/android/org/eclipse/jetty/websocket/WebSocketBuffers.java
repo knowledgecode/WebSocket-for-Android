@@ -21,8 +21,7 @@ package org.eclipse.jetty.websocket;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.Buffers;
 import org.eclipse.jetty.io.Buffers.Type;
-import org.eclipse.jetty.io.BuffersFactory;
-
+import org.eclipse.jetty.io.ThreadLocalBuffers;
 
 /* ------------------------------------------------------------ */
 /** The WebSocket Buffer Pool.
@@ -34,13 +33,11 @@ import org.eclipse.jetty.io.BuffersFactory;
  */
 public class WebSocketBuffers
 {
-    final private int _bufferSize;
     final private Buffers _buffers;
 
     public WebSocketBuffers(final int bufferSize)
     {
-        _bufferSize=bufferSize;
-        _buffers = BuffersFactory.newBuffers(Type.DIRECT,bufferSize,Type.INDIRECT,bufferSize,Type.INDIRECT,-1);
+        _buffers = new ThreadLocalBuffers(Type.DIRECT, bufferSize, Type.INDIRECT, bufferSize, Type.INDIRECT);
     }
 
     public Buffer getBuffer()
@@ -56,10 +53,5 @@ public class WebSocketBuffers
     public void returnBuffer(Buffer buffer)
     {
         _buffers.returnBuffer(buffer);
-    }
-
-    public int getBufferSize()
-    {
-        return _bufferSize;
     }
 }

@@ -28,29 +28,11 @@ public abstract class AbstractConnection implements Connection
 {
     private static final Logger LOG = Log.getLogger(AbstractConnection.class);
 
-    private final long _timeStamp;
     protected final EndPoint _endp;
-
-    public AbstractConnection(EndPoint endp)
-    {
-        _endp=(EndPoint)endp;
-        _timeStamp = System.currentTimeMillis();
-    }
 
     public AbstractConnection(EndPoint endp,long timestamp)
     {
         _endp=(EndPoint)endp;
-        _timeStamp = timestamp;
-    }
-
-    public long getTimeStamp()
-    {
-        return _timeStamp;
-    }
-
-    public EndPoint getEndPoint()
-    {
-        return _endp;
     }
 
     public void onIdleExpired(long idleForMs)

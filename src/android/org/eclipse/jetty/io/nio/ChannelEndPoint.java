@@ -53,23 +53,6 @@ public class ChannelEndPoint implements EndPoint
     private volatile boolean _ishut;
     private volatile boolean _oshut;
 
-    public ChannelEndPoint(ByteChannel channel) throws IOException
-    {
-        super();
-        this._channel = channel;
-        _socket=(channel instanceof SocketChannel)?((SocketChannel)channel).socket():null;
-        if (_socket!=null)
-        {
-            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
-            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
-            _maxIdleTime=_socket.getSoTimeout();
-        }
-        else
-        {
-            _local=_remote=null;
-        }
-    }
-
     protected ChannelEndPoint(ByteChannel channel, int maxIdleTime) throws IOException
     {
         this._channel = channel;
@@ -299,12 +282,6 @@ public class ChannelEndPoint implements EndPoint
                     buffer.skip(len);
             }
         }
-        else if (buf instanceof RandomAccessFileBuffer)
-        {
-            len = ((RandomAccessFileBuffer)buf).writeTo(_channel,buffer.getIndex(),buffer.length());
-            if (len>0)
-                buffer.skip(len);
-        }
         else if (buffer.array()!=null)
         {
             ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
@@ -474,15 +451,6 @@ public class ChannelEndPoint implements EndPoint
         if (_socket==null)
             return 0;
         return _remote==null?-1:_remote.getPort();
-    }
-
-    /* ------------------------------------------------------------ */
-    /*
-     * @see org.eclipse.io.EndPoint#getConnection()
-     */
-    public Object getTransport()
-    {
-        return _channel;
     }
 
     /* ------------------------------------------------------------ */

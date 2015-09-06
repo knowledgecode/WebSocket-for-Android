@@ -21,9 +21,9 @@ package org.eclipse.jetty.io;
 /**
  * A View on another buffer.  Allows operations that do not change the _content or
  * indexes of the backing buffer.
- * 
- * 
- * 
+ *
+ *
+ *
  */
 public class View extends AbstractBuffer
 {
@@ -45,7 +45,7 @@ public class View extends AbstractBuffer
         setMarkIndex(mark);
         _access=access;
     }
-    
+
     public View(Buffer buffer)
     {
         super(READWRITE,!buffer.isImmutable());
@@ -60,7 +60,7 @@ public class View extends AbstractBuffer
     {
         super(READWRITE,true);
     }
-    
+
     /**
      * Update view to buffer
      */
@@ -112,7 +112,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     *  
+     *
      */
     @Override
     public void clear()
@@ -124,7 +124,7 @@ public class View extends AbstractBuffer
     }
 
     /**
-     *  
+     *
      */
     @Override
     public void compact()
@@ -134,7 +134,7 @@ public class View extends AbstractBuffer
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -178,22 +178,13 @@ public class View extends AbstractBuffer
     }
 
     /**
-     * @return The result of calling {@link Buffer#peek(int, int)} on the underlying buffer
-     */
-    @Override
-    public Buffer peek(int index, int length)
-    {
-        return _buffer.peek(index, length);
-    }
-    
-    /**
      * @param index
      * @param src
      */
     @Override
     public int poke(int index, Buffer src)
     {
-        return _buffer.poke(index,src); 
+        return _buffer.poke(index,src);
     }
 
     /**
@@ -216,7 +207,7 @@ public class View extends AbstractBuffer
     {
         return _buffer.poke(index,b,offset,length);
     }
-    
+
     @Override
     public String toString()
     {
@@ -224,7 +215,7 @@ public class View extends AbstractBuffer
             return "INVALID";
         return super.toString();
     }
-    
+
     public static class CaseInsensitive extends View implements Buffer.CaseInsensitve
     {
         public CaseInsensitive()
@@ -232,16 +223,6 @@ public class View extends AbstractBuffer
             super();
         }
 
-        public CaseInsensitive(Buffer buffer, int mark, int get, int put, int access)
-        {
-            super(buffer,mark,get,put,access);
-        }
-
-        public CaseInsensitive(Buffer buffer)
-        {
-            super(buffer);
-        }
-        
         @Override
         public boolean equals(Object obj)
         {

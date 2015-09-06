@@ -18,9 +18,6 @@
  */
 package org.eclipse.jetty.websocket;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -62,21 +59,6 @@ class WebSocketBuffer implements Buffer {
 
     @Override
     public Buffer buffer() {
-        return null;
-    }
-
-    @Override
-    public Buffer asNonVolatileBuffer() {
-        return null;
-    }
-
-    @Override
-    public Buffer asReadOnlyBuffer() {
-        return null;
-    }
-
-    @Override
-    public Buffer asImmutableBuffer() {
         return null;
     }
 
@@ -159,10 +141,6 @@ class WebSocketBuffer implements Buffer {
     }
 
     @Override
-    public void mark(int offset) {
-    }
-
-    @Override
     public int markIndex() {
         return 0;
     }
@@ -175,11 +153,6 @@ class WebSocketBuffer implements Buffer {
     @Override
     public byte peek(int index) {
         return 0;
-    }
-
-    @Override
-    public Buffer peek(int index, int length) {
-        return null;
     }
 
     @Override
@@ -226,10 +199,6 @@ class WebSocketBuffer implements Buffer {
     }
 
     @Override
-    public void reset() {
-    }
-
-    @Override
     public void setGetIndex(int newStart) {
     }
 
@@ -247,11 +216,6 @@ class WebSocketBuffer implements Buffer {
     }
 
     @Override
-    public Buffer slice() {
-        return null;
-    }
-
-    @Override
     public Buffer sliceFromMark() {
         return null;
     }
@@ -263,20 +227,6 @@ class WebSocketBuffer implements Buffer {
 
     @Override
     public String toDetailString() {
-        return null;
-    }
-
-    @Override
-    public void writeTo(OutputStream out) throws IOException {
-    }
-
-    @Override
-    public int readFrom(InputStream in, int max) throws IOException {
-        return 0;
-    }
-
-    @Override
-    public String toString(String charset) {
         return null;
     }
 

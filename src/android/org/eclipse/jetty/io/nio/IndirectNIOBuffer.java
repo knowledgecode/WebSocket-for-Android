@@ -36,27 +36,8 @@ public class IndirectNIOBuffer extends ByteArrayBuffer implements NIOBuffer
     }
 
     /* ------------------------------------------------------------ */
-    public IndirectNIOBuffer(ByteBuffer buffer,boolean immutable)
-    {
-        super(buffer.array(),0,0, immutable?IMMUTABLE:READWRITE,NON_VOLATILE);
-        if (buffer.isDirect())
-            throw new IllegalArgumentException();
-        _buf = buffer;
-        _get=buffer.position();
-        _put=buffer.limit();
-        buffer.position(0);
-        buffer.limit(buffer.capacity());
-    }
-    
-    /* ------------------------------------------------------------ */
     public ByteBuffer getByteBuffer()
     {
         return _buf;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isDirect()
-    {
-        return false;
     }
 }
