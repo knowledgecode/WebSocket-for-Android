@@ -23,7 +23,6 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509KeyManager;
 
@@ -66,7 +65,7 @@ public class AliasedX509ExtendedKeyManager extends X509ExtendedKeyManager
      * @see javax.net.ssl.X509KeyManager#chooseServerAlias(java.lang.String, java.security.Principal[], java.net.Socket)
      */
     public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket)
-    {   
+    {
         return _keyAlias == null ? _keyManager.chooseServerAlias(keyType, issuers, socket) : _keyAlias;
     }
 
@@ -78,7 +77,6 @@ public class AliasedX509ExtendedKeyManager extends X509ExtendedKeyManager
     {
         return _keyManager.getClientAliases(keyType, issuers);
     }
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -105,26 +103,5 @@ public class AliasedX509ExtendedKeyManager extends X509ExtendedKeyManager
     public PrivateKey getPrivateKey(String alias)
     {
         return _keyManager.getPrivateKey(alias);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @see javax.net.ssl.X509ExtendedKeyManager#chooseEngineServerAlias(java.lang.String, java.security.Principal[], javax.net.ssl.SSLEngine)
-     */
-    @Override
-    public String chooseEngineServerAlias(String keyType, Principal[] issuers, SSLEngine engine)
-    {
-        return _keyAlias == null ? super.chooseEngineServerAlias(keyType,issuers,engine) : _keyAlias;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @see javax.net.ssl.X509ExtendedKeyManager#chooseEngineClientAlias(String[], Principal[], SSLEngine)
-     */
-    @Override
-    public String chooseEngineClientAlias(String keyType[], Principal[] issuers, SSLEngine engine)
-    {
-        return _keyAlias == null ? super.chooseEngineClientAlias(keyType,issuers,engine) : _keyAlias;
     }
 }

@@ -26,8 +26,6 @@ import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
-
-
 /* ------------------------------------------------------------ */
 /**
  * Parser the WebSocket protocol.

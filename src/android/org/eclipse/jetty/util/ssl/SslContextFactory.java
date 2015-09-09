@@ -21,10 +21,7 @@ package org.eclipse.jetty.util.ssl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.security.InvalidParameterException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -45,22 +42,19 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
+
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.security.CertificateUtils;
 import org.eclipse.jetty.util.security.CertificateValidator;
 import org.eclipse.jetty.util.security.Password;
+
 import android.annotation.SuppressLint;
 import android.os.Build;
 
@@ -93,7 +87,8 @@ public class SslContextFactory extends AbstractLifeCycle
              * workaround for SSL bugs in 4.0.3 and lower
              * @see https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/AsyncSSLSocketWrapper.java
              */
-            if (Build.VERSION.SDK_INT <= 15) {
+            if (Build.VERSION.SDK_INT <= 15)
+            {
                 for (java.security.cert.X509Certificate cert : certs)
                 {
                     if (cert != null && cert.getCriticalExtensionOIDs() != null)
@@ -160,9 +155,6 @@ public class SslContextFactory extends AbstractLifeCycle
     /** Set to true if client certificate authentication is desired */
     private boolean _wantClientAuth = false;
 
-    /** Set to true if renegotiation is allowed */
-    private boolean _allowRenegotiate = true;
-
     /** Keystore password */
     private transient Password _keyStorePassword;
     /** Key manager password */
@@ -203,10 +195,6 @@ public class SslContextFactory extends AbstractLifeCycle
     private KeyStore _trustStore;
     /** Set to true to enable SSL Session caching */
     private boolean _sessionCachingEnabled = true;
-    /** SSL session cache size */
-    private int _sslSessionCacheSize;
-    /** SSL session timeout */
-    private int _sslSessionTimeout;
 
     /** SSL context */
     private SSLContext _context;
@@ -221,28 +209,6 @@ public class SslContextFactory extends AbstractLifeCycle
     public SslContextFactory()
     {
         _trustAll=true;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Construct an instance of SslContextFactory
-     * Default constructor for use in XmlConfiguration files
-     * @param trustAll whether to blindly trust all certificates
-     * @see #setTrustAll(boolean)
-     */
-    public SslContextFactory(boolean trustAll)
-    {
-        _trustAll=trustAll;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Construct an instance of SslContextFactory
-     * @param keyStorePath default keystore location
-     */
-    public SslContextFactory(String keyStorePath)
-    {
-        _keyStorePath = keyStorePath;
     }
 
     /* ------------------------------------------------------------ */
@@ -301,7 +267,6 @@ public class SslContextFactory extends AbstractLifeCycle
                     validator.setMaxCertPathLength(_maxCertPathLength);
                     validator.setEnableCRLDP(_enableCRLDP);
                     validator.setEnableOCSP(_enableOCSP);
-                    validator.setOcspResponderURL(_ocspResponderURL);
                     validator.validate(keyStore, cert);
                 }
 
@@ -323,265 +288,6 @@ public class SslContextFactory extends AbstractLifeCycle
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The array of protocol names to exclude from
-     * {@link SSLEngine#setEnabledProtocols(String[])}
-     */
-    public String[] getExcludeProtocols()
-    {
-        return _excludeProtocols.toArray(new String[_excludeProtocols.size()]);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param protocols
-     *            The array of protocol names to exclude from
-     *            {@link SSLEngine#setEnabledProtocols(String[])}
-     */
-    public void setExcludeProtocols(String... protocols)
-    {
-        checkNotStarted();
-        _excludeProtocols.clear();
-        _excludeProtocols.addAll(Arrays.asList(protocols));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param protocol Protocol names to add to {@link SSLEngine#setEnabledProtocols(String[])}
-     */
-    public void addExcludeProtocols(String... protocol)
-    {
-        checkNotStarted();
-        _excludeProtocols.addAll(Arrays.asList(protocol));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The array of protocol names to include in
-     * {@link SSLEngine#setEnabledProtocols(String[])}
-     */
-    public String[] getIncludeProtocols()
-    {
-        return _includeProtocols.toArray(new String[_includeProtocols.size()]);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param protocols
-     *            The array of protocol names to include in
-     *            {@link SSLEngine#setEnabledProtocols(String[])}
-     */
-    public void setIncludeProtocols(String... protocols)
-    {
-        checkNotStarted();
-        _includeProtocols.clear();
-        _includeProtocols.addAll(Arrays.asList(protocols));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The array of cipher suite names to exclude from
-     * {@link SSLEngine#setEnabledCipherSuites(String[])}
-     */
-    public String[] getExcludeCipherSuites()
-    {
-        return _excludeCipherSuites.toArray(new String[_excludeCipherSuites.size()]);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param cipherSuites
-     *            The array of cipher suite names to exclude from
-     *            {@link SSLEngine#setEnabledCipherSuites(String[])}
-     */
-    public void setExcludeCipherSuites(String... cipherSuites)
-    {
-        checkNotStarted();
-        _excludeCipherSuites.clear();
-        _excludeCipherSuites.addAll(Arrays.asList(cipherSuites));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param cipher Cipher names to add to {@link SSLEngine#setEnabledCipherSuites(String[])}
-     */
-    public void addExcludeCipherSuites(String... cipher)
-    {
-        checkNotStarted();
-        _excludeCipherSuites.addAll(Arrays.asList(cipher));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The array of cipher suite names to include in
-     * {@link SSLEngine#setEnabledCipherSuites(String[])}
-     */
-    public String[] getIncludeCipherSuites()
-    {
-        return _includeCipherSuites.toArray(new String[_includeCipherSuites.size()]);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param cipherSuites
-     *            The array of cipher suite names to include in
-     *            {@link SSLEngine#setEnabledCipherSuites(String[])}
-     */
-    public void setIncludeCipherSuites(String... cipherSuites)
-    {
-        checkNotStarted();
-        _includeCipherSuites.clear();
-        _includeCipherSuites.addAll(Arrays.asList(cipherSuites));
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The file or URL of the SSL Key store.
-     */
-    public String getKeyStorePath()
-    {
-        return _keyStorePath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param keyStorePath
-     *            The file or URL of the SSL Key store.
-     */
-    public void setKeyStorePath(String keyStorePath)
-    {
-        checkNotStarted();
-
-        _keyStorePath = keyStorePath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The provider of the key store
-     */
-    public String getKeyStoreProvider()
-    {
-        return _keyStoreProvider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param keyStoreProvider
-     *            The provider of the key store
-     */
-    public void setKeyStoreProvider(String keyStoreProvider)
-    {
-        checkNotStarted();
-
-        _keyStoreProvider = keyStoreProvider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The type of the key store (default "JKS")
-     */
-    public String getKeyStoreType()
-    {
-        return (_keyStoreType);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param keyStoreType
-     *            The type of the key store (default "JKS")
-     */
-    public void setKeyStoreType(String keyStoreType)
-    {
-        checkNotStarted();
-
-        _keyStoreType = keyStoreType;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Alias of SSL certificate for the connector
-     */
-    public String getCertAlias()
-    {
-        return _certAlias;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param certAlias
-     *            Alias of SSL certificate for the connector
-     */
-    public void setCertAlias(String certAlias)
-    {
-        checkNotStarted();
-
-        _certAlias = certAlias;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The file name or URL of the trust store location
-     */
-    public String getTrustStore()
-    {
-        return _trustStorePath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param trustStorePath
-     *            The file name or URL of the trust store location
-     */
-    public void setTrustStore(String trustStorePath)
-    {
-        checkNotStarted();
-
-        _trustStorePath = trustStorePath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The provider of the trust store
-     */
-    public String getTrustStoreProvider()
-    {
-        return _trustStoreProvider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param trustStoreProvider
-     *            The provider of the trust store
-     */
-    public void setTrustStoreProvider(String trustStoreProvider)
-    {
-        checkNotStarted();
-
-        _trustStoreProvider = trustStoreProvider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The type of the trust store (default "JKS")
-     */
-    public String getTrustStoreType()
-    {
-        return _trustStoreType;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param trustStoreType
-     *            The type of the trust store (default "JKS")
-     */
-    public void setTrustStoreType(String trustStoreType)
-    {
-        checkNotStarted();
-
-        _trustStoreType = trustStoreType;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return True if SSL needs client authentication.
      * @see SSLEngine#getNeedClientAuth()
      */
@@ -592,342 +298,12 @@ public class SslContextFactory extends AbstractLifeCycle
 
     /* ------------------------------------------------------------ */
     /**
-     * @param needClientAuth
-     *            True if SSL needs client authentication.
-     * @see SSLEngine#getNeedClientAuth()
-     */
-    public void setNeedClientAuth(boolean needClientAuth)
-    {
-        checkNotStarted();
-
-        _needClientAuth = needClientAuth;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return True if SSL wants client authentication.
      * @see SSLEngine#getWantClientAuth()
      */
     public boolean getWantClientAuth()
     {
         return _wantClientAuth;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param wantClientAuth
-     *            True if SSL wants client authentication.
-     * @see SSLEngine#getWantClientAuth()
-     */
-    public void setWantClientAuth(boolean wantClientAuth)
-    {
-        checkNotStarted();
-
-        _wantClientAuth = wantClientAuth;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return true if SSL certificate has to be validated
-     */
-    public boolean isValidateCerts()
-    {
-        return _validateCerts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param validateCerts
-     *            true if SSL certificates have to be validated
-     */
-    public void setValidateCerts(boolean validateCerts)
-    {
-        checkNotStarted();
-
-        _validateCerts = validateCerts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return true if SSL certificates of the peer have to be validated
-     */
-    public boolean isValidatePeerCerts()
-    {
-        return _validatePeerCerts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param validatePeerCerts
-     *            true if SSL certificates of the peer have to be validated
-     */
-    public void setValidatePeerCerts(boolean validatePeerCerts)
-    {
-        checkNotStarted();
-
-        _validatePeerCerts = validatePeerCerts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return True if SSL re-negotiation is allowed (default false)
-     */
-    public boolean isAllowRenegotiate()
-    {
-        return _allowRenegotiate;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
-     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
-     * does not have CVE-2009-3555 fixed, then re-negotiation should
-     * not be allowed.  CVE-2009-3555 was fixed in Sun java 1.6 with a ban
-     * of renegotiates in u19 and with RFC5746 in u22.
-     *
-     * @param allowRenegotiate
-     *            true if re-negotiation is allowed (default false)
-     */
-    public void setAllowRenegotiate(boolean allowRenegotiate)
-    {
-        checkNotStarted();
-
-        _allowRenegotiate = allowRenegotiate;
-    }
-
-//    /* ------------------------------------------------------------ */
-//    /**
-//     * @param password
-//     *            The password for the key store
-//     */
-//    public void setKeyStorePassword(String password)
-//    {
-//        checkNotStarted();
-//
-//        _keyStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
-//    }
-//
-//    /* ------------------------------------------------------------ */
-//    /**
-//     * @param password
-//     *            The password (if any) for the specific key within the key store
-//     */
-//    public void setKeyManagerPassword(String password)
-//    {
-//        checkNotStarted();
-//
-//        _keyManagerPassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
-//    }
-//
-//    /* ------------------------------------------------------------ */
-//    /**
-//     * @param password
-//     *            The password for the trust store
-//     */
-//    public void setTrustStorePassword(String password)
-//    {
-//        checkNotStarted();
-//
-//        _trustStorePassword = Password.getPassword(PASSWORD_PROPERTY,password,null);
-//    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The SSL provider name, which if set is passed to
-     * {@link SSLContext#getInstance(String, String)}
-     */
-    public String getProvider()
-    {
-        return _sslProvider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param provider
-     *            The SSL provider name, which if set is passed to
-     *            {@link SSLContext#getInstance(String, String)}
-     */
-    public void setProvider(String provider)
-    {
-        checkNotStarted();
-
-        _sslProvider = provider;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The SSL protocol (default "TLS") passed to
-     * {@link SSLContext#getInstance(String, String)}
-     */
-    public String getProtocol()
-    {
-        return _sslProtocol;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param protocol
-     *            The SSL protocol (default "TLS") passed to
-     *            {@link SSLContext#getInstance(String, String)}
-     */
-    public void setProtocol(String protocol)
-    {
-        checkNotStarted();
-
-        _sslProtocol = protocol;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The algorithm name, which if set is passed to
-     * {@link SecureRandom#getInstance(String)} to obtain the {@link SecureRandom} instance passed to
-     * {@link SSLContext#init(javax.net.ssl.KeyManager[], javax.net.ssl.TrustManager[], SecureRandom)}
-     */
-    public String getSecureRandomAlgorithm()
-    {
-        return _secureRandomAlgorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param algorithm
-     *            The algorithm name, which if set is passed to
-     *            {@link SecureRandom#getInstance(String)} to obtain the {@link SecureRandom} instance passed to
-     *            {@link SSLContext#init(javax.net.ssl.KeyManager[], javax.net.ssl.TrustManager[], SecureRandom)}
-     */
-    public void setSecureRandomAlgorithm(String algorithm)
-    {
-        checkNotStarted();
-
-        _secureRandomAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The algorithm name (default "SunX509") used by the {@link KeyManagerFactory}
-     */
-    public String getSslKeyManagerFactoryAlgorithm()
-    {
-        return (_keyManagerFactoryAlgorithm);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param algorithm
-     *            The algorithm name (default "SunX509") used by the {@link KeyManagerFactory}
-     */
-    public void setSslKeyManagerFactoryAlgorithm(String algorithm)
-    {
-        checkNotStarted();
-
-        _keyManagerFactoryAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The algorithm name (default "SunX509") used by the {@link TrustManagerFactory}
-     */
-    public String getTrustManagerFactoryAlgorithm()
-    {
-        return (_trustManagerFactoryAlgorithm);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return True if all certificates should be trusted if there is no KeyStore or TrustStore
-     */
-    public boolean isTrustAll()
-    {
-        return _trustAll;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param trustAll True if all certificates should be trusted if there is no KeyStore or TrustStore
-     */
-    public void setTrustAll(boolean trustAll)
-    {
-        _trustAll = trustAll;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param algorithm
-     *            The algorithm name (default "SunX509") used by the {@link TrustManagerFactory}
-     *            Use the string "TrustAll" to install a trust manager that trusts all.
-     */
-    public void setTrustManagerFactoryAlgorithm(String algorithm)
-    {
-        checkNotStarted();
-
-        _trustManagerFactoryAlgorithm = algorithm;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Path to file that contains Certificate Revocation List
-     */
-    public String getCrlPath()
-    {
-        return _crlPath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param crlPath
-     *            Path to file that contains Certificate Revocation List
-     */
-    public void setCrlPath(String crlPath)
-    {
-        checkNotStarted();
-
-        _crlPath = crlPath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Maximum number of intermediate certificates in
-     * the certification path (-1 for unlimited)
-     */
-    public int getMaxCertPathLength()
-    {
-        return _maxCertPathLength;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param maxCertPathLength
-     *            maximum number of intermediate certificates in
-     *            the certification path (-1 for unlimited)
-     */
-    public void setMaxCertPathLength(int maxCertPathLength)
-    {
-        checkNotStarted();
-
-        _maxCertPathLength = maxCertPathLength;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The SSLContext
-     */
-    public SSLContext getSslContext()
-    {
-        if (!isStarted())
-            throw new IllegalStateException(getState());
-        return _context;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param sslContext
-     *            Set a preconfigured SSLContext
-     */
-    public void setSslContext(SSLContext sslContext)
-    {
-        checkNotStarted();
-
-        _context = sslContext;
     }
 
     /* ------------------------------------------------------------ */
@@ -1191,230 +567,11 @@ public class SslContextFactory extends AbstractLifeCycle
 
     /* ------------------------------------------------------------ */
     /**
-     * Check if the lifecycle has been started and throw runtime exception
-     */
-    protected void checkNotStarted()
-    {
-        if (isStarted())
-            throw new IllegalStateException("Cannot modify configuration when "+getState());
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return true if CRL Distribution Points support is enabled
-     */
-    public boolean isEnableCRLDP()
-    {
-        return _enableCRLDP;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Enables CRL Distribution Points Support
-     * @param enableCRLDP true - turn on, false - turns off
-     */
-    public void setEnableCRLDP(boolean enableCRLDP)
-    {
-        checkNotStarted();
-
-        _enableCRLDP = enableCRLDP;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return true if On-Line Certificate Status Protocol support is enabled
-     */
-    public boolean isEnableOCSP()
-    {
-        return _enableOCSP;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Enables On-Line Certificate Status Protocol support
-     * @param enableOCSP true - turn on, false - turn off
-     */
-    public void setEnableOCSP(boolean enableOCSP)
-    {
-        checkNotStarted();
-
-        _enableOCSP = enableOCSP;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Location of the OCSP Responder
-     */
-    public String getOcspResponderURL()
-    {
-        return _ocspResponderURL;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the location of the OCSP Responder.
-     * @param ocspResponderURL location of the OCSP Responder
-     */
-    public void setOcspResponderURL(String ocspResponderURL)
-    {
-        checkNotStarted();
-
-        _ocspResponderURL = ocspResponderURL;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the key store.
-     * @param keyStore the key store to set
-     */
-    public void setKeyStore(KeyStore keyStore)
-    {
-        checkNotStarted();
-
-        _keyStore = keyStore;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the trust store.
-     * @param trustStore the trust store to set
-     */
-    public void setTrustStore(KeyStore trustStore)
-    {
-        checkNotStarted();
-
-        _trustStore = trustStore;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the key store resource.
-     * @param resource the key store resource to set
-     */
-    public void setKeyStoreResource(Resource resource)
-    {
-        checkNotStarted();
-
-        try
-        {
-            _keyStoreInputStream = resource.getInputStream();
-        }
-        catch (IOException e)
-        {
-             throw new InvalidParameterException("Unable to get resource "+
-                     "input stream for resource "+resource.toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the trust store resource.
-     * @param resource the trust store resource to set
-     */
-    public void setTrustStoreResource(Resource resource)
-    {
-        checkNotStarted();
-
-        try
-        {
-            _trustStoreInputStream = resource.getInputStream();
-        }
-        catch (IOException e)
-        {
-             throw new InvalidParameterException("Unable to get resource "+
-                     "input stream for resource "+resource.toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
     * @return true if SSL Session caching is enabled
     */
     public boolean isSessionCachingEnabled()
     {
         return _sessionCachingEnabled;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the flag to enable SSL Session caching.
-    * @param enableSessionCaching the value of the flag
-    */
-    public void setSessionCachingEnabled(boolean enableSessionCaching)
-    {
-        _sessionCachingEnabled = enableSessionCaching;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get SSL session cache size.
-     * @return SSL session cache size
-     */
-    public int getSslSessionCacheSize()
-    {
-        return _sslSessionCacheSize;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** SEt SSL session cache size.
-     * @param sslSessionCacheSize SSL session cache size to set
-     */
-    public void setSslSessionCacheSize(int sslSessionCacheSize)
-    {
-        _sslSessionCacheSize = sslSessionCacheSize;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get SSL session timeout.
-     * @return SSL session timeout
-     */
-    public int getSslSessionTimeout()
-    {
-        return _sslSessionTimeout;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set SSL session timeout.
-     * @param sslSessionTimeout SSL session timeout to set
-     */
-    public void setSslSessionTimeout(int sslSessionTimeout)
-    {
-        _sslSessionTimeout = sslSessionTimeout;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public SSLServerSocket newSslServerSocket(String host,int port,int backlog) throws IOException
-    {
-        SSLServerSocketFactory factory = _context.getServerSocketFactory();
-
-        SSLServerSocket socket =
-            (SSLServerSocket) (host==null ?
-                        factory.createServerSocket(port,backlog):
-                        factory.createServerSocket(port,backlog,InetAddress.getByName(host)));
-
-        if (getWantClientAuth())
-            socket.setWantClientAuth(getWantClientAuth());
-        if (getNeedClientAuth())
-            socket.setNeedClientAuth(getNeedClientAuth());
-
-        socket.setEnabledCipherSuites(selectCipherSuites(
-                                            socket.getEnabledCipherSuites(),
-                                            socket.getSupportedCipherSuites()));
-        socket.setEnabledProtocols(selectProtocols(socket.getEnabledProtocols(),socket.getSupportedProtocols()));
-
-        return socket;
-    }
-
-    /* ------------------------------------------------------------ */
-    public SSLSocket newSslSocket() throws IOException
-    {
-        SSLSocketFactory factory = _context.getSocketFactory();
-
-        SSLSocket socket = (SSLSocket)factory.createSocket();
-
-        if (getWantClientAuth())
-            socket.setWantClientAuth(getWantClientAuth());
-        if (getNeedClientAuth())
-            socket.setNeedClientAuth(getNeedClientAuth());
-
-        socket.setEnabledCipherSuites(selectCipherSuites(
-                                            socket.getEnabledCipherSuites(),
-                                            socket.getSupportedCipherSuites()));
-        socket.setEnabledProtocols(selectProtocols(socket.getEnabledProtocols(),socket.getSupportedProtocols()));
-
-        return socket;
     }
 
     /* ------------------------------------------------------------ */

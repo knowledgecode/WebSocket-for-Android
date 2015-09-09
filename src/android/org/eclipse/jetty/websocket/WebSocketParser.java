@@ -20,8 +20,6 @@ package org.eclipse.jetty.websocket;
 
 import org.eclipse.jetty.io.Buffer;
 
-
-
 /* ------------------------------------------------------------ */
 /**
  * Parser the WebSocket protocol.
@@ -29,7 +27,6 @@ import org.eclipse.jetty.io.Buffer;
  */
 public interface WebSocketParser
 {
-    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -49,5 +46,4 @@ public interface WebSocketParser
     boolean isBufferEmpty();
 
     void fill(Buffer buffer);
-
 }

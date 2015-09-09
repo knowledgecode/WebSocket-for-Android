@@ -22,42 +22,37 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
 
 /**
  * An AggregateLifeCycle is an {@link LifeCycle} implementation for a collection of contained beans.
  * <p>
- * Beans can be added the AggregateLifeCycle either as managed beans or as unmanaged beans.  A managed bean is started, stopped and destroyed with the aggregate.  
+ * Beans can be added the AggregateLifeCycle either as managed beans or as unmanaged beans.  A managed bean is started, stopped and destroyed with the aggregate.
  * An unmanaged bean is associated with the aggregate for the purposes of {@link #dump()}, but it's lifecycle must be managed externally.
  * <p>
- * When a bean is added, if it is a {@link LifeCycle} and it is already started, then it is assumed to be an unmanaged bean.  
- * Otherwise the methods {@link #addBean(Object, boolean)}, {@link #manage(Object)} and {@link #unmanage(Object)} can be used to 
+ * When a bean is added, if it is a {@link LifeCycle} and it is already started, then it is assumed to be an unmanaged bean.
+ * Otherwise the methods {@link #addBean(Object, boolean)}, {@link #manage(Object)} and {@link #unmanage(Object)} can be used to
  * explicitly control the life cycle relationship.
  * <p>
- * If adding a bean that is shared between multiple {@link AggregateLifeCycle} instances, then it should be started before being added, so it is unmanaged, or 
+ * If adding a bean that is shared between multiple {@link AggregateLifeCycle} instances, then it should be started before being added, so it is unmanaged, or
  * the API must be used to explicitly set it as unmanaged.
  * <p>
  */
-public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable, Dumpable
+public class AggregateLifeCycle extends AbstractLifeCycle implements Dumpable
 {
-    private static final Logger LOG = Log.getLogger(AggregateLifeCycle.class);
     private final List<Bean> _beans=new CopyOnWriteArrayList<Bean>();
     private boolean _started=false;
 
     private class Bean
     {
-        Bean(Object b) 
+        Bean(Object b)
         {
             _bean=b;
         }
         final Object _bean;
         volatile boolean _managed=true;
-        
+
         public String toString()
         {
             return "{"+_bean+","+_managed+"}";
@@ -85,7 +80,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
         _started=true;
         super.doStart();
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Stop the joined lifecycle beans in the reverse order they were added.
@@ -109,28 +104,6 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
         }
     }
 
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Destroy the joined Destroyable beans in the reverse order they were added.
-     * @see org.eclipse.jetty.util.component.Destroyable#destroy()
-     */
-    public void destroy()
-    {
-        List<Bean> reverse = new ArrayList<Bean>(_beans);
-        Collections.reverse(reverse);
-        for (Bean b:reverse)
-        {
-            if (b._bean instanceof Destroyable && b._managed)
-            {
-                Destroyable d=(Destroyable)b._bean;
-                d.destroy();
-            }
-        }
-        _beans.clear();
-    }
-
-
     /* ------------------------------------------------------------ */
     /** Is the bean contained in the aggregate.
      * @param bean
@@ -143,24 +116,11 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
                 return true;
         return false;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Is the bean joined to the aggregate.
-     * @param bean
-     * @return True if the aggregate contains the bean and it is joined
-     */
-    public boolean isManaged(Object bean)
-    {
-        for (Bean b:_beans)
-            if (b._bean==bean)
-                return b._managed;
-        return false;
-    }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Add an associated bean.
-     * If the bean is a {@link LifeCycle}, then it will be managed if it is not 
+     * If the bean is a {@link LifeCycle}, then it will be managed if it is not
      * already started and umanaged if it is already started. The {@link #addBean(Object, boolean)}
      * method should be used if this is not correct, or the {@link #manage(Object)} and {@link #unmanage(Object)}
      * methods may be used after an add to change the status.
@@ -172,7 +132,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
         // beans are joined unless they are started lifecycles
         return addBean(o,!((o instanceof LifeCycle)&&((LifeCycle)o).isStarted()));
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Add an associated lifecycle.
      * @param o The lifecycle to add
@@ -183,11 +143,11 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
     {
         if (contains(o))
             return false;
-        
+
         Bean b = new Bean(o);
         b._managed=managed;
         _beans.add(b);
-        
+
         if (o instanceof LifeCycle)
         {
             LifeCycle l=(LifeCycle)o;
@@ -206,159 +166,6 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
             }
         }
         return true;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Manage a bean by this aggregate, so that it is started/stopped/destroyed with the 
-     * aggregate lifecycle.  
-     * @param bean The bean to manage (must already have been added).
-     */
-    public void manage(Object bean)
-    {    
-        for (Bean b :_beans)
-        {
-            if (b._bean==bean)
-            {
-                b._managed=true;
-                return;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Unmanage a bean by this aggregate, so that it is not started/stopped/destroyed with the 
-     * aggregate lifecycle.  
-     * @param bean The bean to manage (must already have been added).
-     */
-    public void unmanage(Object bean)
-    {
-        for (Bean b :_beans)
-        {
-            if (b._bean==bean)
-            {
-                b._managed=false;
-                return;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get dependent beans 
-     * @return List of beans.
-     */
-    public Collection<Object> getBeans()
-    {
-        return getBeans(Object.class);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get dependent beans of a specific class
-     * @see #addBean(Object)
-     * @param clazz
-     * @return List of beans.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> List<T> getBeans(Class<T> clazz)
-    {
-        ArrayList<T> beans = new ArrayList<T>();
-        for (Bean b:_beans)
-        {
-            if (clazz.isInstance(b._bean))
-                beans.add((T)(b._bean));
-        }
-        return beans;
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /** Get dependent beans of a specific class.
-     * If more than one bean of the type exist, the first is returned.
-     * @see #addBean(Object)
-     * @param clazz
-     * @return bean or null
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getBean(Class<T> clazz)
-    {
-        for (Bean b:_beans)
-        {
-            if (clazz.isInstance(b._bean))
-                return (T)b._bean;
-        }
-        
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Remove all associated bean.
-     */
-    public void removeBeans ()
-    {
-        _beans.clear();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Remove an associated bean.
-     */
-    public boolean removeBean (Object o)
-    {
-        Iterator<Bean> i = _beans.iterator();
-        while(i.hasNext())
-        {
-            Bean b=i.next();
-            if (b._bean==o)
-            {
-                _beans.remove(b);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void dumpStdErr()
-    {
-        try
-        {
-            dump(System.err,"");
-        }
-        catch (IOException e)
-        {
-            LOG.warn(e);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String dump()
-    {
-        return dump(this);
-    }    
-    
-    /* ------------------------------------------------------------ */
-    public static String dump(Dumpable dumpable)
-    {
-        StringBuilder b = new StringBuilder();
-        try
-        {
-            dumpable.dump(b,"");
-        }
-        catch (IOException e)
-        {
-            LOG.warn(e);
-        }
-        return b.toString();
-    }    
-
-    /* ------------------------------------------------------------ */
-    public void dump(Appendable out) throws IOException
-    {
-        dump(out,"");
     }
 
     /* ------------------------------------------------------------ */
@@ -382,7 +189,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
             out.append(" => ").append(th.toString()).append('\n');
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public void dump(Appendable out,String indent) throws IOException
     {
@@ -400,17 +207,17 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
             {
                 if (b._bean instanceof Dumpable)
                     ((Dumpable)b._bean).dump(out,indent+(i==size?"    ":" |  "));
-                else 
+                else
                     dumpObject(out,b._bean);
             }
-            else 
+            else
                 dumpObject(out,b._bean);
         }
 
         if (i!=size)
             out.append(indent).append(" |\n");
     }
-    
+
     /* ------------------------------------------------------------ */
     public static void dump(Appendable out,String indent,Collection<?>... collections) throws IOException
     {
@@ -418,7 +225,7 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
             return;
         int size=0;
         for (Collection<?> c : collections)
-            size+=c.size();    
+            size+=c.size();
         if (size==0)
             return;
 
@@ -432,12 +239,12 @@ public class AggregateLifeCycle extends AbstractLifeCycle implements Destroyable
 
                 if (o instanceof Dumpable)
                     ((Dumpable)o).dump(out,indent+(i==size?"    ":" |  "));
-                else 
+                else
                     dumpObject(out,o);
             }
-            
+
             if (i!=size)
-                out.append(indent).append(" |\n");          
+                out.append(indent).append(" |\n");
         }
     }
 }

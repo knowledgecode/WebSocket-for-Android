@@ -78,7 +78,6 @@
     <source-file src="src/android/org/eclipse/jetty/util/TypeUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AbstractLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AggregateLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
-    <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <!-- <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" /> -->
@@ -88,7 +87,6 @@
     <source-file src="src/android/org/eclipse/jetty/util/resource/URLResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
     <source-file src="src/android/org/eclipse/jetty/util/security/CertificateUtils.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/security/CertificateValidator.java" target-dir="src/org/eclipse/jetty/util/security" />
-    <source-file src="src/android/org/eclipse/jetty/util/security/Credential.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/security/Password.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/ssl/AliasedX509ExtendedKeyManager.java" target-dir="src/org/eclipse/jetty/util/ssl" />
     <source-file src="src/android/org/eclipse/jetty/util/ssl/SslContextFactory.java" target-dir="src/org/eclipse/jetty/util/ssl" />
