@@ -26,9 +26,6 @@ import java.nio.charset.Charset;
  */
 public class ByteArrayBuffer extends AbstractBuffer
 {
-    // Set a maximum size to a write for the writeTo method, to ensure that very large content is not
-    // written as a single write (which may fall foul to write timeouts if consumed slowly).
-    static final int MAX_WRITE=Integer.getInteger("org.eclipse.jetty.io.ByteArrayBuffer.MAX_WRITE",128*1024);
     static final Charset __ISO_8859_1 = Charset.forName("ISO-8859-1");
     final protected byte[] _bytes;
 

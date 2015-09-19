@@ -12,7 +12,7 @@
 //      The Apache License v2.0 is available at
 //      http://www.opensource.org/licenses/apache2.0.php
 //
-//  You may elect to redistribute this code under either of these licenses.
+//  You may select to redistribute this code under either of these licenses.
 //  ========================================================================
 //
 
@@ -138,14 +138,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
     }
 
     private final WebSocket.FrameConnection _connection = new WSFrameConnection();
-
-
-    /* ------------------------------------------------------------ */
-    public WebSocketConnectionRFC6455(WebSocket websocket, EndPoint endpoint, WebSocketBuffers buffers, long timestamp, int maxIdleTime, String protocol, List<Extension> extensions,int draft)
-        throws IOException
-    {
-        this(websocket,endpoint,buffers,timestamp,maxIdleTime,protocol,extensions,draft,null);
-    }
 
     /* ------------------------------------------------------------ */
     public WebSocketConnectionRFC6455(WebSocket websocket, EndPoint endpoint, WebSocketBuffers buffers, long timestamp, int maxIdleTime, String protocol, List<Extension> extensions,int draft, MaskGen maskgen)
@@ -644,6 +636,11 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
     private class WSFrameHandler implements WebSocketParser.FrameHandler
     {
+        private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
+        private static final int INITIAL_CAPACITY = 8192;
+        private WebSocketBuffer _buffer = new WebSocketBuffer(INITIAL_CAPACITY);
+        private byte _opcode = -1;
+
         private boolean excess(int opcode, int length)
         {
             switch (opcode)
@@ -656,11 +653,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                     return false;
             }
         }
-
-        private static final int MAX_CONTROL_FRAME_PAYLOAD = 125;
-        private static final int INITIAL_CAPACITY = 8192;
-        private WebSocketBuffer _buffer = new WebSocketBuffer(INITIAL_CAPACITY);
-        private byte _opcode = -1;
 
         public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
         {
