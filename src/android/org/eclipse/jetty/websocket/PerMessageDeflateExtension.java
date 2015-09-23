@@ -43,12 +43,12 @@ public class PerMessageDeflateExtension implements Extension {
 
     private static final Logger __log = Log.getLogger(PerMessageDeflateExtension.class.getName());
     private static final byte[] TAIL_BYTES = new byte[] { 0x00, 0x00, (byte)0xff, (byte)0xff };
-    private static final int INITIAL_CAPACITY = 65536;
+    private static final int INITIAL_CAPACITY = 8192;
     private static final String EXTENSION = "permessage-deflate";
     private static final String CLIENT_NO_CONTEXT_TAKEOVER = "client_no_context_takeover";
     private static final String SERVER_NO_CONTEXT_TAKEOVER = "server_no_context_takeover";
 
-    FrameConnection _connection;
+    private FrameConnection _connection;
     private FrameHandler _inbound;
     private WebSocketGenerator _outbound;
     private Deflater _deflater;
