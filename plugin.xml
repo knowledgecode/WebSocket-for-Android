@@ -69,6 +69,7 @@
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectorManager.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SslConnection.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/util/BlockingArrayQueue.java" target-dir="src/org/eclipse/jetty/util" />
+    <source-file src="src/android/org/eclipse/jetty/util/ConcurrentHashSet.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/IO.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/QuotedStringTokenizer.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/StringMap.java" target-dir="src/org/eclipse/jetty/util" />
