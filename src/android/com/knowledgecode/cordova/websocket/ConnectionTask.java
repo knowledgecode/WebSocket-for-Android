@@ -90,11 +90,12 @@ class ConnectionTask implements Task {
     }
 
     @Override
-    public void execute(JSONArray args, CallbackContext ctx) {
+    public void execute(String rawArgs, CallbackContext ctx) {
         try {
             WebSocketClient client = _factory.newWebSocketClient();
 
-            int id = args.getInt(0);
+            JSONArray args = new JSONArray(rawArgs);
+            int id = Integer.parseInt(args.getString(0), 16);
             URI uri = new URI(args.getString(1));
             String protocol = args.getString(2);
             JSONObject options = args.getJSONObject(5);

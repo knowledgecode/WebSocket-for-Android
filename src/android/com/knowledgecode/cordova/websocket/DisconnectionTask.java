@@ -19,6 +19,8 @@
 package com.knowledgecode.cordova.websocket;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
+import org.apache.cordova.PluginResult.Status;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.json.JSONArray;
 
@@ -43,9 +45,10 @@ class DisconnectionTask implements Task {
     }
 
     @Override
-    public void execute(JSONArray args, CallbackContext ctx) {
+    public void execute(String rawArgs, CallbackContext ctx) {
         try {
-            int id = args.getInt(0);
+            JSONArray args = new JSONArray(rawArgs);
+            int id = Integer.parseInt(args.getString(0), 16);
             int code = args.getInt(1);
             String reason = args.getString(2);
             Connection conn = _map.get(id);
@@ -58,7 +61,11 @@ class DisconnectionTask implements Task {
                 }
             }
         } catch (Exception e) {
-            ctx.error("close");
+            if (!ctx.isFinished()) {
+                PluginResult result = new PluginResult(Status.ERROR);
+                result.setKeepCallback(true);
+                ctx.sendPluginResult(result);
+            }
         }
     }
 }
