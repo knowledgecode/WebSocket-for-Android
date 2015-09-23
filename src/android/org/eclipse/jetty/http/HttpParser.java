@@ -128,6 +128,8 @@ public class HttpParser implements Parser
     /* ------------------------------------------------------------ */
     public boolean isComplete()
     {
+        if (_responseStatus > 0)
+            return isState(STATE_END) || isState(STATE_SEEKING_EOF);
         return isState(STATE_END);
     }
 
