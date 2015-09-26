@@ -101,7 +101,7 @@ class ConnectionTask implements Task {
             JSONObject options = args.getJSONObject(5);
             String origin = options.optString("origin", args.getString(3));
             String agent = options.optString("agent", args.getString(4));
-            boolean deflate = options.optBoolean("perMessageDeflate", false);
+            boolean deflate = options.optBoolean("perMessageDeflate", true);
             long maxConnectTime = options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
             client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));
