@@ -32,29 +32,36 @@ class WebSocketBuffer implements Buffer {
 
     private byte[] _buffer;
     private int _index;
+    private int _capacity;
 
-    public WebSocketBuffer(int capacity) {
+    public WebSocketBuffer(final int capacity) {
         _buffer = new byte[capacity];
         _index = 0;
+        _capacity = capacity;
     }
 
-    public WebSocketBuffer append(final byte[] array, int offset, int length) {
-        if (length > _buffer.length - _index) {
-            _buffer = Arrays.copyOf(_buffer, Math.max(_buffer.length << 1, _index + length));
+    public WebSocketBuffer(final byte[] buffer, final int offset, final int length) {
+        _buffer = Arrays.copyOfRange(buffer, offset, length);
+        _index = length;
+        _capacity = length;
+    }
+
+    public WebSocketBuffer append(final byte[] array, final int offset, final int length) {
+        if ((_index += length) > _capacity) {
+            _buffer = Arrays.copyOf(_buffer, (_capacity = Math.max(_capacity << 1, _index)));
         }
-        System.arraycopy(array, offset, _buffer, _index, length);
-        _index += length;
+        System.arraycopy(array, offset, _buffer, _index - length, length);
         return this;
     }
 
     @Override
     public byte[] array() {
-        return Arrays.copyOf(_buffer, _index);
+        return _buffer;
     }
 
     @Override
     public byte[] asArray() {
-        return null;
+        return Arrays.copyOf(_buffer, _index);
     }
 
     @Override
@@ -69,12 +76,12 @@ class WebSocketBuffer implements Buffer {
 
     @Override
     public int capacity() {
-        return 0;
+        return _capacity;
     }
 
     @Override
     public int space() {
-        return 0;
+        return _capacity - _index;
     }
 
     @Override
@@ -212,7 +219,7 @@ class WebSocketBuffer implements Buffer {
 
     @Override
     public int skip(int n) {
-        return 0;
+        return n;
     }
 
     @Override
@@ -232,6 +239,6 @@ class WebSocketBuffer implements Buffer {
 
     @Override
     public String toString(Charset charset) {
-        return new String(array(), charset);
+        return new String(_buffer, 0, _index, charset);
     }
 }
