@@ -421,9 +421,9 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         public void sendMessage(String content) throws IOException
         {
             if (_closedOut)
-                throw new IOException("closedOut "+_closeCode+":"+_closeMessage);
+                throw new IOException("closedOut " + _closeCode + ":" + _closeMessage);
             byte[] data = content.getBytes(_utf8);
-            _outbound.addFrame((byte)FLAG_FIN,WebSocketConnectionRFC6455.OP_TEXT,data,0,data.length);
+            _outbound.addFrame((byte)FLAG_FIN, WebSocketConnectionRFC6455.OP_TEXT, data, 0, data.length);
             checkWriteable();
         }
 
@@ -431,8 +431,8 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         public void sendMessage(byte[] content, int offset, int length) throws IOException
         {
             if (_closedOut)
-                throw new IOException("closedOut "+_closeCode+":"+_closeMessage);
-            _outbound.addFrame((byte)FLAG_FIN,WebSocketConnectionRFC6455.OP_BINARY,content,offset,length);
+                throw new IOException("closedOut " + _closeCode + ":" + _closeMessage);
+            _outbound.addFrame((byte)FLAG_FIN, WebSocketConnectionRFC6455.OP_BINARY, content, offset, length);
             checkWriteable();
         }
 
@@ -440,8 +440,8 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         public void sendFrame(byte flags,byte opcode, byte[] content, int offset, int length) throws IOException
         {
             if (_closedOut)
-                throw new IOException("closedOut "+_closeCode+":"+_closeMessage);
-            _outbound.addFrame(flags,opcode,content,offset,length);
+                throw new IOException("closedOut " + _closeCode + ":" + _closeMessage);
+            _outbound.addFrame(flags, opcode, content, offset, length);
             checkWriteable();
         }
 
@@ -450,8 +450,8 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         {
             // TODO: section 5.5 states that control frames MUST never be length > 125 bytes and MUST NOT be fragmented
             if (_closedOut)
-                throw new IOException("closedOut "+_closeCode+":"+_closeMessage);
-            _outbound.addFrame((byte)FLAG_FIN,ctrl,data,offset,length);
+                throw new IOException("closedOut " + _closeCode + ":" + _closeMessage);
+            _outbound.addFrame((byte)FLAG_FIN, ctrl, data, offset, length);
             checkWriteable();
         }
 
@@ -530,7 +530,8 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         {
             List<String> extensions = new ArrayList<String>();
 
-            for (Extension extension : _extensions) {
+            for (Extension extension : _extensions)
+            {
                 extensions.add(extension.getParameterizedName());
             }
             return TextUtils.join(", ", extensions);
@@ -656,8 +657,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
         public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
         {
-            boolean lastFrame = isLastFrame(flags);
-
             synchronized (WebSocketConnectionRFC6455.this)
             {
                 // Ignore incoming after a close
@@ -668,10 +667,12 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
             }
 
             byte[] array = buffer.array();
+            int offset = buffer.getIndex();
+            int length = buffer.length();
 
-            if (isControlFrame(opcode) && buffer.length() > MAX_CONTROL_FRAME_PAYLOAD)
+            if (isControlFrame(opcode) && length > MAX_CONTROL_FRAME_PAYLOAD)
             {
-                errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Control frame too large: " + buffer.length() + " > " + MAX_CONTROL_FRAME_PAYLOAD);
+                errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL, "Control frame too large: " + length + " > " + MAX_CONTROL_FRAME_PAYLOAD);
                 return;
             }
 
@@ -688,9 +689,9 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
             }
 
             // Deliver frame if websocket is a FrameWebSocket
-            if (_onFrame!=null)
+            if (_onFrame != null)
             {
-                if (_onFrame.onFrame(flags,opcode,array,buffer.getIndex(),buffer.length()))
+                if (_onFrame.onFrame(flags, opcode, array, offset, length))
                 {
                     return;
                 }
@@ -698,14 +699,11 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
             if (_onControl != null && isControlFrame(opcode))
             {
-                if (_onControl.onControl(opcode, array, buffer.getIndex(), buffer.length()))
+                if (_onControl.onControl(opcode, array, offset, length))
                 {
                     return;
                 }
             }
-
-            int offset = buffer.getIndex();
-            int length = buffer.length();
 
             switch (opcode)
             {
@@ -740,7 +738,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                                 return;
                         }
                     }
-                    if (lastFrame)
+                    if (isLastFrame(flags))
                     {
                         switch (_opcode)
                         {
@@ -761,8 +759,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                                 }
                                 else
                                 {
-                                    byte[] msg = _buffer.append(array, offset, length).array();
-                                    _onBinaryMessage.onMessage(msg, 0, msg.length);
+                                    _onBinaryMessage.onMessage(_buffer.append(array, offset, length).array(), 0, _buffer.length());
                                 }
                                 break;
                         }
@@ -837,7 +834,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
         private void errorClose(int code, String message)
         {
-            _connection.close(code,message);
+            _connection.close(code, message);
 
             // Brutally drop the connection
             try
@@ -853,15 +850,15 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
 
         public void close(int code,String message)
         {
-            if (code!=CLOSE_NORMAL)
-                LOG.warn("Close: "+code+" "+message);
-            _connection.close(code,message);
+            if (code != CLOSE_NORMAL)
+                LOG.warn("Close: " + code + " " + message);
+            _connection.close(code, message);
         }
 
         @Override
         public String toString()
         {
-            return WebSocketConnectionRFC6455.this.toString()+"FH";
+            return WebSocketConnectionRFC6455.this.toString() + "FH";
         }
     }
 
