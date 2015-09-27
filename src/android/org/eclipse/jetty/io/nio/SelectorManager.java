@@ -77,27 +77,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
 
     /* ------------------------------------------------------------ */
     /**
-     * @param maxIdleTime The maximum period in milli seconds that a connection may be idle before it is closed.
-     * @see #setLowResourcesMaxIdleTime(long)
-     */
-    public void setMaxIdleTime(long maxIdleTime)
-    {
-        _maxIdleTime=(int)maxIdleTime;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param selectSets number of select sets to create
-     */
-    public void setSelectSets(int selectSets)
-    {
-        long lrc = _lowResourcesConnections * _selectSets;
-        _selectSets=selectSets;
-        _lowResourcesConnections=lrc/_selectSets;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return the max idle time
      */
     public long getMaxIdleTime()
@@ -112,16 +91,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
     public int getSelectSets()
     {
         return _selectSets;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param i
-     * @return The select set
-     */
-    public SelectSet getSelectSet(int i)
-    {
-        return _selectSet[i];
     }
 
     /* ------------------------------------------------------------ */
@@ -148,45 +117,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
         }
     }
 
-
-    /* ------------------------------------------------------------ */
-    /** Register a channel
-     * @param channel
-     */
-    public void register(SocketChannel channel)
-    {
-        // The ++ increment here is not atomic, but it does not matter.
-        // so long as the value changes sometimes, then connections will
-        // be distributed over the available sets.
-
-        int s=_set++;
-        if (s<0)
-            s=-s;
-        s=s%_selectSets;
-        SelectSet[] sets=_selectSet;
-        if (sets!=null)
-        {
-            SelectSet set=sets[s];
-            set.addChange(channel);
-            set.wakeup();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Register a {@link ServerSocketChannel}
-     * @param acceptChannel
-     */
-    public void register(ServerSocketChannel acceptChannel)
-    {
-        int s=_set++;
-        if (s<0)
-            s=-s;
-        s=s%_selectSets;
-        SelectSet set=_selectSet[s];
-        set.addChange(acceptChannel);
-        set.wakeup();
-    }
-
     /* ------------------------------------------------------------ */
     /**
      * @return delta The value to add to the selector thread priority.
@@ -195,57 +125,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
     {
         return _selectorPriorityDelta;
     }
-
-    /* ------------------------------------------------------------ */
-    /** Set the selector thread priorty delta.
-     * @param delta The value to add to the selector thread priority.
-     */
-    public void setSelectorPriorityDelta(int delta)
-    {
-        _selectorPriorityDelta=delta;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the lowResourcesConnections
-     */
-    public long getLowResourcesConnections()
-    {
-        return _lowResourcesConnections*_selectSets;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Set the number of connections, which if exceeded places this manager in low resources state.
-     * This is not an exact measure as the connection count is averaged over the select sets.
-     * @param lowResourcesConnections the number of connections
-     * @see #setLowResourcesMaxIdleTime(long)
-     */
-    public void setLowResourcesConnections(long lowResourcesConnections)
-    {
-        _lowResourcesConnections=(lowResourcesConnections+_selectSets-1)/_selectSets;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the lowResourcesMaxIdleTime
-     */
-    public long getLowResourcesMaxIdleTime()
-    {
-        return _lowResourcesMaxIdleTime;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param lowResourcesMaxIdleTime the period in ms that a connection is allowed to be idle when this SelectSet has more connections than {@link #getLowResourcesConnections()}
-     * @see #setMaxIdleTime(long)
-     */
-    public void setLowResourcesMaxIdleTime(long lowResourcesMaxIdleTime)
-    {
-        _lowResourcesMaxIdleTime=(int)lowResourcesMaxIdleTime;
-    }
-
 
     /* ------------------------------------------------------------------------------- */
     public abstract boolean dispatch(Runnable task);
@@ -316,7 +195,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
         }
     }
 
-
     /* ------------------------------------------------------------------------------- */
     @Override
     protected void doStop() throws Exception
@@ -371,18 +249,11 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
     }
 
     /* ------------------------------------------------------------ */
-    public String dump()
-    {
-        return AggregateLifeCycle.dump(this);
-    }
-
-    /* ------------------------------------------------------------ */
     public void dump(Appendable out, String indent) throws IOException
     {
         AggregateLifeCycle.dumpObject(out,this);
         AggregateLifeCycle.dump(out,indent,Arrays.asList(_selectSet));
     }
-
 
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
@@ -747,7 +618,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
             }
         }
 
-
         /* ------------------------------------------------------------ */
         private void renewSelector()
         {
@@ -919,12 +789,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
         }
 
         /* ------------------------------------------------------------ */
-        public String dump()
-        {
-            return AggregateLifeCycle.dump(this);
-        }
-
-        /* ------------------------------------------------------------ */
         public void dump(Appendable out, String indent) throws IOException
         {
             out.append(String.valueOf(this)).append(" id=").append(String.valueOf(_setID)).append("\n");
@@ -1020,16 +884,8 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
     }
 
     /* ------------------------------------------------------------ */
-    public void setDeferringInterestedOps0(boolean deferringInterestedOps0)
-    {
-        _deferringInterestedOps0 = deferringInterestedOps0;
-    }
-
-
-    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private interface ChangeTask extends Runnable
     {}
-
 }

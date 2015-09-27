@@ -27,7 +27,7 @@ import java.util.EventListener;
  * Classes implementing this interface have a defined life cycle
  * defined by the methods of this interface.
  *
- * 
+ *
  */
 public interface LifeCycle
 {
@@ -91,18 +91,6 @@ public interface LifeCycle
      */
     public boolean isStopped();
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @return true if the component has failed to start or has failed to stop.
-     */
-    public boolean isFailed();
-    
-    /* ------------------------------------------------------------ */
-    public void addLifeCycleListener(LifeCycle.Listener listener);
-
-    /* ------------------------------------------------------------ */
-    public void removeLifeCycleListener(LifeCycle.Listener listener);
-    
 
     /* ------------------------------------------------------------ */
     /** Listener.

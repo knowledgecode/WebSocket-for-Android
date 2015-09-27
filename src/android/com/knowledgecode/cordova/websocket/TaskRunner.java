@@ -24,13 +24,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.cordova.CallbackContext;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 class TaskRunner implements Runnable {
 
     interface Task {
-        public void execute(JSONArray args, CallbackContext ctx);
+        public void execute(String rawArgs, CallbackContext ctx);
     }
 
     private BlockingQueue<TaskBean> _queue;
@@ -64,18 +62,9 @@ class TaskRunner implements Runnable {
             } catch (InterruptedException e) {
                 break;
             }
-
             String action = task.getAction();
-            CallbackContext ctx = task.getCtx();
-            JSONArray args = null;
 
-            try {
-                args = new JSONArray(task.getRawArgs());
-            } catch (JSONException e) {
-                ctx.error("JSON");
-            }
-            _map.get(action).execute(args, ctx);
-
+            _map.get(action).execute(task.getRawArgs(), task.getCtx());
             if (WebSocket.DESTROY_TASK.equals(action)) {
                 break;
             }

@@ -30,7 +30,7 @@ import org.eclipse.jetty.util.log.Logger;
  * Provides stream handling utilities in
  * singleton Threadpool implementation accessed by static members.
  */
-public class IO 
+public class IO
 {
     private static final Logger LOG = Log.getLogger(IO.class);
 

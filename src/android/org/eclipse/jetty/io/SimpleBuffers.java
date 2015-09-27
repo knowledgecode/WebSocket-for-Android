@@ -21,19 +21,19 @@ package org.eclipse.jetty.io;
 /* ------------------------------------------------------------ */
 /** SimpleBuffers.
  * Simple implementation of Buffers holder.
- * 
+ *
  *
  */
 public class SimpleBuffers implements Buffers
-{   
+{
     final Buffer _header;
     final Buffer _buffer;
     boolean _headerOut;
     boolean _bufferOut;
-    
+
     /* ------------------------------------------------------------ */
     /**
-     * 
+     *
      */
     public SimpleBuffers(Buffer header, Buffer buffer)
     {
@@ -51,13 +51,13 @@ public class SimpleBuffers implements Buffers
                 _bufferOut=true;
                 return _buffer;
             }
-            
+
             if (_buffer!=null && _header!=null && _header.capacity()==_buffer.capacity() && !_headerOut)
             {
                 _headerOut=true;
                 return _header;
             }
-            
+
             if (_buffer!=null)
                 return new ByteArrayBuffer(_buffer.capacity());
             return new ByteArrayBuffer(4096);
@@ -74,29 +74,16 @@ public class SimpleBuffers implements Buffers
                 _headerOut=true;
                 return _header;
             }
-            
+
             if (_buffer!=null && _header!=null && _header.capacity()==_buffer.capacity() && !_bufferOut)
             {
                 _bufferOut=true;
                 return _buffer;
             }
-            
+
             if (_header!=null)
                 return new ByteArrayBuffer(_header.capacity());
             return new ByteArrayBuffer(4096);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public Buffer getBuffer(int size)
-    {
-        synchronized(this)
-        {
-            if (_header!=null && _header.capacity()==size)
-                return getHeader();
-            if (_buffer!=null && _buffer.capacity()==size)
-                return getBuffer();
-            return null;            
         }
     }
 
@@ -112,6 +99,4 @@ public class SimpleBuffers implements Buffers
                 _bufferOut=false;
         }
     }
-
-
 }

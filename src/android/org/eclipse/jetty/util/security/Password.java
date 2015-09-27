@@ -18,12 +18,6 @@
 
 package org.eclipse.jetty.util.security;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
-
 /* ------------------------------------------------------------ */
 /**
  * Password utility class.
@@ -52,59 +46,17 @@ import org.eclipse.jetty.util.log.Logger;
  * 
  * 
  */
-public class Password extends Credential
+public class Password
 {
-    private static final Logger LOG = Log.getLogger(Password.class);
-
-    private static final long serialVersionUID = 5062906681431569445L;
-
     public static final String __OBFUSCATE = "OBF:";
 
     private String _pw;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Constructor.
-     * 
-     * @param password The String password.
-     */
-    public Password(String password)
-    {
-        _pw = password;
-
-        // expand password
-        while (_pw != null && _pw.startsWith(__OBFUSCATE))
-            _pw = deobfuscate(_pw);
-    }
 
     /* ------------------------------------------------------------ */
     @Override
     public String toString()
     {
         return _pw;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String toStarString()
-    {
-        return "*****************************************************".substring(0, _pw.length());
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    public boolean check(Object credentials)
-    {
-        if (this == credentials) return true;
-
-        if (credentials instanceof Password) return credentials.equals(_pw);
-
-        if (credentials instanceof String) return credentials.equals(_pw);
-
-        if (credentials instanceof char[]) return Arrays.equals(_pw.toCharArray(), (char[]) credentials);
-
-        if (credentials instanceof Credential) return ((Credential) credentials).check(_pw);
-
-        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -128,110 +80,5 @@ public class Password extends Credential
             return o.equals(_pw);
 
         return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    @Override
-    public int hashCode()
-    {
-        return null == _pw ? super.hashCode() : _pw.hashCode();
-    }
-
-    /* ------------------------------------------------------------ */
-    public static String obfuscate(String s)
-    {
-        StringBuilder buf = new StringBuilder();
-        byte[] b = s.getBytes();
-
-        buf.append(__OBFUSCATE);
-        for (int i = 0; i < b.length; i++)
-        {
-            byte b1 = b[i];
-            byte b2 = b[s.length() - (i + 1)];
-            int i1 = 127 + b1 + b2;
-            int i2 = 127 + b1 - b2;
-            int i0 = i1 * 256 + i2;
-            String x = Integer.toString(i0, 36);
-
-            switch (x.length())
-            {
-                case 1:
-                    buf.append('0');
-                    buf.append('0');
-                    buf.append('0');
-                    buf.append(x);
-                    break;
-                case 2:
-                    buf.append('0');
-                    buf.append('0');
-                    buf.append(x);
-                    break;
-                case 3:
-                    buf.append('0');
-                    buf.append(x);
-                    break;
-                default:
-                    buf.append(x);
-                    break;
-            }
-        }
-        return buf.toString();
-
-    }
-
-    /* ------------------------------------------------------------ */
-    public static String deobfuscate(String s)
-    {
-        if (s.startsWith(__OBFUSCATE)) s = s.substring(4);
-
-        byte[] b = new byte[s.length() / 2];
-        int l = 0;
-        for (int i = 0; i < s.length(); i += 4)
-        {
-            String x = s.substring(i, i + 4);
-            int i0 = Integer.parseInt(x, 36);
-            int i1 = (i0 / 256);
-            int i2 = (i0 % 256);
-            b[l++] = (byte) ((i1 + i2 - 254) / 2);
-        }
-
-        return new String(b, 0, l);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Get a password. A password is obtained by trying
-     * <UL>
-     * <LI>Calling <Code>System.getProperty(realm,dft)</Code>
-     * <LI>Prompting for a password
-     * <LI>Using promptDft if nothing was entered.
-     * </UL>
-     * 
-     * @param realm The realm name for the password, used as a SystemProperty
-     *                name.
-     * @param dft The default password.
-     * @param promptDft The default to use if prompting for the password.
-     * @return Password
-     */
-    public static Password getPassword(String realm, String dft, String promptDft)
-    {
-        String passwd = System.getProperty(realm, dft);
-        if (passwd == null || passwd.length() == 0)
-        {
-            try
-            {
-                System.out.print(realm + ((promptDft != null && promptDft.length() > 0) ? " [dft]" : "") + " : ");
-                System.out.flush();
-                byte[] buf = new byte[512];
-                int len = System.in.read(buf);
-                if (len > 0) passwd = new String(buf, 0, len).trim();
-            }
-            catch (IOException e)
-            {
-                LOG.warn(Log.EXCEPTION, e);
-            }
-            if (passwd == null || passwd.length() == 0) passwd = promptDft;
-        }
-        return new Password(passwd);
     }
 }

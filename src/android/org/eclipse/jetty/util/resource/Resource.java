@@ -18,16 +18,11 @@
 
 package org.eclipse.jetty.util.resource;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
-import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 
@@ -40,23 +35,6 @@ public abstract class Resource
     private static final Logger LOG = Log.getLogger(Resource.class);
     public static boolean __defaultUseCaches = true;
     volatile Object _associate;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Change the default setting for url connection caches.
-     * Subsequent URLConnections will use this default.
-     * @param useCaches
-     */
-    public static void setDefaultUseCaches (boolean useCaches)
-    {
-        __defaultUseCaches=useCaches;
-    }
-
-    /* ------------------------------------------------------------ */
-    public static boolean getDefaultUseCaches ()
-    {
-        return __defaultUseCaches;
-    }
 
     /* ------------------------------------------------------------ */
     /** Construct a resource from a url.
@@ -121,12 +99,6 @@ public abstract class Resource
     }
 
     /* ------------------------------------------------------------ */
-    public static boolean isContainedIn (Resource r, Resource containingResource) throws MalformedURLException
-    {
-        return r.isContainedIn(containingResource);
-    }
-
-    /* ------------------------------------------------------------ */
     @Override
     protected void finalize()
     {
@@ -134,82 +106,9 @@ public abstract class Resource
     }
 
     /* ------------------------------------------------------------ */
-    public abstract boolean isContainedIn (Resource r) throws MalformedURLException;
-
-
-    /* ------------------------------------------------------------ */
     /** Release any temporary resources held by the resource.
      */
     public abstract void release();
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns true if the respresened resource exists.
-     */
-    public abstract boolean exists();
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns true if the respresenetd resource is a container/directory.
-     * If the resource is not a file, resources ending with "/" are
-     * considered directories.
-     */
-    public abstract boolean isDirectory();
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns the last modified time
-     */
-    public abstract long lastModified();
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Return the length of the resource
-     */
-    public abstract long length();
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns an URL representing the given resource
-     */
-    public abstract URL getURL();
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns an URI representing the given resource
-     */
-    public URI getURI()
-    {
-        try
-        {
-            return getURL().toURI();
-        }
-        catch(Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns an File representing the given resource or NULL if this
-     * is not possible.
-     */
-    public abstract File getFile()
-        throws IOException;
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns the name of the resource
-     */
-    public abstract String getName();
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -217,97 +116,4 @@ public abstract class Resource
      */
     public abstract InputStream getInputStream()
         throws java.io.IOException;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns an output stream to the resource
-     */
-    public abstract OutputStream getOutputStream()
-        throws java.io.IOException, SecurityException;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Deletes the given resource
-     */
-    public abstract boolean delete()
-        throws SecurityException;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Rename the given resource
-     */
-    public abstract boolean renameTo( Resource dest)
-        throws SecurityException;
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Returns a list of resource names contained in the given resource
-     * The resource names are not URL encoded.
-     */
-    public abstract String[] list();
-
-    /* ------------------------------------------------------------ */
-    public Object getAssociate()
-    {
-        return _associate;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setAssociate(Object o)
-    {
-        _associate=o;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The canonical Alias of this resource or null if none.
-     */
-    public URL getAlias()
-    {
-        return null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param out
-     * @param start First byte to write
-     * @param count Bytes to write or -1 for all of them.
-     */
-    public void writeTo(OutputStream out,long start,long count)
-        throws IOException
-    {
-        InputStream in = getInputStream();
-        try
-        {
-            in.skip(start);
-            if (count<0)
-                IO.copy(in,out);
-            else
-                IO.copy(in,out,count);
-        }
-        finally
-        {
-            in.close();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void copyTo(File destination)
-        throws IOException
-    {
-        if (destination.exists())
-            throw new IllegalArgumentException(destination+" exists");
-        writeTo(new FileOutputStream(destination),0,-1);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Generate a properly encoded URL from a {@link File} instance.
-     * @param file Target file.
-     * @return URL of the target file.
-     * @throws MalformedURLException
-     */
-    public static URL toURL(File file) throws MalformedURLException
-    {
-        return file.toURI().toURL();
-    }
 }

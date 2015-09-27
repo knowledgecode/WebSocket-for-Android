@@ -90,17 +90,18 @@ class ConnectionTask implements Task {
     }
 
     @Override
-    public void execute(JSONArray args, CallbackContext ctx) {
+    public void execute(String rawArgs, CallbackContext ctx) {
         try {
             WebSocketClient client = _factory.newWebSocketClient();
 
-            int id = args.getInt(0);
+            JSONArray args = new JSONArray(rawArgs);
+            int id = Integer.parseInt(args.getString(0), 16);
             URI uri = new URI(args.getString(1));
             String protocol = args.getString(2);
             JSONObject options = args.getJSONObject(5);
             String origin = options.optString("origin", args.getString(3));
             String agent = options.optString("agent", args.getString(4));
-            boolean deflate = options.optBoolean("perMessageDeflate", false);
+            boolean deflate = options.optBoolean("perMessageDeflate", true);
             long maxConnectTime = options.optLong("maxConnectTime", MAX_CONNECT_TIME);
 
             client.setMaxTextMessageSize(options.optInt("maxTextMessageSize", MAX_TEXT_MESSAGE_SIZE));

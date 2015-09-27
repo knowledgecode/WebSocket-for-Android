@@ -1,9 +1,14 @@
 ## Change Log
+#### 0.11.0
+* permessage-deflate support  
+* deleted unused code (further shrank about 20%)  
+* performance improvement (further about 15% to 25% faster than previous versions)  
+
 #### 0.10.0
 * permessage-deflate support (experimental)  
 * fixed multiple subprotocol bug  
 * improved finalization  
-* deleted unused codes (shrank about 25%)  
+* deleted unused code (shrank about 20%)  
 
 #### 0.9.2
 * fixed lack of trailing zeros (0x00) when receiving binary (thanks to @lemoncola)  

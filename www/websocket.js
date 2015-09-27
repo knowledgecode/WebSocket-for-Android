@@ -19,7 +19,7 @@
 /**
  * Cordova WebSocket Plugin for Android
  * @author KNOWLEDGECODE <knowledgecode@gmail.com>
- * @version 0.10.0
+ * @version 0.11.0
  */
 (function (window) {
     'use strict';
@@ -137,10 +137,10 @@
                 var that = this;
 
                 if (typeof data === 'string') {
-                    exec(null, null, 'WebSocket', 'send', [that.__getId__(), data, false]);
+                    exec(null, null, 'WebSocket', 'send', [that.__getId__() + '0' + data]);
                 } else {
                     binaryToString(data, function (blob) {
-                        exec(null, null, 'WebSocket', 'send', [that.__getId__(), blob, true]);
+                        exec(null, null, 'WebSocket', 'send', [that.__getId__() + '1' + blob]);
                     });
                 }
             };
@@ -152,7 +152,7 @@
             };
         },
         WebSocket = function (url, protocols) {
-            var i, len, that = this, id = identifier;
+            var i, len, that = this, id = ('0000000' + identifier.toString(16)).slice(-8);
 
             if (this === window) {
                 throw new TypeError('Failed to construct \'WebSocket\': ' +

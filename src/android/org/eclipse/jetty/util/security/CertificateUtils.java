@@ -42,7 +42,7 @@ public class CertificateUtils
                 {
                     inStream = Resource.newResource(storePath).getInputStream();
                 }
-                
+
                 if (storeProvider != null)
                 {
                     keystore = KeyStore.getInstance(storeType, storeProvider);
@@ -51,7 +51,7 @@ public class CertificateUtils
                 {
                     keystore = KeyStore.getInstance(storeType);
                 }
-    
+
                 keystore.load(inStream, storePassword == null ? null : storePassword.toCharArray());
             }
             finally
@@ -62,7 +62,7 @@ public class CertificateUtils
                 }
             }
         }
-        
+
         return keystore;
     }
 
@@ -90,5 +90,4 @@ public class CertificateUtils
 
         return crlList;
     }
-    
 }

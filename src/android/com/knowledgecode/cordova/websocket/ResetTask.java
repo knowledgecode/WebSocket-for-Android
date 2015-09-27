@@ -20,7 +20,6 @@ package com.knowledgecode.cordova.websocket;
 
 import org.apache.cordova.CallbackContext;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
-import org.json.JSONArray;
 
 import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 
@@ -43,7 +42,7 @@ class ResetTask implements Task {
     }
 
     @Override
-    public void execute(JSONArray args, CallbackContext ctx) {
+    public void execute(String rawArgs, CallbackContext ctx) {
         for (int i = 0; i < _map.size(); i++) {
             int key = _map.keyAt(i);
 

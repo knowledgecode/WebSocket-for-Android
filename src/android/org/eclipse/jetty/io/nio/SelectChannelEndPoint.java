@@ -69,7 +69,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     private static final int STATE_DISPATCHED=1;
     private static final int STATE_ASYNC=2;
     private int _state;
-    
+
     private boolean _onIdle;
 
     /** true if the last write operation succeed and wrote all offered bytes */
@@ -87,7 +87,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
 
     private volatile long _idleTimestamp;
     private volatile boolean _checkIdle;
-    
+
     private boolean _interruptable;
 
     private boolean _ishut;
@@ -109,21 +109,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     }
 
     /* ------------------------------------------------------------ */
-    public SelectionKey getSelectionKey()
-    {
-        synchronized (this)
-        {
-            return _key;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public SelectorManager getSelectManager()
-    {
-        return _manager;
-    }
-
-    /* ------------------------------------------------------------ */
     public Connection getConnection()
     {
         return _connection;
@@ -136,12 +121,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
         _connection=(AsyncConnection)connection;
         if (old!=null && old!=_connection)
             _manager.endPointUpgraded(this,old);
-    }
-
-    /* ------------------------------------------------------------ */
-    public long getIdleTimestamp()
-    {
-        return _idleTimestamp;
     }
 
     /* ------------------------------------------------------------ */
@@ -215,7 +194,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
                 case STATE_UNDISPATCHED:
                     dispatch();
                     break;
-                    
+
                 case STATE_DISPATCHED:
                 case STATE_ASYNC:
                     _state=STATE_ASYNC;
@@ -372,30 +351,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     }
 
     /* ------------------------------------------------------------ */
-    @Override
-    public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-    {
-        int l = super.flush(header, buffer, trailer);
-
-        // If there was something to write and it wasn't written, then we are not writable.
-        if (l==0 && ( header!=null && header.hasContent() || buffer!=null && buffer.hasContent() || trailer!=null && trailer.hasContent()))
-        {
-            synchronized (this)
-            {   
-                _writable=false;
-                if (_state<STATE_DISPATCHED)
-                    updateKey();
-            }
-        }
-        else if (l>0)
-        {
-            _writable=true;
-            notIdle();
-        }
-        return l;
-    }
-
-    /* ------------------------------------------------------------ */
     /*
      */
     @Override
@@ -407,7 +362,7 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
         if (l==0 && buffer!=null && buffer.hasContent())
         {
             synchronized (this)
-            {   
+            {
                 _writable=false;
                 if (_state<STATE_DISPATCHED)
                     updateKey();
@@ -524,28 +479,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the interruptable mode of the endpoint.
-     * If set to false (default), then interrupts are assumed to be spurious 
-     * and blocking operations continue unless the endpoint has been closed.
-     * If true, then interrupts of blocking operations result in InterruptedIOExceptions
-     * being thrown.
-     * @param interupable
-     */
-    public void setInterruptable(boolean interupable)
-    {
-        synchronized (this)
-        {
-            _interruptable=interupable;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isInterruptable()
-    {
-        return _interruptable;
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * @see org.eclipse.jetty.io.AsyncEndPoint#scheduleWrite()
      */
@@ -609,7 +542,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
             _selectSet.wakeup();
         }
     }
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -774,9 +706,9 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     @Override
     public void close() throws IOException
     {
-        // On unix systems there is a JVM issue that if you cancel before closing, it can 
-        // cause the selector to block waiting for a channel to close and that channel can 
-        // block waiting for the remote end.  But on windows, if you don't cancel before a 
+        // On unix systems there is a JVM issue that if you cancel before closing, it can
+        // cause the selector to block waiting for a channel to close and that channel can
+        // block waiting for the remote end.  But on windows, if you don't cancel before a
         // close, then the selector can block anyway!
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=357318
         if (WORK_AROUND_JVM_BUG_6346658)
@@ -834,7 +766,8 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
         {
             keyString += "-";
         }
-        return String.format("SCEP@%x{l(%s)<->r(%s),s=%d,open=%b,ishut=%b,oshut=%b,rb=%b,wb=%b,w=%b,i=%d%s}-{%s}",
+        return String.format(Locale.getDefault(),
+                "SCEP@%x{l(%s)<->r(%s),s=%d,open=%b,ishut=%b,oshut=%b,rb=%b,wb=%b,w=%b,i=%d%s}-{%s}",
                 hashCode(),
                 _socket.getRemoteSocketAddress(),
                 _socket.getLocalSocketAddress(),
@@ -866,5 +799,4 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     {
         _maxIdleTime=timeMs;
     }
-
 }

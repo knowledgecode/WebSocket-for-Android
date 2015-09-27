@@ -19,8 +19,9 @@
 package com.knowledgecode.cordova.websocket;
 
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
+import org.apache.cordova.PluginResult.Status;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
-import org.json.JSONArray;
 
 import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 
@@ -44,23 +45,25 @@ class SendingTask implements Task {
     }
 
     @Override
-    public void execute(JSONArray args, CallbackContext ctx) {
+    public void execute(String rawArgs, CallbackContext ctx) {
         try {
-            int id = args.getInt(0);
-            String data = args.getString(1);
-            boolean binaryString = args.getBoolean(2);
-            Connection conn = _map.get(id);
+            Connection conn = _map.get(Integer.parseInt(rawArgs.substring(2, 10), 16));
 
             if (conn != null) {
-                if (binaryString) {
-                    byte[] binary = Base64.decode(data.substring(data.indexOf(',') + 1), Base64.NO_WRAP);
+                if (rawArgs.charAt(10) == '1') {
+                    byte[] binary = Base64.decode(rawArgs.substring(rawArgs.indexOf(',') + 1, rawArgs.length() - 2),
+                            Base64.NO_WRAP);
                     conn.sendMessage(binary, 0, binary.length);
                 } else {
-                    conn.sendMessage(data);
+                    conn.sendMessage(rawArgs.substring(11, rawArgs.length() - 2));
                 }
             }
         } catch (Exception e) {
-            ctx.error("send");
+            if (!ctx.isFinished()) {
+                PluginResult result = new PluginResult(Status.ERROR);
+                result.setKeepCallback(true);
+                ctx.sendPluginResult(result);
+            }
         }
     }
 }

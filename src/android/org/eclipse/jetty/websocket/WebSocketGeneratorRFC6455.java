@@ -19,6 +19,7 @@
 package org.eclipse.jetty.websocket;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,6 +34,8 @@ import org.eclipse.jetty.io.EofException;
  * It is fully synchronized because it is likely that async
  * threads will call the addMessage methods while other
  * threads are flushing the generator.
+ *
+ * modified by KNOWLEDGECODE
  */
 public class WebSocketGeneratorRFC6455 implements WebSocketGenerator
 {
@@ -92,7 +95,11 @@ public class WebSocketGeneratorRFC6455 implements WebSocketGenerator
 
             do
             {
-                opcode = _opsent ? WebSocketConnectionRFC6455.OP_CONTINUATION : opcode;
+                if (_opsent)
+                {
+                    flags &= 0x0b;
+                    opcode = WebSocketConnectionRFC6455.OP_CONTINUATION;
+                }
                 opcode = (byte)(((0xf & flags) << 4) + (0xf & opcode));
                 _opsent = true;
 
@@ -303,7 +310,7 @@ public class WebSocketGeneratorRFC6455 implements WebSocketGenerator
         // because it's very easy to deadlock when debugging is enabled.
         // We do a best effort to print the right toString() and that's it.
         Buffer buffer = _buffer;
-        return String.format("%s@%x closed=%b buffer=%d",
+        return String.format(Locale.getDefault(), "%s@%x closed=%b buffer=%d",
                 getClass().getSimpleName(),
                 hashCode(),
                 _closed,

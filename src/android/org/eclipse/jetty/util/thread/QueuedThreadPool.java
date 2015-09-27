@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -33,22 +32,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.jetty.util.BlockingArrayQueue;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.AggregateLifeCycle;
 import org.eclipse.jetty.util.component.Dumpable;
-import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.thread.ThreadPool.SizedThreadPool;
 
-public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPool, Executor, Dumpable
+public class QueuedThreadPool extends AbstractLifeCycle implements ThreadPool, Executor, Dumpable
 {
     private static final Logger LOG = Log.getLogger(QueuedThreadPool.class);
 
     private final AtomicInteger _threadsStarted = new AtomicInteger();
     private final AtomicInteger _threadsIdle = new AtomicInteger();
     private final AtomicLong _lastShrink = new AtomicLong();
-    private final ConcurrentLinkedQueue<Thread> _threads=new ConcurrentLinkedQueue<Thread>();
+    private final ConcurrentHashSet<Thread> _threads=new ConcurrentHashSet<Thread>();
     private final Object _joinLock = new Object();
     private BlockingQueue<Runnable> _jobs;
     private String _name;
@@ -68,26 +66,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
     {
         _name="qtp"+super.hashCode();
     }
-
-    /* ------------------------------------------------------------------- */
-    /** Construct
-     */
-    public QueuedThreadPool(int maxThreads)
-    {
-        this();
-        setMaxThreads(maxThreads);
-    }
-
-    /* ------------------------------------------------------------------- */
-    /** Construct
-     */
-    public QueuedThreadPool(BlockingQueue<Runnable> jobQ)
-    {
-        this();
-        _jobs=jobQ;
-        _jobs.clear();
-    }
-
 
     /* ------------------------------------------------------------ */
     @Override
@@ -164,131 +142,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Delegated to the named or anonymous Pool.
-     */
-    public void setDaemon(boolean daemon)
-    {
-        _daemon=daemon;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the maximum thread idle time.
-     * Threads that are idle for longer than this period may be
-     * stopped.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMaxIdleTimeMs
-     * @param maxIdleTimeMs Max idle time in ms.
-     */
-    public void setMaxIdleTimeMs(int maxIdleTimeMs)
-    {
-        _maxIdleTimeMs=maxIdleTimeMs;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param stopTimeMs maximum total time that stop() will wait for threads to die.
-     */
-    public void setMaxStopTimeMs(int stopTimeMs)
-    {
-        _maxStopTime = stopTimeMs;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the maximum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMaxThreads
-     * @param maxThreads maximum number of threads.
-     */
-    public void setMaxThreads(int maxThreads)
-    {
-        _maxThreads=maxThreads;
-        if (_minThreads>_maxThreads)
-            _minThreads=_maxThreads;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the minimum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMinThreads
-     * @param minThreads minimum number of threads
-     */
-    public void setMinThreads(int minThreads)
-    {
-        _minThreads=minThreads;
-
-        if (_minThreads>_maxThreads)
-            _maxThreads=_minThreads;
-
-        int threads=_threadsStarted.get();
-        while (isStarted() && threads<_minThreads)
-        {
-            startThread(threads);
-            threads=_threadsStarted.get();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param name Name of the BoundedThreadPool to use when naming Threads.
-     */
-    public void setName(String name)
-    {
-        if (isRunning())
-            throw new IllegalStateException("started");
-        _name= name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the priority of the pool threads.
-     *  @param priority the new thread priority.
-     */
-    public void setThreadsPriority(int priority)
-    {
-        _priority=priority;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return maximum queue size
-     */
-    public int getMaxQueued()
-    {
-        return _maxQueued;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param max job queue size
-     */
-    public void setMaxQueued(int max)
-    {
-        if (isRunning())
-            throw new IllegalStateException("started");
-        _maxQueued=max;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the maximum thread idle time.
-     * Delegated to the named or anonymous Pool.
-     * @see #setMaxIdleTimeMs
-     * @return Max idle time in ms.
-     */
-    public int getMaxIdleTimeMs()
-    {
-        return _maxIdleTimeMs;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return maximum total time that stop() will wait for threads to die.
-     */
-    public int getMaxStopTimeMs()
-    {
-        return _maxStopTime;
-    }
-
-    /* ------------------------------------------------------------ */
     /** Set the maximum number of threads.
      * Delegated to the named or anonymous Pool.
      * @see #setMaxThreads
@@ -308,45 +161,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
     public int getMinThreads()
     {
         return _minThreads;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return The name of the BoundedThreadPool.
-     */
-    public String getName()
-    {
-        return _name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the priority of the pool threads.
-     *  @return the priority of the pool threads.
-     */
-    public int getThreadsPriority()
-    {
-        return _priority;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Delegated to the named or anonymous Pool.
-     */
-    public boolean isDaemon()
-    {
-        return _daemon;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isDetailedDump()
-    {
-        return _detailedDump;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setDetailedDump(boolean detailedDump)
-    {
-        _detailedDump = detailedDump;
     }
 
     /* ------------------------------------------------------------ */
@@ -381,22 +195,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
 
     /* ------------------------------------------------------------ */
     /**
-     * Blocks until the thread pool is {@link LifeCycle#stop stopped}.
-     */
-    public void join() throws InterruptedException
-    {
-        synchronized (_joinLock)
-        {
-            while (isRunning())
-                _joinLock.wait();
-        }
-
-        while (isStopping())
-            Thread.sleep(1);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return The total number of threads currently in the pool
      */
     public int getThreads()
@@ -411,15 +209,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
     public int getIdleThreads()
     {
         return _threadsIdle.get();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return True if the pool is at maxThreads and there are not more idle threads than queued jobs
-     */
-    public boolean isLowOnThreads()
-    {
-        return _threadsStarted.get()==_maxThreads && _jobs.size()>=_threadsIdle.get();
     }
 
     /* ------------------------------------------------------------ */
@@ -455,13 +244,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
         return new Thread(runnable);
     }
 
-
-    /* ------------------------------------------------------------ */
-    public String dump()
-    {
-        return AggregateLifeCycle.dump(this);
-    }
-
     /* ------------------------------------------------------------ */
     public void dump(Appendable out, String indent) throws IOException
     {
@@ -494,11 +276,6 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
                         if (!idle)
                             AggregateLifeCycle.dump(out,indent,Arrays.asList(trace));
                     }
-
-                    public String dump()
-                    {
-                        return null;
-                    }
                 });
             }
             else
@@ -509,9 +286,7 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
 
         AggregateLifeCycle.dumpObject(out,this);
         AggregateLifeCycle.dump(out,indent,dump);
-
     }
-
 
     /* ------------------------------------------------------------ */
     @Override
@@ -606,53 +381,5 @@ public class QueuedThreadPool extends AbstractLifeCycle implements SizedThreadPo
     protected void runJob(Runnable job)
     {
         job.run();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return the job queue
-     */
-    protected BlockingQueue<Runnable> getQueue()
-    {
-        return _jobs;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param id The thread ID to interrupt.
-     * @return true if the thread was found and interrupted.
-     */
-    public boolean interruptThread(long id)
-    {
-        for (Thread thread: _threads)
-        {
-            if (thread.getId()==id)
-            {
-                thread.interrupt();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param id The thread ID to interrupt.
-     * @return true if the thread was found and interrupted.
-     */
-    public String dumpThread(long id)
-    {
-        for (Thread thread: _threads)
-        {
-            if (thread.getId()==id)
-            {
-                StringBuilder buf = new StringBuilder();
-                buf.append(thread.getId()).append(" ").append(thread.getName()).append(" ").append(thread.getState()).append(":\n");
-                for (StackTraceElement element : thread.getStackTrace())
-                    buf.append("  at ").append(element.toString()).append('\n');
-                return buf.toString();
-            }
-        }
-        return null;
     }
 }

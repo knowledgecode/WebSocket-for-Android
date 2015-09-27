@@ -116,26 +116,6 @@ public class WebSocketClient
 
     /* ------------------------------------------------------------ */
     /**
-     * @return the address to bind the socket channel to
-     * @see #setBindAddress(SocketAddress)
-     */
-    public SocketAddress getBindAddress()
-    {
-        return _bindAddress;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param bindAddress the address to bind the socket channel to
-     * @see #getBindAddress()
-     */
-    public void setBindAddress(SocketAddress bindAddress)
-    {
-        this._bindAddress = bindAddress;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return The maxIdleTime in ms for connections opened by this client,
      * or -1 if the default from {@link WebSocketClientFactory#getSelectorManager()} is used.
      * @see #setMaxIdleTime(int)
@@ -364,7 +344,7 @@ public class WebSocketClient
         {
             // close the channel (prevent connection leak)
             IO.close(channel);
-            
+
             // rethrow
             throw e;
         }

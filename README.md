@@ -34,17 +34,17 @@ Use Cordova Command-Line Interface (CLI). At first, check Cordova version:
 ```sh
 $ cordova --version
 ```
-If using 5.0.0 or later (via npm):
+If using 5.0.0 or later, you can install it via npm:
 ```sh
 $ cordova plugin add cordova-plugin-websocket
 ```
-If using other old versions (via GitHub):
+If using other old versions, you can install it via GitHub:
 ```sh
 $ cordova plugin add https://github.com/knowledgecode/WebSocket-for-Android.git
 ```
 
 #### Caveats
-Cordova core plugins have been moved to npm from Cordova plugins registry (CPR). This plugin has been moved as well. It will be **no longer updated** in CPR, but can still install it from there for now:
+Cordova core plugins have been moved to npm from Cordova plugins registry (CPR). This plugin has been moved as well. It will be **no longer updated** in CPR. Not recommended even if you can still install it from there:
 ```sh
 $ cordova plugin add com.knowledgecode.cordova.websocket
 ```
@@ -113,22 +113,26 @@ This plugin has the following options. All these parameters are optional. Of cou
 | maxBinaryMessageSize | Number  | -1                  | v0.4.0 ~ (except v0.8.x) |
 | override             | Boolean | false               | v0.8.0 ~                 |
 | agent                | String  | (depends on device) | v0.9.0 ~                 |
-| perMessageDeflate    | Boolean | false               | v0.10.0 ~                |
+| perMessageDeflate    | Boolean | true                | v0.10.0 ~                |
 
 `origin` is a value to set the request header field. Default value is usually `file://`. This is the same value as when using built-in WebSocket.  
+
 `maxConnectTime` is time to wait for connection. A unit is millisecond.  
-`maxTextMessageSize` and `maxBinaryMessageSize` are receivable maximum size from the server. Default value is -1 (unlimited. depends on devices heap size). A unit is byte.  
+
+`maxTextMessageSize` and `maxBinaryMessageSize` are receivable maximum size from the server. Default value is -1 (unlimited. depends on heap size of devices). A unit is byte.  
+
 `override` is a flag to force WebView to use this plugin even if it supports WebSocket. However in most cases it will be slower than built-in WebSocket.  
+
 `agent` is user-agent to set the request header field. Default value depends on devices. This is the same value as when using built-in WebSocket.  
-`perMessageDeflate` is a flag whether to use permessage-deflate extension or not. Default value is false for now because it is still experimental. If you would like to try it, set to true. However It is necessary that the server supports permessage-deflate.  
+
+`perMessageDeflate` is a flag whether to use permessage-deflate extension or not. Default value is true (but as of v0.10 was false). Sends data with compression if the server also supports permessage-deflate. However if mainly sending compressed binary like JPEG images, recommended to set to false.  
 
 If change these parameters, need to do before creating a instance:  
 ```javascript
 WebSocket.pluginOptions = {
     origin: 'http://example.com',
     maxConnectTime: 5000,
-    override: true,
-    perMessageDeflate: true
+    override: true
 };
 
 var ws = new WebSocket('ws://echo.websocket.org');
@@ -137,8 +141,7 @@ var ws = new WebSocket('ws://echo.websocket.org');
 Transmits data to the server over the WebSocket connection. The data takes a string, a blob, or an arraybuffer.  
 
 #### Notes
-The size of message that can transmit and receive at a time depends on heap size. Would be better to consider a way to split a message if it is quite large.  
-
+An upper limit of the message size depends on heap size of devices. It would be better to consider a way to split the message if it is quite large.  
 ### *close([code[, reason]])*
 Closes the WebSocket connection or connection attempt, if any.  
 

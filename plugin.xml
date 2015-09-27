@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cordova-plugin-websocket"
-  version="0.10.0">
+  version="0.11.0">
   <name>WebSocket for Android</name>
   <description>Cordova WebSocket Plugin for Android</description>
   <license>Apache 2.0</license>
@@ -42,8 +42,6 @@
     <source-file src="src/android/org/eclipse/jetty/http/HttpHeaderValues.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpMethods.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpParser.java" target-dir="src/org/eclipse/jetty/http" />
-    <source-file src="src/android/org/eclipse/jetty/http/HttpStatus.java" target-dir="src/org/eclipse/jetty/http" />
-    <source-file src="src/android/org/eclipse/jetty/http/HttpTokens.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/HttpVersions.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/http/Parser.java" target-dir="src/org/eclipse/jetty/http" />
     <source-file src="src/android/org/eclipse/jetty/io/AbstractBuffer.java" target-dir="src/org/eclipse/jetty/io" />
@@ -53,14 +51,12 @@
     <source-file src="src/android/org/eclipse/jetty/io/Buffer.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/BufferCache.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/Buffers.java" target-dir="src/org/eclipse/jetty/io" />
-    <source-file src="src/android/org/eclipse/jetty/io/BuffersFactory.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/BufferUtil.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/ByteArrayBuffer.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/ConnectedEndPoint.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/Connection.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/EndPoint.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/EofException.java" target-dir="src/org/eclipse/jetty/io" />
-    <source-file src="src/android/org/eclipse/jetty/io/PooledBuffers.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/SimpleBuffers.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/ThreadLocalBuffers.java" target-dir="src/org/eclipse/jetty/io" />
     <source-file src="src/android/org/eclipse/jetty/io/View.java" target-dir="src/org/eclipse/jetty/io" />
@@ -69,11 +65,11 @@
     <source-file src="src/android/org/eclipse/jetty/io/nio/DirectNIOBuffer.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/IndirectNIOBuffer.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/NIOBuffer.java" target-dir="src/org/eclipse/jetty/io/nio" />
-    <source-file src="src/android/org/eclipse/jetty/io/nio/RandomAccessFileBuffer.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectChannelEndPoint.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SelectorManager.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/io/nio/SslConnection.java" target-dir="src/org/eclipse/jetty/io/nio" />
     <source-file src="src/android/org/eclipse/jetty/util/BlockingArrayQueue.java" target-dir="src/org/eclipse/jetty/util" />
+    <source-file src="src/android/org/eclipse/jetty/util/ConcurrentHashSet.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/IO.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/QuotedStringTokenizer.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/StringMap.java" target-dir="src/org/eclipse/jetty/util" />
@@ -83,7 +79,6 @@
     <source-file src="src/android/org/eclipse/jetty/util/TypeUtil.java" target-dir="src/org/eclipse/jetty/util" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AbstractLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/AggregateLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
-    <source-file src="src/android/org/eclipse/jetty/util/component/Destroyable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <!-- <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" /> -->
@@ -93,7 +88,6 @@
     <source-file src="src/android/org/eclipse/jetty/util/resource/URLResource.java" target-dir="src/org/eclipse/jetty/util/resource" />
     <source-file src="src/android/org/eclipse/jetty/util/security/CertificateUtils.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/security/CertificateValidator.java" target-dir="src/org/eclipse/jetty/util/security" />
-    <source-file src="src/android/org/eclipse/jetty/util/security/Credential.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/security/Password.java" target-dir="src/org/eclipse/jetty/util/security" />
     <source-file src="src/android/org/eclipse/jetty/util/ssl/AliasedX509ExtendedKeyManager.java" target-dir="src/org/eclipse/jetty/util/ssl" />
     <source-file src="src/android/org/eclipse/jetty/util/ssl/SslContextFactory.java" target-dir="src/org/eclipse/jetty/util/ssl" />

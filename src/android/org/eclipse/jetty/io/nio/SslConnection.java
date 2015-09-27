@@ -38,7 +38,6 @@ import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.thread.Timeout.Task;
 
 /* ------------------------------------------------------------ */
 /** SSL Connection.
@@ -109,31 +108,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
     protected SslEndPoint newSslEndPoint()
     {
         return new SslEndPoint();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return True if SSL re-negotiation is allowed (default false)
-     */
-    public boolean isAllowRenegotiate()
-    {
-        return _allowRenegotiate;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Set if SSL re-negotiation is allowed. CVE-2009-3555 discovered
-     * a vulnerability in SSL/TLS with re-negotiation.  If your JVM
-     * does not have CVE-2009-3555 fixed, then re-negotiation should
-     * not be allowed.  CVE-2009-3555 was fixed in Sun java 1.6 with a ban
-     * of renegotiates in u19 and with RFC5746 in u22.
-     *
-     * @param allowRenegotiate
-     *            true if re-negotiation is allowed (default false)
-     */
-    public void setAllowRenegotiate(boolean allowRenegotiate)
-    {
-        _allowRenegotiate = allowRenegotiate;
     }
 
     /* ------------------------------------------------------------ */
@@ -229,12 +203,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
         }
 
         return this;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isIdle()
-    {
-        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -616,12 +584,8 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
             throw new IOException(result.toString());
         }
 
-        //if (LOG.isDebugEnabled() && result.bytesProduced()>0)
-        //    LOG.debug("{} unwrapped '{}'",_session,buffer);
-
         return encrypted_consumed > 0 || decrypted_produced > 0;
     }
-
 
     /* ------------------------------------------------------------ */
     private ByteBuffer extractByteBuffer(Buffer buffer)
@@ -647,16 +611,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
     /* ------------------------------------------------------------ */
     public class SslEndPoint implements AsyncEndPoint
     {
-        public SSLEngine getSslEngine()
-        {
-            return _engine;
-        }
-
-        public AsyncEndPoint getEndpoint()
-        {
-            return _aEndp;
-        }
-
         public void shutdownOutput() throws IOException
         {
             synchronized (SslConnection.this)
@@ -725,33 +679,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
             return size-buffer.length();
         }
 
-        public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-        {
-            if (header!=null && header.hasContent())
-                return flush(header);
-            if (buffer!=null && buffer.hasContent())
-                return flush(buffer);
-            if (trailer!=null && trailer.hasContent())
-                return flush(trailer);
-            return 0;
-        }
-
-        public boolean blockReadable(long millisecs) throws IOException
-        {
-            long now = System.currentTimeMillis();
-            long end=millisecs>0?(now+millisecs):Long.MAX_VALUE;
-
-            while (now<end)
-            {
-                if (process(null,null))
-                    break;
-                _endp.blockReadable(end-now);
-                now = System.currentTimeMillis();
-            }
-
-            return now<end;
-        }
-
         public boolean blockWritable(long millisecs) throws IOException
         {
             return _endp.blockWritable(millisecs);
@@ -760,11 +687,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
         public boolean isOpen()
         {
             return _endp.isOpen();
-        }
-
-        public Object getTransport()
-        {
-            return _endp;
         }
 
         public void flush() throws IOException
@@ -777,44 +699,9 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
             _aEndp.dispatch();
         }
 
-        public void asyncDispatch()
-        {
-            _aEndp.asyncDispatch();
-        }
-
         public void scheduleWrite()
         {
             _aEndp.scheduleWrite();
-        }
-
-        public void onIdleExpired(long idleForMs)
-        {
-            _aEndp.onIdleExpired(idleForMs);
-        }
-
-        public void setCheckForIdle(boolean check)
-        {
-            _aEndp.setCheckForIdle(check);
-        }
-
-        public boolean isCheckForIdle()
-        {
-            return _aEndp.isCheckForIdle();
-        }
-
-        public void scheduleTimeout(Task task, long timeoutMs)
-        {
-            _aEndp.scheduleTimeout(task,timeoutMs);
-        }
-
-        public void cancelTimeout(Task task)
-        {
-            _aEndp.cancelTimeout(task);
-        }
-
-        public boolean isWritable()
-        {
-            return _aEndp.isWritable();
         }
 
         public boolean hasProgressed()
@@ -827,11 +714,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
             return _aEndp.getLocalAddr();
         }
 
-        public String getLocalHost()
-        {
-            return _aEndp.getLocalHost();
-        }
-
         public int getLocalPort()
         {
             return _aEndp.getLocalPort();
@@ -840,11 +722,6 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
         public String getRemoteAddr()
         {
             return _aEndp.getRemoteAddr();
-        }
-
-        public String getRemoteHost()
-        {
-            return _aEndp.getRemoteHost();
         }
 
         public int getRemotePort()
@@ -894,6 +771,5 @@ public class SslConnection extends AbstractConnection implements AsyncConnection
                     _ishut, _oshut,
                     _connection);
         }
-
     }
 }

@@ -25,11 +25,11 @@ import org.eclipse.jetty.util.log.Logger;
 /* ------------------------------------------------------------ */
 /** Timeout queue.
  * This class implements a timeout queue for timers that are at least as likely to be cancelled as they are to expire.
- * Unlike the util timeout class, the duration of the timeouts is shared by all scheduled tasks and if the duration 
+ * Unlike the util timeout class, the duration of the timeouts is shared by all scheduled tasks and if the duration
  * is changed, this affects all scheduled tasks.
  * <p>
- * The nested class Task should be extended by users of this class to obtain call back notification of 
- * expires. 
+ * The nested class Task should be extended by users of this class to obtain call back notification of
+ * expires.
  */
 public class Timeout
 {
@@ -40,26 +40,10 @@ public class Timeout
     private Task _head=new Task();
 
     /* ------------------------------------------------------------ */
-    public Timeout()
-    {
-        _lock=new Object();
-        _head._timeout=this;
-    }
-
-    /* ------------------------------------------------------------ */
     public Timeout(Object lock)
     {
         _lock=lock;
         _head._timeout=this;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the duration.
-     */
-    public long getDuration()
-    {
-        return _duration;
     }
 
     /* ------------------------------------------------------------ */
@@ -71,12 +55,6 @@ public class Timeout
         _duration = duration;
     }
 
-    /* ------------------------------------------------------------ */
-    public long setNow()
-    {
-        return _now=System.currentTimeMillis();
-    }
-    
     /* ------------------------------------------------------------ */
     public long getNow()
     {
@@ -94,7 +72,7 @@ public class Timeout
      * This is called instead of {@link #tick()} to obtain the next
      * expired Task, but without calling it's {@link Task#expire()} or
      * {@link Task#expired()} methods.
-     * 
+     *
      * @return the next expired task or null.
      */
     public Task expired()
@@ -136,7 +114,7 @@ public class Timeout
                     task._expired=true;
                     task.expire();
                 }
-                
+
                 task.expired();
             }
             catch(Throwable th)
@@ -147,18 +125,11 @@ public class Timeout
     }
 
     /* ------------------------------------------------------------ */
-    public void tick(long now)
-    {
-        _now=now;
-        tick();
-    }
-
-    /* ------------------------------------------------------------ */
     public void schedule(Task task)
     {
         schedule(task,0L);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param task
@@ -189,22 +160,12 @@ public class Timeout
         }
     }
 
-
     /* ------------------------------------------------------------ */
     public void cancelAll()
     {
         synchronized (_lock)
         {
             _head._next=_head._prev=_head;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isEmpty()
-    {
-        synchronized (_lock)
-        {
-            return _head._next==_head;
         }
     }
 
@@ -226,7 +187,7 @@ public class Timeout
     {
         StringBuffer buf = new StringBuffer();
         buf.append(super.toString());
-        
+
         Task task = _head._next;
         while (task!=_head)
         {
@@ -234,7 +195,7 @@ public class Timeout
             buf.append(task);
             task=task._next;
         }
-        
+
         return buf.toString();
     }
 
@@ -246,8 +207,8 @@ public class Timeout
      * The base class for scheduled timeouts.  This class should be
      * extended to implement the expire() method, which is called if the
      * timeout expires.
-     * 
-     * 
+     *
+     *
      *
      */
     public static class Task
@@ -266,25 +227,6 @@ public class Timeout
         }
 
         /* ------------------------------------------------------------ */
-        public long getTimestamp()
-        {
-            return _timestamp;
-        }
-
-        /* ------------------------------------------------------------ */
-        public long getAge()
-        {
-            final Timeout t = _timeout;
-            if (t!=null)
-            {
-                final long now=t._now;
-                if (now!=0 && _timestamp!=0)
-                    return now-_timestamp;
-            }
-            return 0;
-        }
-
-        /* ------------------------------------------------------------ */
         private void unlink()
         {
             _next._prev=_prev;
@@ -300,41 +242,9 @@ public class Timeout
             _next._prev=task;
             _next=task;
             _next._next=next_next;
-            _next._prev=this;   
+            _next._prev=this;
         }
-        
-        /* ------------------------------------------------------------ */
-        /** Schedule the task on the given timeout.
-         * The task exiry will be called after the timeout duration.
-         * @param timer
-         */
-        public void schedule(Timeout timer)
-        {
-            timer.schedule(this);
-        }
-        
-        /* ------------------------------------------------------------ */
-        /** Schedule the task on the given timeout.
-         * The task exiry will be called after the timeout duration.
-         * @param timer
-         */
-        public void schedule(Timeout timer, long delay)
-        {
-            timer.schedule(this,delay);
-        }
-        
-        /* ------------------------------------------------------------ */
-        /** Reschedule the task on the current timeout.
-         * The task timeout is rescheduled as if it had been cancelled and
-         * scheduled on the current timeout.
-         */
-        public void reschedule()
-        {
-            Timeout timeout = _timeout;
-            if (timeout!=null)
-                timeout.schedule(this,_delay);
-        }
-        
+
         /* ------------------------------------------------------------ */
         /** Cancel the task.
          * Remove the task from the timeout.
@@ -351,17 +261,11 @@ public class Timeout
                 }
             }
         }
-        
-        /* ------------------------------------------------------------ */
-        public boolean isExpired() { return _expired; }
 
-        /* ------------------------------------------------------------ */
-	public boolean isScheduled() { return _next!=this; }
-        
         /* ------------------------------------------------------------ */
         /** Expire task.
          * This method is called when the timeout expires. It is called
-         * in the scope of the synchronize block (on this) that sets 
+         * in the scope of the synchronize block (on this) that sets
          * the {@link #isExpired()} state to true.
          * @see #expired() For an unsynchronized callback.
          */
@@ -369,12 +273,10 @@ public class Timeout
 
         /* ------------------------------------------------------------ */
         /** Expire task.
-         * This method is called when the timeout expires. It is called 
-         * outside of any synchronization scope and may be delayed. 
-         * 
+         * This method is called when the timeout expires. It is called
+         * outside of any synchronization scope and may be delayed.
+         *
          */
         public void expired(){}
-
     }
-
 }
