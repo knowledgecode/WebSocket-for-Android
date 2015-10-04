@@ -655,7 +655,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
             }
         }
 
-        public void onFrame(final byte flags, final byte opcode, final Buffer buffer)
+        public void onFrame(final byte flags, final byte opcode, final byte[] array, int offset, int length)
         {
             synchronized (WebSocketConnectionRFC6455.this)
             {
@@ -665,10 +665,6 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                     return;
                 }
             }
-
-            byte[] array = buffer.array();
-            int offset = buffer.getIndex();
-            int length = buffer.length();
 
             if (isControlFrame(opcode) && length > MAX_CONTROL_FRAME_PAYLOAD)
             {
@@ -816,7 +812,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
                             return;
                         }
                     }
-                    else if(buffer.length() == 1)
+                    else if(length == 1)
                     {
                         // Invalid length. use status code 1002 (Protocol error)
                         errorClose(WebSocketConnectionRFC6455.CLOSE_PROTOCOL,"Invalid payload length of 1");

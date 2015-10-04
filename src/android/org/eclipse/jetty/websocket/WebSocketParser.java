@@ -24,6 +24,7 @@ import org.eclipse.jetty.io.Buffer;
 /**
  * Parser the WebSocket protocol.
  *
+ * modified by KNOWLEDGECODE
  */
 public interface WebSocketParser
 {
@@ -32,7 +33,7 @@ public interface WebSocketParser
     /* ------------------------------------------------------------ */
     public interface FrameHandler
     {
-        void onFrame(byte flags, byte opcode, Buffer buffer);
+        void onFrame(byte flags, byte opcode, byte[] array, int offset, int length);
         void close(int code,String message);
     }
 

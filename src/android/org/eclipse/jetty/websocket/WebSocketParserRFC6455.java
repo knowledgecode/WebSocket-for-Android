@@ -30,6 +30,7 @@ import org.eclipse.jetty.util.log.Logger;
 /**
  * Parser the WebSocket protocol.
  *
+ * modified by KNOWLEDGECODE
  */
 public class WebSocketParserRFC6455 implements WebSocketParser
 {
@@ -161,10 +162,9 @@ public class WebSocketParserRFC6455 implements WebSocketParser
                                 array[i]^=_mask[_m++%4];
                         }
 
-                        // System.err.printf("%s %s %s >>\n",TypeUtil.toHexString(_flags),TypeUtil.toHexString(_opcode),data.length());
                         _bytesNeeded-=data.length();
                         progress=true;
-                        _handler.onFrame((byte)(_flags&(0xff^WebSocketConnectionRFC6455.FLAG_FIN)), _opcode, data);
+                        _handler.onFrame((byte)(_flags&(0xff^WebSocketConnectionRFC6455.FLAG_FIN)), _opcode, data.array(), data.getIndex(), data.length());
 
                         _opcode=WebSocketConnectionRFC6455.OP_CONTINUATION;
                     }
@@ -341,10 +341,8 @@ public class WebSocketParserRFC6455 implements WebSocketParser
                             array[i]^=_mask[_m++%4];
                     }
 
-                    // System.err.printf("%s %s %s >>\n",TypeUtil.toHexString(_flags),TypeUtil.toHexString(_opcode),data.length());
-
                     progress=true;
-                    _handler.onFrame(_flags, _opcode, data);
+                    _handler.onFrame(_flags, _opcode, data.array(), data.getIndex(), data.length());
                     _bytesNeeded=0;
                     _state=State.START;
                 }
