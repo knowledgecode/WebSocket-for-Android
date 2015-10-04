@@ -86,13 +86,11 @@
             };
             r.readAsDataURL(blob);
         },
-        stringToBinary = function (data, binaryType) {
+        stringToBinary = function (data, size, binaryType) {
             var i, len, array;
 
-            data = atob(data);
-            len = data.length;
-            array = new window.Uint8Array(len);
-            for (i = 0; i < len; i++) {
+            array = new window.Uint8Array(size);
+            for (i = 0, len = data.length; i < len; i++) {
                 array[i] = data.charCodeAt(i);
             }
             if (binaryType === 'arraybuffer') {
@@ -226,7 +224,9 @@
                     break;
                 case 'B':
                     taskQueue.push(function () {
-                        var evt = createMessage('message', stringToBinary(data.substring(1), that.binaryType), that.url);
+                        var evt = createMessage('message',
+                                stringToBinary(data.substring(9), parseInt(data.substring(1, 9), 16),
+                                    that.binaryType), that.url);
 
                         if (that.onmessage) {
                             that.onmessage(evt);
