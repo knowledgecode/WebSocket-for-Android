@@ -27,7 +27,6 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.websocket.WebSocket.FrameConnection;
@@ -46,7 +45,8 @@ public class PerMessageDeflateExtension implements Extension {
 
     private static final Logger __log = Log.getLogger(PerMessageDeflateExtension.class.getName());
     private static final byte[] TAIL_BYTES = new byte[] { 0x00, 0x00, (byte) 0xff, (byte) 0xff };
-    private static final int INITIAL_CAPACITY = 8192;
+    private static final int TAIL_LENGTH = TAIL_BYTES.length;
+    private static final int INITIAL_CAPACITY = 16384;
     private static final String EXTENSION = "permessage-deflate";
     private static final String CLIENT_NO_CONTEXT_TAKEOVER = "client_no_context_takeover";
     private static final String SERVER_NO_CONTEXT_TAKEOVER = "server_no_context_takeover";
@@ -55,8 +55,7 @@ public class PerMessageDeflateExtension implements Extension {
     private static class Zlib {
         protected Deflater _deflater;
         protected Inflater _inflater;
-        protected WebSocketBuffer _buffer;
-        protected byte[] _buf;
+        protected byte[] _buffer;
         protected int _capcacity;
         protected boolean _deflaterReset;
         protected boolean _inflaterReset;
@@ -64,43 +63,51 @@ public class PerMessageDeflateExtension implements Extension {
         public Zlib(boolean deflaterReset, boolean inflaterReset) {
             _deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
             _inflater = new Inflater(true);
-            _buffer = new WebSocketBuffer(INITIAL_CAPACITY);
-            _buf = new byte[INITIAL_CAPACITY];
-            _capcacity = INITIAL_CAPACITY;
+            _buffer = new byte[INITIAL_CAPACITY];
+            _capcacity = _buffer.length;
             _deflaterReset = deflaterReset;
             _inflaterReset = inflaterReset;
         }
 
+        public static byte[] appendTailBytes(byte[] array, int offset, int length) {
+            byte[] buffer = Arrays.copyOfRange(array, offset, offset + length + TAIL_LENGTH);
+            System.arraycopy(TAIL_BYTES, 0, buffer, length, TAIL_LENGTH);
+            return buffer;
+        }
+
         public byte[] compress(byte[] b, int offset, int length) {
             int len;
-            int index = 0;
+            int position = 0;
 
             _deflater.reset();
             _deflater.setInput(b, offset, length);
             _deflater.finish();
-            while ((len = _deflater.deflate(_buf, index, _capcacity - index)) > 0) {
-                if ((index += len) == _capcacity) {
-                    _buf = Arrays.copyOf(_buf, _capcacity <<= 1);
+            while ((len = _deflater.deflate(_buffer, position, _capcacity - position)) > 0) {
+                if ((position += len) == _capcacity) {
+                    _buffer = Arrays.copyOf(_buffer, _capcacity <<= 1);
                 }
             }
-            return Arrays.copyOf(_buf, index);
+            return Arrays.copyOf(_buffer, position);
         }
 
-        public Buffer decompress(byte[] b, int offset, int length) throws DataFormatException {
+        public byte[] decompress(byte[] b) throws DataFormatException {
+            return decompress(b, 0, b.length);
+        }
+
+        public byte[] decompress(byte[] b, int offset, int length) throws DataFormatException {
             int len;
-            int index = 0;
+            int position = 0;
 
             if (_inflaterReset) {
                 _inflater.reset();
             }
             _inflater.setInput(b, offset, length);
-            while ((len = _inflater.inflate(_buf, index, _capcacity - index)) > 0) {
-                if ((index += len) == _capcacity) {
-                    _buf = Arrays.copyOf(_buf, _capcacity <<= 1);
+            while ((len = _inflater.inflate(_buffer, position, _capcacity - position)) > 0) {
+                if ((position += len) == _capcacity) {
+                    _buffer = Arrays.copyOf(_buffer, _capcacity <<= 1);
                 }
             }
-            _buffer.clear();
-            return _buffer.append(_buf, 0, index);
+            return Arrays.copyOf(_buffer, position);
         }
 
         public boolean isCompressible() {
@@ -122,18 +129,18 @@ public class PerMessageDeflateExtension implements Extension {
         @Override
         public byte[] compress(byte[] b, int offset, int length) {
             int len;
-            int index = 0;
+            int position = 0;
 
             if (_deflaterReset) {
                 _deflater.reset();
             }
             _deflater.setInput(b, offset, length);
-            while ((len = _deflater.deflate(_buf, index, _capcacity - index, Deflater.SYNC_FLUSH)) > 0) {
-                if ((index += len) == _capcacity) {
-                    _buf = Arrays.copyOf(_buf, _capcacity <<= 1);
+            while ((len = _deflater.deflate(_buffer, position, _capcacity - position, Deflater.SYNC_FLUSH)) > 0) {
+                if ((position += len) == _capcacity) {
+                    _buffer = Arrays.copyOf(_buffer, _capcacity <<= 1);
                 }
             }
-            return Arrays.copyOf(_buf, index - TAIL_BYTES.length);
+            return Arrays.copyOf(_buffer, position - TAIL_LENGTH);
         }
 
         @Override
@@ -159,7 +166,7 @@ public class PerMessageDeflateExtension implements Extension {
     }
 
     @Override
-    public void onFrame(byte flags, byte opcode, Buffer buffer) {
+    public void onFrame(byte flags, byte opcode, byte[] array, int offset, int length) {
         switch (opcode) {
         case WebSocketConnectionRFC6455.OP_TEXT:
         case WebSocketConnectionRFC6455.OP_BINARY:
@@ -167,10 +174,13 @@ public class PerMessageDeflateExtension implements Extension {
         case WebSocketConnectionRFC6455.OP_CONTINUATION:
             if (_compressed) {
                 try {
+                    byte[] buffer;
                     if ((flags &= 0x08) > 0) {
-                        buffer.put(TAIL_BYTES);
+                        buffer = _zlib.decompress(Zlib.appendTailBytes(array, offset, length));
+                    } else {
+                        buffer = _zlib.decompress(array, offset, length);
                     }
-                    _inbound.onFrame(flags, opcode, _zlib.decompress(buffer.array(), buffer.getIndex(), buffer.length()));
+                    _inbound.onFrame(flags, opcode, buffer, 0, buffer.length);
                 } catch (DataFormatException e) {
                     __log.warn(e);
                     _connection.close(WebSocketConnectionRFC6455.CLOSE_BAD_DATA, "Bad data");
@@ -178,7 +188,7 @@ public class PerMessageDeflateExtension implements Extension {
                 return;
             }
         }
-        _inbound.onFrame(flags, opcode, buffer);
+        _inbound.onFrame(flags, opcode, array, offset, length);
     }
 
     @Override

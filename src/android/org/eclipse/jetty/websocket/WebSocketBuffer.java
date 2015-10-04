@@ -36,14 +36,7 @@ class WebSocketBuffer implements Buffer {
 
     public WebSocketBuffer(final int capacity) {
         _buffer = new byte[capacity];
-        _index = 0;
         _capacity = capacity;
-    }
-
-    public WebSocketBuffer(final byte[] buffer, final int offset, final int length) {
-        _buffer = Arrays.copyOfRange(buffer, offset, length);
-        _index = length;
-        _capacity = length;
     }
 
     public WebSocketBuffer append(final byte[] array, final int offset, final int length) {
