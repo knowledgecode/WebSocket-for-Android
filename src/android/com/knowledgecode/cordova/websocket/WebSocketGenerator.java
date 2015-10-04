@@ -18,11 +18,13 @@
  */
 package com.knowledgecode.cordova.websocket;
 
+import java.nio.charset.Charset;
+
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
 
-import android.util.Base64;
+import android.text.TextUtils;
 
 class WebSocketGenerator implements
     org.eclipse.jetty.websocket.WebSocket.OnTextMessage,
@@ -35,6 +37,8 @@ class WebSocketGenerator implements
     interface OnCloseListener {
         public void onClose(int id);
     }
+
+    private static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     private final int _id;
     private final CallbackContext _ctx;
@@ -100,7 +104,8 @@ class WebSocketGenerator implements
 
     @Override
     public void onMessage(byte[] data, int offset, int length) {
-        sendCallback("B" + Base64.encodeToString(data, offset, length, Base64.NO_WRAP), true);
+        sendCallback((String) TextUtils.concat(
+                "B", String.format("%08x", length), new String(data, offset, length, ISO_8859_1)), true);
     }
 
     @Override
