@@ -22,6 +22,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
+import org.json.JSONArray;
 
 import com.knowledgecode.cordova.websocket.TaskRunner.Task;
 
@@ -47,16 +48,17 @@ class SendingTask implements Task {
     @Override
     public void execute(String rawArgs, CallbackContext ctx) {
         try {
-            Connection conn = _map.get(Integer.parseInt(rawArgs.substring(2, 10), 16));
+            String args = new JSONArray(rawArgs).getString(0);
+            Connection conn = _map.get(Integer.parseInt(args.substring(0, 8), 16));
 
             if (conn != null) {
-                if (rawArgs.charAt(10) == '1') {
-                    byte[] binary = Base64.decode(rawArgs.substring(rawArgs.indexOf(',') + 1, rawArgs.length() - 2),
-                            Base64.NO_WRAP);
+                if (args.charAt(8) == '1') {
+                    byte[] binary = Base64.decode(args.substring(args.indexOf(',') + 1), Base64.NO_WRAP);
                     conn.sendMessage(binary, 0, binary.length);
                 } else {
-                    conn.sendMessage(rawArgs.substring(11, rawArgs.length() - 2));
+                    conn.sendMessage(args.substring(9));
                 }
+            } else {
             }
         } catch (Exception e) {
             if (!ctx.isFinished()) {
