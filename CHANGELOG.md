@@ -1,4 +1,9 @@
 ## Change Log
+#### 0.11.1
+* fixed the bug that was not be done unescape when sending a message (thanks to @shilder)  
+* fixed the bug that became unable to send a message when was created an instance many times  
+* temporarily disabled `AndroidLogger`  
+
 #### 0.11.0
 * permessage-deflate support  
 * deleted unused code (further shrank about 20%)  
