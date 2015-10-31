@@ -104,29 +104,6 @@ public class Log
         }
     };
 
-    static
-    {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try
-        {
-            @SuppressWarnings("unchecked")
-            Class<Logger> clazz = (Class<Logger>) loader.loadClass("org.eclipse.jetty.util.log.AndroidLogger");
-            LOG = clazz.newInstance();
-        }
-        catch (ClassNotFoundException e)
-        {
-        }
-        catch (IllegalAccessException e)
-        {
-        }
-        catch (IllegalArgumentException e)
-        {
-        }
-        catch (InstantiationException e)
-        {
-        }
-    }
-
     /**
      * Obtain a named Logger based on the fully qualified class name.
      *
