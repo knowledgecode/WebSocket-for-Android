@@ -19,18 +19,15 @@
 package org.eclipse.jetty.util.log;
 
 /**
- * Logger for Android
+ * A logger implementation for Android
  *
  * Copyright (c) 2015 KNOWLEDGECODE
  */
-class AndroidLogger implements Logger {
+final class AndroidLog implements Logger {
 
     private String _tag;
 
-    AndroidLogger() {
-    }
-
-    private AndroidLogger(String tag) {
+    AndroidLog(String tag) {
         _tag = tag.substring(tag.length() > 23 ? tag.length() - 23 : 0);
     }
 
@@ -40,37 +37,49 @@ class AndroidLogger implements Logger {
 
     @Override
     public String getName() {
-        return AndroidLogger.class.getName();
+        return AndroidLog.class.getName();
     }
 
     @Override
     public void warn(String msg, Object... args) {
-        android.util.Log.w(_tag, format(msg, args));
+        if (Log.logLevel <= android.util.Log.WARN) {
+            android.util.Log.w(_tag, format(msg, args));
+        }
     }
 
     @Override
     public void warn(Throwable thrown) {
-        android.util.Log.w(_tag, thrown);
+        if (Log.logLevel <= android.util.Log.WARN) {
+            android.util.Log.w(_tag, thrown);
+        }
     }
 
     @Override
     public void warn(String msg, Throwable thrown) {
-        android.util.Log.w(_tag, msg, thrown);
+        if (Log.logLevel <= android.util.Log.WARN) {
+            android.util.Log.w(_tag, msg, thrown);
+        }
     }
 
     @Override
     public void info(String msg, Object... args) {
-        android.util.Log.i(_tag, format(msg, args));
+        if (Log.logLevel <= android.util.Log.INFO) {
+            android.util.Log.i(_tag, format(msg, args));
+        }
     }
 
     @Override
     public void info(Throwable thrown) {
-        android.util.Log.i(_tag, "", thrown);
+        if (Log.logLevel <= android.util.Log.INFO) {
+            android.util.Log.i(_tag, "", thrown);
+        }
     }
 
     @Override
     public void info(String msg, Throwable thrown) {
-        android.util.Log.i(_tag, msg, thrown);
+        if (Log.logLevel <= android.util.Log.INFO) {
+            android.util.Log.i(_tag, msg, thrown);
+        }
     }
 
     @Override
@@ -85,22 +94,28 @@ class AndroidLogger implements Logger {
 
     @Override
     public void debug(String msg, Object... args) {
-        android.util.Log.d(_tag, format(msg, args));
+        if (Log.logLevel <= android.util.Log.DEBUG) {
+            android.util.Log.d(_tag, format(msg, args));
+        }
     }
 
     @Override
     public void debug(Throwable thrown) {
-        android.util.Log.d(_tag, "", thrown);
+        if (Log.logLevel <= android.util.Log.DEBUG) {
+            android.util.Log.d(_tag, "", thrown);
+        }
     }
 
     @Override
     public void debug(String msg, Throwable thrown) {
-        android.util.Log.d(_tag, msg, thrown);
+        if (Log.logLevel <= android.util.Log.DEBUG) {
+            android.util.Log.d(_tag, msg, thrown);
+        }
     }
 
     @Override
     public Logger getLogger(String tag) {
-        return new AndroidLogger(tag);
+        throw new UnsupportedOperationException();
     }
 
     @Override
