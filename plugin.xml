@@ -81,7 +81,7 @@
     <source-file src="src/android/org/eclipse/jetty/util/component/AggregateLifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/Dumpable.java" target-dir="src/org/eclipse/jetty/util/component" />
     <source-file src="src/android/org/eclipse/jetty/util/component/LifeCycle.java" target-dir="src/org/eclipse/jetty/util/component" />
-    <!-- <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLogger.java" target-dir="src/org/eclipse/jetty/util/log" /> -->
+    <source-file src="src/android/org/eclipse/jetty/util/log/AndroidLog.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Log.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/log/Logger.java" target-dir="src/org/eclipse/jetty/util/log" />
     <source-file src="src/android/org/eclipse/jetty/util/resource/Resource.java" target-dir="src/org/eclipse/jetty/util/resource" />

@@ -22,10 +22,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.cordova.CordovaPreferences;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 
@@ -64,6 +66,7 @@ public class WebSocket extends CordovaPlugin {
         _runner.setTask(RESET_TASK, new ResetTask(_conn));
         _runner.setTask(DESTROY_TASK, new DestroyTask(_factory, _conn));
         _executor.execute(_runner);
+        Log.setLogLevel(getLogLevel(this.preferences));
     }
 
     @Override
@@ -87,4 +90,20 @@ public class WebSocket extends CordovaPlugin {
         }
         super.onDestroy();
     }
+
+    private static int getLogLevel(CordovaPreferences preferences) {
+        String logLevel = preferences.getString("LogLevel", "ERROR");
+
+        if ("VERBOSE".equals(logLevel)) {
+            return android.util.Log.VERBOSE;
+        } else if ("DEBUG".equals(logLevel)) {
+            return android.util.Log.DEBUG;
+        } else if ("INFO".equals(logLevel)) {
+            return android.util.Log.INFO;
+        } else if ("WARN".equals(logLevel)) {
+            return android.util.Log.WARN;
+        } else {
+            return android.util.Log.ERROR;
+        }
+     }
 }
