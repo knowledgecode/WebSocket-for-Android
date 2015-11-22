@@ -123,6 +123,12 @@ public interface WebSocket
          */
         void close();
 
+        /** 
+         * Close the connection with normal close code.
+         * @param silent Whether telling the app this thing or not
+         */
+        void close(boolean silent);
+
         /** Close the connection with specific closeCode and message.
          * @param closeCode The close code to send, or -1 for no close code
          * @param message The message to send or null for no message

@@ -610,6 +610,16 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
         }
 
         /* ------------------------------------------------------------ */
+        public void close(boolean silent)
+        {
+            if (silent)
+            {
+                _closeCode = CLOSE_NORMAL;
+            }
+            close(CLOSE_NORMAL,null);
+        }
+
+        /* ------------------------------------------------------------ */
         public void setAllowFrameFragmentation(boolean allowFragmentation)
         {
             _parser.setFakeFragments(allowFragmentation);
