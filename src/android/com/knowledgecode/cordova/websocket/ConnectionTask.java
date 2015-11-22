@@ -47,6 +47,7 @@ class ConnectionTask implements Task {
     private static final long MAX_CONNECT_TIME = 75000;
     private static final int MAX_TEXT_MESSAGE_SIZE = -1;
     private static final int MAX_BINARY_MESSAGE_SIZE = -1;
+    private static final String WSS = "wss";
 
     private final WebSocketClientFactory _factory;
     private final SparseArray<Connection> _map;
@@ -73,9 +74,11 @@ class ConnectionTask implements Task {
      * Set cookies, if any.
      *
      * @param cookies
-     * @param url
+     * @param host
+     * @param secure
      */
-    private static void setCookie(Map<String, String> cookies, String url) {
+    private static void setCookie(Map<String, String> cookies, String host, String path, boolean secure) {
+        String url = String.format("%s://%s%s", secure ? "https" : "http", host, path);
         String cookie = CookieManager.getInstance().getCookie(url);
 
         if (cookie != null) {
@@ -83,7 +86,7 @@ class ConnectionTask implements Task {
                 String[] pair = c.split("=");
 
                 if (pair.length == 2) {
-                    cookies.put(pair[0], pair[1]);
+                    cookies.put(pair[0].trim(), pair[1].trim());
                 }
             }
         }
@@ -119,7 +122,7 @@ class ConnectionTask implements Task {
                 client.getExtensions().add(new PerMessageDeflateExtension());
             }
 
-            setCookie(client.getCookies(), uri.getHost());
+            setCookie(client.getCookies(), uri.getHost(), uri.getPath(), WSS.equals(uri.getScheme()));
 
             WebSocketGenerator gen = new WebSocketGenerator(id, ctx);
 
