@@ -51,7 +51,7 @@ class DestroyTask implements Task {
             int key = _map.keyAt(i);
 
             if (_map.get(key).isOpen()) {
-                _map.get(key).close();
+                _map.get(key).close(true);
             }
         }
         _map.clear();
