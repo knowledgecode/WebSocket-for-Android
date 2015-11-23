@@ -38,6 +38,8 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.util.log.Logger;
 
+import android.text.TextUtils;
+
 
 /* ------------------------------------------------------------ */
 /**
@@ -152,7 +154,19 @@ public class WebSocketClient
      */
     public void setProtocol(String protocol)
     {
-        _protocol = protocol;
+        if (!TextUtils.isEmpty(protocol))
+        {
+            for (String p : protocol.split(", *"))
+            {
+                if (!p.matches("^[0-9A-Za-z!#\\$%&'\\*\\+\\-\\.\\^_`|~]+$"))
+                {
+                    IllegalArgumentException e = new IllegalArgumentException("Bad protocol: " + p);
+                    __log.warn(e);
+                    throw e;
+                }
+            }
+        }
+        _protocol = protocol == null ? "" : protocol;
     }
 
     /* ------------------------------------------------------------ */
@@ -172,7 +186,16 @@ public class WebSocketClient
      */
     public void setOrigin(String origin)
     {
-        _origin = origin;
+        if (!TextUtils.isEmpty(origin))
+        {
+            if (!origin.matches("^[\\x21-\\x7E]+$"))
+            {
+                IllegalArgumentException e = new IllegalArgumentException("Bad Origin: " + origin);
+                __log.warn(e);
+                throw e;
+            }
+        }
+        _origin = origin == null ? "" : origin;
     }
 
     /* ------------------------------------------------------------ */
@@ -270,7 +293,16 @@ public class WebSocketClient
      */
     public void setAgent(String _agent)
     {
-        this._agent = _agent;
+        if (!TextUtils.isEmpty(_agent))
+        {
+            if (!_agent.matches("^[\\x20-\\x7E]+$"))
+            {
+                IllegalArgumentException e = new IllegalArgumentException("Bad UA: " + _agent);
+                __log.warn(e);
+                throw e;
+            }
+        }
+        this._agent = _agent == null ? "" : _agent;
     }
 
     /* ------------------------------------------------------------ */
