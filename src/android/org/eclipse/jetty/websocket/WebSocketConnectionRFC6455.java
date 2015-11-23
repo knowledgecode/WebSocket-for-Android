@@ -616,7 +616,7 @@ public class WebSocketConnectionRFC6455 extends AbstractConnection implements We
             {
                 _closeCode = CLOSE_NORMAL;
             }
-            close(CLOSE_NORMAL,null);
+            this.close();
         }
 
         /* ------------------------------------------------------------ */
