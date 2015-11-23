@@ -18,9 +18,6 @@
 
 package org.eclipse.jetty.util.thread;
 
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
-
 
 /* ------------------------------------------------------------ */
 /** Timeout queue.
@@ -33,7 +30,6 @@ import org.eclipse.jetty.util.log.Logger;
  */
 public class Timeout
 {
-    private static final Logger LOG = Log.getLogger(Timeout.class);
     private Object _lock;
     private long _duration;
     private volatile long _now=System.currentTimeMillis();
@@ -92,71 +88,6 @@ public class Timeout
                 return task;
             }
             return null;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void tick()
-    {
-        final long expiry = _now-_duration;
-
-        Task task=null;
-        while (true)
-        {
-            try
-            {
-                synchronized (_lock)
-                {
-                    task= _head._next;
-                    if (task==_head || task._timestamp>expiry)
-                        break;
-                    task.unlink();
-                    task._expired=true;
-                    task.expire();
-                }
-
-                task.expired();
-            }
-            catch(Throwable th)
-            {
-                LOG.warn(Log.EXCEPTION,th);
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void schedule(Task task)
-    {
-        schedule(task,0L);
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param task
-     * @param delay A delay in addition to the default duration of the timeout
-     */
-    public void schedule(Task task,long delay)
-    {
-        synchronized (_lock)
-        {
-            if (task._timestamp!=0)
-            {
-                task.unlink();
-                task._timestamp=0;
-            }
-            task._timeout=this;
-            task._expired=false;
-            task._delay=delay;
-            task._timestamp = _now+delay;
-
-            Task last=_head._prev;
-            while (last!=_head)
-            {
-                if (last._timestamp <= task._timestamp)
-                    break;
-                last=last._prev;
-            }
-            last.link(task);
         }
     }
 
@@ -234,49 +165,5 @@ public class Timeout
             _next=_prev=this;
             _expired=false;
         }
-
-        /* ------------------------------------------------------------ */
-        private void link(Task task)
-        {
-            Task next_next = _next;
-            _next._prev=task;
-            _next=task;
-            _next._next=next_next;
-            _next._prev=this;
-        }
-
-        /* ------------------------------------------------------------ */
-        /** Cancel the task.
-         * Remove the task from the timeout.
-         */
-        public void cancel()
-        {
-            Timeout timeout = _timeout;
-            if (timeout!=null)
-            {
-                synchronized (timeout._lock)
-                {
-                    unlink();
-                    _timestamp=0;
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        /** Expire task.
-         * This method is called when the timeout expires. It is called
-         * in the scope of the synchronize block (on this) that sets
-         * the {@link #isExpired()} state to true.
-         * @see #expired() For an unsynchronized callback.
-         */
-        protected void expire(){}
-
-        /* ------------------------------------------------------------ */
-        /** Expire task.
-         * This method is called when the timeout expires. It is called
-         * outside of any synchronization scope and may be delayed.
-         *
-         */
-        public void expired(){}
     }
 }

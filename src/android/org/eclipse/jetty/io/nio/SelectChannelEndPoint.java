@@ -34,7 +34,6 @@ import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.io.nio.SelectorManager.SelectSet;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.thread.Timeout.Task;
 
 /* ------------------------------------------------------------ */
 /**
@@ -184,26 +183,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
     }
 
     /* ------------------------------------------------------------ */
-    public void asyncDispatch()
-    {
-        synchronized(this)
-        {
-            switch(_state)
-            {
-                case STATE_NEEDS_DISPATCH:
-                case STATE_UNDISPATCHED:
-                    dispatch();
-                    break;
-
-                case STATE_DISPATCHED:
-                case STATE_ASYNC:
-                    _state=STATE_ASYNC;
-                    break;
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     public void dispatch()
     {
         synchronized(this)
@@ -250,18 +229,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
                     return true;
             }
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void cancelTimeout(Task task)
-    {
-        getSelectSet().cancelTimeout(task);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void scheduleTimeout(Task task, long timeoutMs)
-    {
-        getSelectSet().scheduleTimeout(task,timeoutMs);
     }
 
     /* ------------------------------------------------------------ */
@@ -383,57 +350,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
      */
     @SuppressWarnings("serial")
     @Override
-    public boolean blockReadable(long timeoutMs) throws IOException
-    {
-        synchronized (this)
-        {
-            if (isInputShutdown())
-                throw new EofException();
-
-            long now=_selectSet.getNow();
-            long end=now+timeoutMs;
-            boolean check=isCheckForIdle();
-            setCheckForIdle(true);
-            try
-            {
-                _readBlocked=true;
-                while (!isInputShutdown() && _readBlocked)
-                {
-                    try
-                    {
-                        updateKey();
-                        this.wait(timeoutMs>0?(end-now):10000);
-                    }
-                    catch (final InterruptedException e)
-                    {
-                        LOG.warn(e);
-                        if (_interruptable)
-                            throw new InterruptedIOException(){{this.initCause(e);}};
-                    }
-                    finally
-                    {
-                        now=_selectSet.getNow();
-                    }
-
-                    if (_readBlocked && timeoutMs>0 && now>=end)
-                        return false;
-                }
-            }
-            finally
-            {
-                _readBlocked=false;
-                setCheckForIdle(check);
-            }
-        }
-        return true;
-    }
-
-    /* ------------------------------------------------------------ */
-    /*
-     * Allows thread to block waiting for further events.
-     */
-    @SuppressWarnings("serial")
-    @Override
     public boolean blockWritable(long timeoutMs) throws IOException
     {
         synchronized (this)
@@ -489,12 +405,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
 
         _writable=false;
         updateKey();
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isWritable()
-    {
-        return _writable;
     }
 
     /* ------------------------------------------------------------ */
@@ -781,12 +691,6 @@ public class SelectChannelEndPoint extends ChannelEndPoint implements AsyncEndPo
                 _interestOps,
                 keyString,
                 _connection);
-    }
-
-    /* ------------------------------------------------------------ */
-    public SelectSet getSelectSet()
-    {
-        return _selectSet;
     }
 
     /* ------------------------------------------------------------ */

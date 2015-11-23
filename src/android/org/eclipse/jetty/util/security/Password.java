@@ -48,8 +48,6 @@ package org.eclipse.jetty.util.security;
  */
 public class Password
 {
-    public static final String __OBFUSCATE = "OBF:";
-
     private String _pw;
 
     /* ------------------------------------------------------------ */

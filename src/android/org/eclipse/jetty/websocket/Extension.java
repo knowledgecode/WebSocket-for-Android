@@ -24,8 +24,6 @@ public interface Extension extends WebSocketParser.FrameHandler, WebSocketGenera
 {
     public String getName();
     public String getParameterizedName();
-    
     public boolean init(Map<String,String> parameters);
     public void bind(WebSocket.FrameConnection connection, WebSocketParser.FrameHandler inbound, WebSocketGenerator outbound);
-    
 }

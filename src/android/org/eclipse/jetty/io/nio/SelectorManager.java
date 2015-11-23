@@ -665,26 +665,6 @@ public abstract class SelectorManager extends AbstractLifeCycle implements Dumpa
         }
 
         /* ------------------------------------------------------------ */
-        /**
-         * @param task The task to timeout. If it implements Runnable, then
-         * expired will be called from a dispatched thread.
-         *
-         * @param timeoutMs
-         */
-        public void scheduleTimeout(Timeout.Task task, long timeoutMs)
-        {
-            if (!(task instanceof Runnable))
-                throw new IllegalArgumentException("!Runnable");
-            _timeout.schedule(task, timeoutMs);
-        }
-
-        /* ------------------------------------------------------------ */
-        public void cancelTimeout(Timeout.Task task)
-        {
-            task.cancel();
-        }
-
-        /* ------------------------------------------------------------ */
         public void wakeup()
         {
             try

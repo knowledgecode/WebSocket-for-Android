@@ -57,11 +57,6 @@ public class BufferCache
         return (CachedBuffer)_bufferMap.get(buffer);
     }
 
-    public CachedBuffer get(String value)
-    {
-        return (CachedBuffer)_stringMap.get(value);
-    }
-
     public Buffer lookup(Buffer buffer)
     {
         if (buffer instanceof CachedBuffer)
