@@ -20,7 +20,6 @@ package org.eclipse.jetty.util.ssl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -108,16 +107,6 @@ public class SslContextFactory extends AbstractLifeCycle
     public static final String DEFAULT_TRUSTMANAGERFACTORY_ALGORITHM =
         (Security.getProperty("ssl.TrustManagerFactory.algorithm") == null ?
                 "SunX509" : Security.getProperty("ssl.TrustManagerFactory.algorithm"));
-
-    /** Default value for the keystore location path. */
-    public static final String DEFAULT_KEYSTORE_PATH =
-        System.getProperty("user.home") + File.separator + ".keystore";
-
-    /** String name of key password property. */
-    public static final String KEYPASSWORD_PROPERTY = "org.eclipse.jetty.ssl.keypassword";
-
-    /** String name of keystore password property. */
-    public static final String PASSWORD_PROPERTY = "org.eclipse.jetty.ssl.password";
 
     /** Excluded protocols. */
     private final Set<String> _excludeProtocols = new LinkedHashSet<String>();

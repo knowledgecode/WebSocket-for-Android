@@ -75,11 +75,6 @@ public class ChannelEndPoint implements EndPoint
         return  !(_channel instanceof SelectableChannel) || ((SelectableChannel)_channel).isBlocking();
     }
 
-    public boolean blockReadable(long millisecs) throws IOException
-    {
-        return true;
-    }
-
     public boolean blockWritable(long millisecs) throws IOException
     {
         return true;
