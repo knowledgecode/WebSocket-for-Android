@@ -1,22 +1,32 @@
 ## Change Log
+#### 0.12.0
+* changed minimum version of `cordova-android` that is required (3.6.0 or later)  
+* fixed a bug that could not get cookies that have secure attribute when using wss protocol  
+* fixed a bug that crashed when closing an app with leaving a connection open  
+* prevented that corrupt option strings are injected  
+* improved speed of receiving large binary  
+* logging support  
+* removed unused code  
+* refactor  
+
 #### 0.11.1
-* fixed the bug that was not be done unescape when sending a message (thanks to @shilder)  
-* fixed the bug that became unable to send a message when was created an instance many times  
+* fixed a bug that was not be done unescape when sending a message (thanks to @shilder)  
+* fixed a bug that became unable to send a message when was created an instance many times  
 * temporarily disabled `AndroidLogger`  
 
 #### 0.11.0
 * permessage-deflate support  
-* deleted unused code (further shrank about 20%)  
+* removed unused code (further shrank about 20%)  
 * performance improvement (further about 15% to 25% faster than previous versions)  
 
 #### 0.10.0
 * permessage-deflate support (experimental)  
-* fixed multiple subprotocol bug  
+* fixed a multiple subprotocol bug  
 * improved finalization  
-* deleted unused code (shrank about 20%)  
+* removed unused code (shrank about 20%)  
 
 #### 0.9.2
-* fixed lack of trailing zeros (0x00) when receiving binary (thanks to @lemoncola)  
+* fixed a bug that was lacked of trailing zeros (0x00) when receiving binary (thanks to @lemoncola)  
 
 #### 0.9.1
 * updated only documents  
@@ -35,11 +45,11 @@
 * fixed that difference between packages and directories structure (thanks to @digigm)  
 
 #### 0.8.2
-* fixed the constructor error on 4.4 and later (thanks to @digigm)  
+* fixed a constructor error on 4.4 and later (thanks to @digigm)  
 
 #### 0.8.1
-* fixed the frame aggregation error (thanks to @Atsyn)  
-* fixed the binary transmission for the case of using the plugin on 4.4 and later  
+* fixed a frame aggregation error (thanks to @Atsyn)  
+* fixed a binary transmission for the case of using the plugin on 4.4 and later  
 
 #### 0.8.0
 * performance improvement (about 5% to 15% faster than previous versions)  
@@ -49,7 +59,7 @@
 * refactor  
 
 #### 0.7.0
-* resolved the issue of SSL on 4.0 and 2.3 (thanks to @agalazis and koush/AndroidAsync)  
+* solved a problem of SSL on 4.0 and 2.3 (thanks to @agalazis and koush/AndroidAsync)  
 
 #### 0.6.3
 * fixed a bug of a receiving binary size  
