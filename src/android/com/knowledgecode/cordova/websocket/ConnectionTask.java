@@ -77,8 +77,8 @@ class ConnectionTask implements Task {
      * @param host
      * @param secure
      */
-    private static void setCookie(Map<String, String> cookies, String host, boolean secure) {
-        String url = String.format("%s://%s", secure ? "https" : "http", host);
+    private static void setCookie(Map<String, String> cookies, String host, String path, boolean secure) {
+        String url = String.format("%s://%s%s", secure ? "https" : "http", host, path);
         String cookie = CookieManager.getInstance().getCookie(url);
 
         if (cookie != null) {
@@ -122,7 +122,7 @@ class ConnectionTask implements Task {
                 client.getExtensions().add(new PerMessageDeflateExtension());
             }
 
-            setCookie(client.getCookies(), uri.getHost(), WSS.equals(uri.getScheme()));
+            setCookie(client.getCookies(), uri.getHost(), uri.getPath(), WSS.equals(uri.getScheme()));
 
             WebSocketGenerator gen = new WebSocketGenerator(id, ctx);
 
