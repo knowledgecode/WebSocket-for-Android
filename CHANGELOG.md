@@ -1,4 +1,7 @@
 ## Change Log
+#### 0.12.1
+* added readyState attribute values to WebSocket constructor (thanks to @llevkin)  
+
 #### 0.12.0
 * changed minimum version of `cordova-android` that is required (3.6.0 or later)  
 * fixed a bug that could not get cookies that have secure attribute when using wss protocol  
