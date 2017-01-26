@@ -83,10 +83,11 @@ class ConnectionTask implements Task {
 
         if (cookie != null) {
             for (String c : cookie.split(";")) {
-                String[] pair = c.split("=");
-
-                if (pair.length == 2) {
-                    cookies.put(pair[0].trim(), pair[1].trim());
+                int position  = c.indexOf("=");
+                if (position > 0) {
+                    String key = c.substring(0,position).trim();
+                    String value = c.substring(position+1).trim();
+                    cookies.put(key, value);
                 }
             }
         }
