@@ -1,4 +1,7 @@
 ## Change Log
+#### 0.12.2
+* support for cookies that include "=" character in the value (thanks to @evgk)  
+
 #### 0.12.1
 * added readyState attribute values to WebSocket constructor (thanks to @llevkin)  
 
